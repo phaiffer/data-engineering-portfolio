@@ -1,0 +1,2 @@
+-- Placeholder model file for future gold transformations.
+-- Intentionally left without SQL logic until analytical outputs are defined.

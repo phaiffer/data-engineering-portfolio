@@ -1,0 +1,17 @@
+name: hospital_analytics
+version: 1.0.0
+config-version: 2
+
+profile: hospital_analytics
+
+model-paths:
+  - models
+
+models:
+  hospital_analytics:
+    bronze:
+      +materialized: view
+    silver:
+      +materialized: view
+    gold:
+      +materialized: table

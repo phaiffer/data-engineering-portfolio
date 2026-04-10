@@ -1,0 +1,2 @@
+-- Placeholder model file for future bronze transformations.
+-- Intentionally left without SQL logic until source datasets are defined.

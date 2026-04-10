@@ -1,0 +1,2 @@
+-- Placeholder model file for future silver transformations.
+-- Intentionally left without SQL logic until transformation requirements are defined.

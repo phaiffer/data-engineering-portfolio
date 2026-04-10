@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+
+# Local data artifacts
+*.parquet
+*.csv
+*.json
+*.delta
+
+# DBT
+dbt_packages/
+target/
+logs/
