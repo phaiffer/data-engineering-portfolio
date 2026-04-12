@@ -1,10 +1,9 @@
-"""Databricks-ready entrypoint for raw ingestion."""
-
+from __future__ import annotations
+from ingestion.sources import download_hospital_dataset
 
 def main() -> None:
-    """Execute the ingestion job."""
-    raise NotImplementedError("Ingestion job entrypoint is a scaffold only.")
-
-
+    downloaded_path = download_hospital_dataset()
+    print(f"Ingestion completed. Dataset available at: {downloaded_path}")
+    
 if __name__ == "__main__":
     main()

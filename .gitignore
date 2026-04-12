@@ -25,3 +25,14 @@ Thumbs.db
 dbt_packages/
 target/
 logs/
+
+
+#  Environment files
+.env
+.env.*
+!.env.example
+
+# Local data artifacts
+projects/01-hospital-analytics/data/bronze/raw/
+projects/01-hospital-analytics/data/silver/
+projects/01-hospital-analytics/data/gold/
