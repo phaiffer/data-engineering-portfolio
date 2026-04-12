@@ -38,4 +38,4 @@ The project is intended for hospital analytics scenarios such as operational rep
 
 ## Status
 
-This project currently contains structure only. ETL logic, data contracts, DBT models, API implementation, and dashboards will be added in later iterations.
+This project currently includes the first Bronze foundation for raw file inventory, Pandas-based raw CSV profiling, and metadata JSON generation. Silver transformations, data contracts, DBT models, API implementation, and dashboards will be added in later iterations.
