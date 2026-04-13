@@ -7,3 +7,4 @@ Project-specific documentation, decisions, and implementation notes live here.
 - [Gold Layer](gold.md)
 - [Serving Layer](serving.md)
 - [API Layer](api.md)
+- [Dashboard](../dashboard/README.md)

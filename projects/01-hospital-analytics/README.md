@@ -1,10 +1,10 @@
 # Hospital Analytics
 
-Foundational scaffold for a hospital-focused data engineering project built as an end-to-end portfolio case.
+Hospital-focused data engineering project built as an end-to-end portfolio case.
 
 ## Objective
 
-Create a structured data pipeline project for hospital analytics use cases, with clear separation between ingestion, medallion-layer processing, data quality, modeling, and future data serving.
+Create a structured hospital analytics workflow with clear separation between ingestion, medallion-layer processing, data quality, serving, API access, and dashboard consumption.
 
 ## Domain Focus
 
@@ -25,6 +25,7 @@ The project is intended for hospital analytics scenarios such as operational rep
 - DBT
 - Databricks
 - Flask API for curated serving-view access
+- React + Vite dashboard for portfolio visualization
 
 ## Folder Overview
 
@@ -35,7 +36,8 @@ The project is intended for hospital analytics scenarios such as operational rep
 - `tests/`: unit and integration test areas
 - `notebooks/`: exploratory and validation notebooks
 - `api/`: lightweight Flask API over PostgreSQL serving views
+- `dashboard/`: React + Vite dashboard over the Flask API
 
 ## Status
 
-This project currently includes Kaggle raw ingestion, Bronze profiling and metadata, Pandas-based Silver and Gold outputs, a PostgreSQL serving layer, and a first lightweight Flask API over the serving views. Dashboards, authentication, deployment tooling, Spark implementation, and production DBT models remain future iterations.
+This project currently includes Kaggle raw ingestion, Bronze profiling and metadata, Pandas-based Silver and Gold outputs, a PostgreSQL serving layer, a lightweight Flask API over the serving views, and a first React dashboard for the curated analytical outputs. Authentication, deployment tooling, Spark implementation, and production DBT models remain future iterations.

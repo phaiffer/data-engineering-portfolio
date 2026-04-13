@@ -26,6 +26,13 @@ dbt_packages/
 target/
 logs/
 
+# Frontend
+node_modules/
+dist/
+*.tsbuildinfo
+!projects/01-hospital-analytics/dashboard/package.json
+!projects/01-hospital-analytics/dashboard/package-lock.json
+!projects/01-hospital-analytics/dashboard/tsconfig.json
 
 #  Environment files
 .env
