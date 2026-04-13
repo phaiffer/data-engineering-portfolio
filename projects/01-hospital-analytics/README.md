@@ -24,7 +24,7 @@ The project is intended for hospital analytics scenarios such as operational rep
 - NumPy
 - DBT
 - Databricks
-- Flask API later for curated data access
+- Flask API for curated serving-view access
 
 ## Folder Overview
 
@@ -34,8 +34,8 @@ The project is intended for hospital analytics scenarios such as operational rep
 - `docs/`: project-specific documentation
 - `tests/`: unit and integration test areas
 - `notebooks/`: exploratory and validation notebooks
-- `api/`: reserved for future service exposure
+- `api/`: lightweight Flask API over PostgreSQL serving views
 
 ## Status
 
-This project currently includes the first Bronze foundation for raw file inventory, Pandas-based raw CSV profiling, and metadata JSON generation. Silver transformations, data contracts, DBT models, API implementation, and dashboards will be added in later iterations.
+This project currently includes Kaggle raw ingestion, Bronze profiling and metadata, Pandas-based Silver and Gold outputs, a PostgreSQL serving layer, and a first lightweight Flask API over the serving views. Dashboards, authentication, deployment tooling, Spark implementation, and production DBT models remain future iterations.

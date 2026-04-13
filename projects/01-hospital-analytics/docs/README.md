@@ -6,3 +6,4 @@ Project-specific documentation, decisions, and implementation notes live here.
 - [Silver Layer](silver.md)
 - [Gold Layer](gold.md)
 - [Serving Layer](serving.md)
+- [API Layer](api.md)
