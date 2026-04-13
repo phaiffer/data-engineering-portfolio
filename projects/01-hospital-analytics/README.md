@@ -98,6 +98,30 @@ The implementation is suitable for portfolio review and local demonstration. It 
 - Add honest presentation assets such as diagrams, dashboard screenshots, and API screenshots.
 - Expand test coverage around processing, serving, and API behavior.
 
+## Setup
+
+Install Python runtime dependencies from the repository root:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+For notebook exploration and validation work, install the development extras:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+```
+
+Dashboard dependencies are managed separately in [`dashboard/`](dashboard/) with npm:
+
+```powershell
+cd projects/01-hospital-analytics/dashboard
+npm install
+```
+
 ## How to Run Locally
 
 Use the [Demo / Run Guide](docs/demo.md) for the concise end-to-end flow.

@@ -44,6 +44,25 @@ These items are roadmap items, not current production claims.
 - [`projects/`](projects/): individual portfolio case studies.
 - [`projects/01-hospital-analytics/`](projects/01-hospital-analytics/): current end-to-end flagship project.
 
+## Local Python Setup
+
+From the repository root:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+For notebook exploration and local validation:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+```
+
+The React dashboard has its own Node/npm dependencies under [`projects/01-hospital-analytics/dashboard/`](projects/01-hospital-analytics/dashboard/). Install those separately with `npm install` from the dashboard directory.
+
 ## How the Current Case Works
 
 The hospital analytics project uses a medallion-style local workflow:

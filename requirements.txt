@@ -1,5 +1,4 @@
 pandas
-numpy
 kagglehub
 python-dotenv
 psycopg[binary]
