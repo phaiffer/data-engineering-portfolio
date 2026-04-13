@@ -1,32 +1,59 @@
 # Data Engineering Portfolio
 
-Production-minded monorepo for end-to-end data engineering portfolio projects.
+Portfolio monorepo for end-to-end data engineering case studies.
 
-This repository is organized as a collection of reusable project cases that emphasize clean structure, engineering standards, and room for progressive implementation. Each project is intended to evolve into a complete data engineering workflow while remaining understandable as a portfolio artifact.
+This repository is organized around realistic project scenarios that show how raw data can move through ingestion, medallion-style processing, analytical serving, API access, and dashboard consumption. The current flagship case is a hospital analytics workflow that is already implemented locally through a PostgreSQL serving layer, Flask API, and React dashboard.
 
-## Technologies
+## Current Flagship Project
 
-- Python
-- PySpark
-- Pandas
-- NumPy
-- DBT
-- Databricks
-- Medallion architecture
-- Flask API layer later for curated data exposure
+[`projects/01-hospital-analytics/`](projects/01-hospital-analytics/) is the main case study in this repository.
 
-## Repository Organization
+It demonstrates a local analytics pipeline for hospital patient-flow data:
 
-- `docs/`: repository-level architecture notes and engineering standards
-- `shared/`: reusable templates, conventions, and shared utility placeholders
-- `projects/`: individual end-to-end portfolio projects
+```text
+Kaggle ingestion -> Bronze profiling -> Silver processing -> Gold outputs -> PostgreSQL serving -> Flask API -> React dashboard
+```
 
-## Project Philosophy
+The project is intentionally portfolio-oriented: the implementation is small enough to inspect, but it covers the core handoff points of a real analytical data product.
 
-Each project in this monorepo is built as:
+## What Is Implemented
 
-- a realistic engineering case study
-- a learning and experimentation space
-- a reusable reference for future portfolio work
+- Kaggle-based raw data ingestion into a local Bronze landing area.
+- Bronze inventory, profiling, and metadata generation.
+- Pandas-based Silver processing for cleaned, row-level patient-flow data.
+- Pandas-based Gold outputs for dashboard-ready analytical summaries.
+- PostgreSQL serving tables and views over the Gold outputs.
+- Flask API endpoints over the PostgreSQL serving views.
+- React + Vite dashboard that consumes the Flask API.
+- Layer-specific documentation for Bronze, Silver, Gold, Serving, API, and Dashboard.
 
-The current foundation focuses on structure only. Business logic, transformations, and deployment concerns will be added incrementally as each project matures.
+## Planned Future Iterations
+
+- Production DBT models for transformation governance.
+- PySpark or Databricks implementation once the local Spark environment is unblocked.
+- Deployment, orchestration, CI/CD, and infrastructure automation.
+- Authentication, authorization, and production API hardening.
+- Presentation assets such as architecture diagrams and dashboard screenshots.
+
+These items are roadmap items, not current production claims.
+
+## Repository Structure
+
+- [`docs/`](docs/): repository-level notes and engineering standards.
+- [`shared/`](shared/): shared templates, conventions, and reusable placeholders.
+- [`projects/`](projects/): individual portfolio case studies.
+- [`projects/01-hospital-analytics/`](projects/01-hospital-analytics/): current end-to-end flagship project.
+
+## How the Current Case Works
+
+The hospital analytics project uses a medallion-style local workflow:
+
+1. Raw data is downloaded from Kaggle into the Bronze landing area.
+2. Bronze jobs profile the raw CSV and write metadata without changing source values.
+3. Silver processing standardizes and cleans the patient-flow records while preserving row grain.
+4. Gold processing creates curated analytical CSV outputs for daily flow, referrals, and demographics.
+5. The serving job loads Gold outputs into PostgreSQL and creates stable serving views.
+6. A Flask API exposes those serving views over HTTP.
+7. A React + Vite dashboard consumes the API for portfolio visualization.
+
+Start with the [Hospital Analytics README](projects/01-hospital-analytics/) or the [demo/run guide](projects/01-hospital-analytics/docs/demo.md) for local execution details.
