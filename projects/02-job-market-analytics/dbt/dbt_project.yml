@@ -14,11 +14,8 @@ test-paths:
 models:
   job_market_analytics:
     staging:
-      +materialized: view
-      +schema: staging
+      +materialized: ephemeral
     intermediate:
-      +materialized: view
-      +schema: intermediate
+      +materialized: ephemeral
     marts:
       +materialized: table
-      +schema: marts

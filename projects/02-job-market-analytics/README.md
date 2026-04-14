@@ -59,6 +59,7 @@ Implemented in this foundation step:
 - PostgreSQL Silver loader for `analytics.job_market_insights_silver`;
 - DBT PostgreSQL target over the loaded Silver table;
 - shared DBT staging, intermediate, and mart models;
+- final DBT PostgreSQL marts materialized in the `marts` schema;
 - lightweight DBT source, model, and singular tests;
 - lightweight exploratory notebook;
 - documentation for the current Bronze, Silver, and Gold scopes.
@@ -107,21 +108,21 @@ Run the DBT DuckDB analytical modeling path:
 
 ```powershell
 cd projects/02-job-market-analytics/dbt
-dbt debug --profiles-dir . --target dev
-dbt run --profiles-dir . --target dev
-dbt test --profiles-dir . --target dev
+.\scripts\run_dbt_duckdb.ps1 debug
+.\scripts\run_dbt_duckdb.ps1 run
+.\scripts\run_dbt_duckdb.ps1 test
 ```
 
-DBT was verified with Python 3.12. If your active virtualenv uses Python 3.14 and DBT fails during import, run these commands from a Python 3.12 or 3.13 environment. The DBT-specific dependencies live in `projects/02-job-market-analytics/dbt/requirements.txt`.
+DBT is not meant to run from the repository base `.venv` when that environment uses an incompatible Python version. The helper scripts use `uv`, Python 3.12, and the DBT-specific dependency file at `projects/02-job-market-analytics/dbt/requirements.txt`.
 
 To run the PostgreSQL modeling path, configure `projects/02-job-market-analytics/.env`, load Silver into PostgreSQL, and run DBT with the PostgreSQL target:
 
 ```powershell
 python projects/02-job-market-analytics/src/jobs/run_postgres_load.py
 cd projects/02-job-market-analytics/dbt
-dbt debug --profiles-dir . --target postgres
-dbt run --profiles-dir . --target postgres
-dbt test --profiles-dir . --target postgres
+.\scripts\run_dbt_postgres.ps1 debug
+.\scripts\run_dbt_postgres.ps1 run
+.\scripts\run_dbt_postgres.ps1 test
 ```
 
 The Bronze metadata artifact is written under:
@@ -152,6 +153,15 @@ The PostgreSQL Silver load writes to:
 
 ```text
 analytics.job_market_insights_silver
+```
+
+The PostgreSQL DBT analytical outputs materialize to:
+
+```text
+marts.mart_job_title_summary
+marts.mart_industry_summary
+marts.mart_location_summary
+marts.mart_automation_ai_summary
 ```
 
 Raw data files and generated downstream data artifacts are local-only and ignored by Git.
