@@ -60,7 +60,7 @@ Silver normalizes obvious categorical values into lowercase analytical tokens:
 - `UX/UI Design` -> `ux_ui_design`
 - `Yes` / `No` -> `yes` / `no`
 
-This creates stable values for future DBT staging and dimensions without inventing new business categories.
+This creates stable values for DBT staging and marts without inventing new business categories.
 
 ## Silver Will Do
 
@@ -73,13 +73,12 @@ This creates stable values for future DBT staging and dimensions without inventi
 - Write a Silver CSV and Silver metadata JSON.
 - Report duplicate row count and null counts.
 
-## Silver Will Not Do Yet
+## Silver Does Not Do
 
 - Deduplicate rows.
 - Aggregate records.
 - Create dimensional tables.
 - Create Gold marts or KPIs.
-- Create DBT models beyond the existing scaffold.
 - Infer unsupported semantics such as job posting identity, freshness, or market representativeness.
 
 ## Open Semantic Questions
@@ -91,7 +90,7 @@ This creates stable values for future DBT staging and dimensions without inventi
 
 ## DBT and Gold Preparation
 
-Silver v1 produces stable column names and normalized category values. This prepares future DBT work for:
+Silver v1 produces stable column names and normalized category values. This supports the implemented DBT work for:
 
 - staging models over a consistent row-level input;
 - accepted-value tests for compact categorical fields;

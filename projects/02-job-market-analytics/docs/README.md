@@ -1,20 +1,37 @@
-# Job Market Analytics Documentation
+# Job Market Analytics Docs
 
-This documentation folder tracks the implementation notes for `02-job-market-analytics`.
+Curated documentation index for `02-job-market-analytics`.
 
-The current project stage is Bronze-first. It establishes raw source ingestion and profiling for the Kaggle dataset `uom190346a/ai-powered-job-market-insights`.
+Use this folder to review how the case moves from raw Kaggle data into modeled analytical outputs, then into the API and dashboard read layer.
 
-## Current Docs
+## Start Here
 
-- [Bronze](bronze.md): raw landing, file inventory, main CSV selection, and profiling metadata.
-- [Silver Plan](silver_plan.md): Silver v1 grain, rename, type, null, and normalization plan.
-- [Silver](silver.md): current row-preserving Silver implementation and run instructions.
-- [Gold Plan](gold_plan.md): Gold v1 output grains, metrics, and modeling assumptions.
-- [Gold](gold.md): current curated analytical outputs and run instructions.
+- [Project README](../README.md): portfolio case-study overview, architecture flow, local run path, and current status.
+- [Assets](assets/README.md): dashboard screenshot inventory and future presentation assets.
 
-## Roadmap Docs
+## Pipeline Layers
 
-Future documentation should be added only when those layers are implemented:
+- [Bronze](bronze.md): raw landing, file inventory, source selection, and profiling metadata.
+- [Silver](silver.md): row-preserving standardization of job-market records.
+- [Gold](gold.md): Python-generated analytical summaries for the local medallion path.
 
-- DBT model lineage and tests.
-- Serving or dashboard notes if those layers are introduced later.
+## Modeling
+
+- [DBT project](../dbt/README.md): DuckDB and PostgreSQL DBT execution notes.
+- [Silver Plan](silver_plan.md): design notes for the first Silver implementation.
+- [Gold Plan](gold_plan.md): design notes for the first Gold implementation.
+
+## Read Layer
+
+- [API docs](api.md): read-only Flask endpoints over PostgreSQL Silver data and DBT marts.
+- [API README](../api/README.md): concise run instructions and endpoint list for the API package.
+
+## Portfolio Review Path
+
+For a quick reviewer walkthrough:
+
+1. Read the [Project README](../README.md) for the case positioning.
+2. Open [Bronze](bronze.md), [Silver](silver.md), and [Gold](gold.md) to understand the Python medallion flow.
+3. Review the [DBT project](../dbt/README.md) to see the dual DuckDB and PostgreSQL modeling paths.
+4. Check [API docs](api.md) for the dashboard read layer.
+5. Use [Assets](assets/README.md) to locate the current dashboard screenshot.

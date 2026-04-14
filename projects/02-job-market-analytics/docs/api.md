@@ -184,5 +184,5 @@ Python medallion pipeline
 -> DBT analytical modeling
 -> PostgreSQL-backed marts
 -> read-only Flask analytics API
--> future dashboard-ready data source
+-> React dashboard
 ```

@@ -1,109 +1,80 @@
 # Job Market Analytics
 
-Job market analytics case study using the Kaggle dataset `uom190346a/ai-powered-job-market-insights`.
+End-to-end job market analytics case study using the Kaggle dataset `uom190346a/ai-powered-job-market-insights`.
 
-## Project Objective
+This project is the second portfolio case in the repository. It demonstrates a complete local analytics workflow for labor-market data: Python medallion processing, dual DBT modeling paths, PostgreSQL marts, a read-only Flask API, and a React dashboard consuming the real API.
 
-This project is the second portfolio case study in the monorepo. It complements the first flagship project, [`01-hospital-analytics`](../01-hospital-analytics/), by shifting the analytical domain from hospital operations to labor and job-market analytics.
+## Project Overview
 
-The goal is to establish a clean foundation for job-market analytics: land the raw Kaggle dataset, inventory the raw files, profile the main analytical file, standardize row-preserving Silver records, produce curated Gold summaries, and add DBT modeling paths for SQL-first analytical modeling.
+`02-job-market-analytics` analyzes AI-era job market signals such as job titles, industries, locations, salary ranges, automation risk, and AI adoption.
+
+The implementation starts with a raw Kaggle dataset and moves it through:
+
+- Bronze raw landing and profiling.
+- Silver standardized, row-preserving records.
+- Gold analytical summaries generated in Python.
+- DBT marts modeled through both DuckDB and PostgreSQL paths.
+- A PostgreSQL-backed read layer.
+- A read-only Flask API.
+- A React dashboard connected to the API.
+
+The case is intentionally local-first and portfolio-oriented. It shows practical engineering choices without claiming production deployment, orchestration, or enterprise hardening.
 
 ## Why This Case Exists
 
-The hospital analytics project already demonstrates an end-to-end path through ingestion, Bronze, Silver, Gold, PostgreSQL serving, Flask API, and a React dashboard.
+The first portfolio case, [`01-hospital-analytics`](../01-hospital-analytics/), demonstrates a hospital operations pipeline with PostgreSQL serving views, a Flask API, and a React dashboard.
 
-This project is intentionally different. It is focused on:
+This case expands the portfolio in a different direction:
 
-- labor and job-market analytics;
-- reusable dimensional thinking;
-- stronger SQL and DBT modeling;
-- PostgreSQL-backed relational loading;
-- clear raw-to-modeled boundaries;
-- an honest Bronze-first implementation that evolves into curated analytical marts;
-- a thin read-only API over the PostgreSQL mart layer for dashboard consumption.
+- Different domain: labor-market and AI impact analytics instead of hospital patient-flow analytics.
+- Stronger SQL modeling emphasis through DBT.
+- Two modeling runtimes: DuckDB for local file-based development and PostgreSQL for relational mart serving.
+- A dashboard/API read layer over DBT marts rather than only Python-generated Gold files.
+- A second proof that the repository can support more than one analytical product pattern.
 
-## Dataset Focus
+Together, the two cases show both reusable data engineering fundamentals and domain-specific implementation choices.
 
-- Source: Kaggle
-- Dataset handle: `uom190346a/ai-powered-job-market-insights`
-- Current local landing path: `data/bronze/raw/ai_powered_job_market_insights/`
-
-The Bronze job does not invent business semantics. It discovers the landed files and profiles the main CSV as raw source data.
-
-## Planned Medallion Flow
+## Architecture Flow
 
 ```text
 Kaggle dataset
 -> Bronze raw landing and profiling
 -> Silver standardized job-market records
--> Gold dimensional or mart-style analytical outputs
--> DBT path A: DuckDB staging, intermediate, and marts over the Silver CSV
--> DBT path B: PostgreSQL staging, intermediate, and marts over loaded Silver data
--> Thin read-only Flask API over PostgreSQL Silver and DBT marts
--> Dashboard-ready JSON endpoints
+-> Gold analytical summaries
+-> DBT path A: DuckDB marts over Silver CSV
+-> DBT path B: PostgreSQL marts over loaded Silver data
+-> Flask read-only API
+-> React dashboard
 ```
 
-## Current Implementation Status
+## Dashboard Preview
 
-Implemented in this foundation step:
+![Job market analytics dashboard overview](docs/assets/dashboard-overview.png)
 
-- project scaffold under `projects/02-job-market-analytics/`;
-- Kaggle ingestion with `kagglehub`;
-- local raw Bronze landing area;
-- raw file inventory helpers;
-- Bronze v1 profiling with Pandas;
-- JSON metadata generation for the selected main CSV;
-- Silver v1 row-preserving standardization with Pandas;
-- Gold v1 curated analytical summaries with Pandas;
-- local DBT project using DuckDB over the Silver artifact;
-- PostgreSQL Silver loader for `analytics.job_market_insights_silver`;
-- DBT PostgreSQL target over the loaded Silver table;
-- shared DBT staging, intermediate, and mart models;
-- final DBT PostgreSQL marts materialized in the `marts` schema;
-- lightweight DBT source, model, and singular tests;
-- thin read-only Flask API over PostgreSQL Silver and DBT marts;
-- lightweight exploratory notebook;
-- documentation for the current Bronze, Silver, and Gold scopes.
+This screenshot is the current dashboard implementation proof for the case study. The React dashboard is not a mockup: it reads from the Flask API, which reads from PostgreSQL Silver data and DBT marts.
 
-Not implemented yet:
+## Implemented Stack
 
-- PostgreSQL serving views beyond the DBT marts;
-- orchestration, deployment, or infrastructure.
+- **Python**: ingestion, Bronze profiling, Silver standardization, Gold summaries, PostgreSQL loading.
+- **Pandas**: local medallion transformations and profiling.
+- **DuckDB**: local DBT development over the Silver CSV artifact.
+- **PostgreSQL**: relational Silver load and DBT mart materialization.
+- **DBT**: staging, intermediate, mart models, sources, model tests, and singular tests.
+- **Flask**: thin read-only API for dashboard access.
+- **React + Vite + TypeScript**: dashboard frontend over the API.
+- **PowerShell helper scripts**: DBT execution for DuckDB and PostgreSQL targets.
 
-## How to Run Locally
+## Modeling Paths
 
-From the repository root:
+### Path A: DuckDB Local Modeling
 
-```powershell
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+The DuckDB path supports fast local analytical modeling over the Silver CSV artifact.
+
+```text
+Silver CSV -> DBT DuckDB source -> staging -> intermediate -> marts -> local DuckDB database
 ```
 
-Download the Kaggle dataset into the project-local Bronze raw area:
-
-```powershell
-python projects/02-job-market-analytics/src/jobs/run_ingestion.py
-```
-
-Run the Bronze inventory and profiling job:
-
-```powershell
-python projects/02-job-market-analytics/src/jobs/run_bronze.py
-```
-
-Run the Silver standardization job:
-
-```powershell
-python projects/02-job-market-analytics/src/jobs/run_silver.py
-```
-
-Run the Gold summary job:
-
-```powershell
-python projects/02-job-market-analytics/src/jobs/run_gold.py
-```
-
-Run the DBT DuckDB analytical modeling path:
+Run from the DBT project directory:
 
 ```powershell
 cd projects/02-job-market-analytics/dbt
@@ -112,9 +83,21 @@ cd projects/02-job-market-analytics/dbt
 .\scripts\run_dbt_duckdb.ps1 test
 ```
 
-DBT is not meant to run from the repository base `.venv` when that environment uses an incompatible Python version. The helper scripts use `uv`, Python 3.12, and the DBT-specific dependency file at `projects/02-job-market-analytics/dbt/requirements.txt`.
+The local DuckDB database is written to:
 
-To run the PostgreSQL modeling path, configure `projects/02-job-market-analytics/.env`, load Silver into PostgreSQL, and run DBT with the PostgreSQL target:
+```text
+projects/02-job-market-analytics/data/job_market_analytics.duckdb
+```
+
+### Path B: PostgreSQL-Backed Modeling
+
+The PostgreSQL path loads Silver records into PostgreSQL and materializes DBT marts in the `marts` schema.
+
+```text
+Silver CSV -> analytics.job_market_insights_silver -> DBT PostgreSQL source -> staging -> intermediate -> marts
+```
+
+Load Silver and run the PostgreSQL DBT target:
 
 ```powershell
 python projects/02-job-market-analytics/src/jobs/run_postgres_load.py
@@ -124,52 +107,21 @@ cd projects/02-job-market-analytics/dbt
 .\scripts\run_dbt_postgres.ps1 test
 ```
 
-The Bronze metadata artifact is written under:
-
-```text
-projects/02-job-market-analytics/data/bronze/metadata/
-```
-
-The Silver artifact and metadata are written under:
-
-```text
-projects/02-job-market-analytics/data/silver/
-```
-
-The Gold artifacts and metadata are written under:
-
-```text
-projects/02-job-market-analytics/data/gold/
-```
-
-The local DBT DuckDB database is written to:
-
-```text
-projects/02-job-market-analytics/data/job_market_analytics.duckdb
-```
-
-The PostgreSQL Silver load writes to:
+Implemented PostgreSQL outputs:
 
 ```text
 analytics.job_market_insights_silver
-```
-
-The PostgreSQL DBT analytical outputs materialize to:
-
-```text
 marts.mart_job_title_summary
 marts.mart_industry_summary
 marts.mart_location_summary
 marts.mart_automation_ai_summary
 ```
 
-Start the local read-only dashboard API:
+## API and Dashboard Read Layer
 
-```powershell
-.\.venv\Scripts\python.exe projects/02-job-market-analytics/api/app.py
-```
+The Flask API is intentionally thin and read-only. It does not rebuild transformation logic in the API layer. It reads from PostgreSQL Silver data and DBT marts, then exposes dashboard-oriented JSON endpoints.
 
-The API runs at `http://127.0.0.1:5001` by default and exposes:
+Primary endpoints:
 
 ```text
 GET /health
@@ -180,7 +132,60 @@ GET /api/v1/locations
 GET /api/v1/automation-ai
 ```
 
-Start the first React dashboard:
+The React dashboard consumes these endpoints directly. It is the presentation layer for the modeled data, not a separate analytical engine.
+
+## How to Run Locally
+
+From the repository root, activate the Python environment and install dependencies:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+Run the Python medallion pipeline:
+
+```powershell
+python projects/02-job-market-analytics/src/jobs/run_ingestion.py
+python projects/02-job-market-analytics/src/jobs/run_bronze.py
+python projects/02-job-market-analytics/src/jobs/run_silver.py
+python projects/02-job-market-analytics/src/jobs/run_gold.py
+```
+
+Run the DuckDB DBT path:
+
+```powershell
+cd projects/02-job-market-analytics/dbt
+.\scripts\run_dbt_duckdb.ps1 debug
+.\scripts\run_dbt_duckdb.ps1 run
+.\scripts\run_dbt_duckdb.ps1 test
+cd ../../..
+```
+
+Run the PostgreSQL load and DBT path after configuring `projects/02-job-market-analytics/.env`:
+
+```powershell
+python projects/02-job-market-analytics/src/jobs/run_postgres_load.py
+cd projects/02-job-market-analytics/dbt
+.\scripts\run_dbt_postgres.ps1 debug
+.\scripts\run_dbt_postgres.ps1 run
+.\scripts\run_dbt_postgres.ps1 test
+cd ../../..
+```
+
+Start the API:
+
+```powershell
+.\.venv\Scripts\python.exe projects/02-job-market-analytics/api/app.py
+```
+
+By default, the API runs at:
+
+```text
+http://127.0.0.1:5001
+```
+
+Start the dashboard:
 
 ```powershell
 cd projects/02-job-market-analytics/dashboard
@@ -188,22 +193,53 @@ npm install
 npm run dev
 ```
 
-The dashboard reads from the PostgreSQL Silver table and DBT marts through the thin Flask API. It does not use the Figma mock numbers or rebuild any medallion-layer logic in the frontend.
-
-Raw data files and generated downstream data artifacts are local-only and ignored by Git.
+Generated data artifacts are local-only and ignored by Git.
 
 ## Project Structure
 
-- [`data/`](data/): local medallion-aligned storage for Bronze, Silver, and Gold artifacts.
-- [`src/`](src/): ingestion, processing, quality, utility, and job modules.
-- [`dbt/`](dbt/): DBT project with DuckDB and PostgreSQL targets sharing staging, intermediate, and mart models over Silver.
-- [`api/`](api/): thin read-only Flask API for dashboard access to PostgreSQL Silver and DBT marts.
-- [`dashboard/`](dashboard/): React, Vite, and TypeScript dashboard over the modeled outputs.
-- [`docs/`](docs/): project, layer, and API documentation.
-- [`notebooks/`](notebooks/): exploratory notebook for source profiling.
-- [`tests/`](tests/): unit and integration test placeholders.
+```text
+projects/02-job-market-analytics/
+|-- api/                 # Read-only Flask API over PostgreSQL Silver and DBT marts
+|-- dashboard/           # React + Vite dashboard consuming the API
+|-- data/                # Local generated Bronze, Silver, Gold, and DuckDB artifacts
+|-- dbt/                 # Shared DBT project for DuckDB and PostgreSQL targets
+|-- docs/                # Layer docs, API notes, and portfolio assets
+|-- notebooks/           # Exploratory source profiling notebook
+|-- src/                 # Python ingestion, processing, quality, loading, and job modules
+|-- tests/               # Test placeholders and validation surface
+|-- .env.example         # Local configuration template
+`-- README.md            # Case study overview
+```
+
+## Current Status
+
+Implemented today:
+
+- Kaggle ingestion into a local Bronze raw area.
+- Bronze file inventory, profiling, and metadata generation.
+- Silver row-preserving standardization.
+- Gold analytical summaries.
+- DBT DuckDB modeling over Silver CSV.
+- PostgreSQL Silver loading.
+- DBT PostgreSQL modeling into marts.
+- DBT source, model, and singular tests.
+- Read-only Flask API over PostgreSQL data.
+- React dashboard consuming the real API.
+- Portfolio screenshot for the dashboard.
+
+Not claimed today:
+
+- Cloud deployment.
+- Orchestration.
+- CI/CD automation.
+- Authentication or authorization.
+- Production API hardening.
+- Production data contracts or SLAs.
 
 ## Future Iterations
 
-- Add deeper DBT documentation, exposures, and CI after the local modeling path stabilizes.
-- Add serving and visualization only after the analytical model has a stable shape.
+- Add a repository-level architecture diagram for the second case.
+- Add captured validation assets for Postman, PostgreSQL marts, and DBT runs/tests.
+- Add DBT docs generation artifacts or exposures if the project moves toward richer lineage presentation.
+- Add orchestration once the local workflow is stable enough to justify it.
+- Add deployment notes only after there is a real deployed environment to document.

@@ -53,8 +53,8 @@ python projects/02-job-market-analytics/src/jobs/run_ingestion.py
 python projects/02-job-market-analytics/src/jobs/run_bronze.py
 ```
 
-## Current Limitations
+## Current Notes
 
 - The profiling engine is Pandas, matching the current local environment and avoiding unstable Spark usage.
-- No Silver or Gold transformations are implemented yet.
-- DBT is scaffolded for future modeling but does not contain production marts yet.
+- Bronze remains raw and intentionally does not apply business transformations.
+- Downstream Silver, Gold, DBT DuckDB, DBT PostgreSQL, API, and dashboard layers are implemented outside the Bronze boundary.
