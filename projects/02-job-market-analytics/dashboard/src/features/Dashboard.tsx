@@ -249,7 +249,7 @@ function HeroSection() {
         <SectionState message="No industry rows returned by the API." tone="empty" />
       ) : (
         <div className="chart-frame chart-frame--hero">
-          <ResponsiveContainer width="100%" height={360}>
+          <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 16, right: 28, bottom: 8, left: 8 }}>
               <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 8" />
               <XAxis dataKey="industry" tickLine={false} axisLine={false} tick={{ fill: "#64748b", fontSize: 11 }} tickMargin={14} />

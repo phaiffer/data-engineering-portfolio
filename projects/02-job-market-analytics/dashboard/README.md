@@ -76,6 +76,12 @@ Vite will print the local dashboard URL, usually:
 http://localhost:5173
 ```
 
+For full-page portfolio screenshots, open the dashboard with capture mode enabled:
+
+```text
+http://127.0.0.1:5173/?capture=1
+```
+
 ## Build
 
 ```powershell

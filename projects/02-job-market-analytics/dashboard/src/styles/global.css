@@ -44,6 +44,11 @@ button {
   display: grid;
   min-height: 100vh;
   grid-template-columns: 290px minmax(0, 1fr);
+  align-items: start;
+}
+
+.capture-mode .dashboard-shell {
+  align-items: stretch;
 }
 
 .sidebar {
@@ -57,7 +62,15 @@ button {
   border-right: 1px solid #273449;
   background: var(--sidebar);
   color: #f8fafc;
-  padding: 28px 17px;
+  padding: 24px 17px;
+}
+
+.capture-mode .sidebar {
+  position: static;
+  align-self: stretch;
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
 }
 
 .sidebar__brand {
@@ -146,7 +159,7 @@ button {
 
 .sidebar-panel {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .sidebar-panel__heading {
@@ -159,7 +172,7 @@ button {
 
 .pipeline-stack {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .pipeline-badge {
@@ -234,21 +247,22 @@ button {
 }
 
 .dashboard-main {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  min-height: 100vh;
 }
 
 .dashboard-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 10;
   display: flex;
   justify-content: space-between;
   gap: 24px;
   align-items: flex-start;
   border-bottom: 1px solid var(--border);
-  background: rgb(255 255 255 / 94%);
-  padding: 28px 32px;
-  backdrop-filter: blur(12px);
+  background: #ffffff;
+  padding: 24px 32px 22px;
 }
 
 .dashboard-header h1 {
@@ -329,14 +343,15 @@ button {
 }
 
 .dashboard-content {
-  padding: 32px;
+  display: grid;
+  gap: 20px;
+  padding: 24px 32px 32px;
 }
 
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(160px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 14px;
 }
 
 .metric-grid .section-state {
@@ -353,10 +368,10 @@ button {
 
 .metric-card {
   display: grid;
-  min-height: 166px;
+  min-height: 150px;
   gap: 10px;
   align-content: start;
-  padding: 20px;
+  padding: 18px;
 }
 
 .metric-card__topline {
@@ -418,12 +433,11 @@ button {
 }
 
 .section-block {
-  padding: 24px;
-  margin-bottom: 24px;
+  padding: 22px;
 }
 
 .section-block--hero {
-  min-height: 470px;
+  min-height: 0;
 }
 
 .section-heading {
@@ -431,7 +445,7 @@ button {
   justify-content: space-between;
   gap: 18px;
   align-items: flex-start;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .section-heading h2 {
@@ -468,18 +482,18 @@ button {
 }
 
 .chart-frame--hero {
-  height: 380px;
+  height: 350px;
 }
 
 .chart-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  gap: 20px;
   align-items: stretch;
 }
 
 .chart-grid .section-block {
-  min-height: 405px;
+  min-height: 382px;
 }
 
 .chart-tooltip {
@@ -511,7 +525,7 @@ button {
 }
 
 .table-wrap {
-  max-height: 580px;
+  max-height: 520px;
   overflow: auto;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -525,7 +539,7 @@ table {
 
 th,
 td {
-  padding: 15px 16px;
+  padding: 13px 16px;
   border-bottom: 1px solid var(--border);
   text-align: left;
   white-space: nowrap;
