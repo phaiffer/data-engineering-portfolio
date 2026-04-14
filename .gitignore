@@ -33,6 +33,9 @@ dist/
 !projects/01-hospital-analytics/dashboard/package.json
 !projects/01-hospital-analytics/dashboard/package-lock.json
 !projects/01-hospital-analytics/dashboard/tsconfig.json
+!projects/02-job-market-analytics/dashboard/package.json
+!projects/02-job-market-analytics/dashboard/package-lock.json
+!projects/02-job-market-analytics/dashboard/tsconfig.json
 
 #  Environment files
 .env

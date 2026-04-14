@@ -19,9 +19,8 @@ This project is intentionally different. It is focused on:
 - stronger SQL and DBT modeling;
 - PostgreSQL-backed relational loading;
 - clear raw-to-modeled boundaries;
-- an honest Bronze-first implementation that can evolve into curated analytical marts.
-
-It does not build another dashboard or API yet.
+- an honest Bronze-first implementation that evolves into curated analytical marts;
+- a thin read-only API over the PostgreSQL mart layer for dashboard consumption.
 
 ## Dataset Focus
 
@@ -40,7 +39,8 @@ Kaggle dataset
 -> Gold dimensional or mart-style analytical outputs
 -> DBT path A: DuckDB staging, intermediate, and marts over the Silver CSV
 -> DBT path B: PostgreSQL staging, intermediate, and marts over loaded Silver data
--> Future serving or dashboard layer, if useful
+-> Thin read-only Flask API over PostgreSQL Silver and DBT marts
+-> Dashboard-ready JSON endpoints
 ```
 
 ## Current Implementation Status
@@ -61,14 +61,13 @@ Implemented in this foundation step:
 - shared DBT staging, intermediate, and mart models;
 - final DBT PostgreSQL marts materialized in the `marts` schema;
 - lightweight DBT source, model, and singular tests;
+- thin read-only Flask API over PostgreSQL Silver and DBT marts;
 - lightweight exploratory notebook;
 - documentation for the current Bronze, Silver, and Gold scopes.
 
 Not implemented yet:
 
-- PostgreSQL serving;
-- Flask API;
-- React dashboard;
+- PostgreSQL serving views beyond the DBT marts;
 - orchestration, deployment, or infrastructure.
 
 ## How to Run Locally
@@ -164,6 +163,33 @@ marts.mart_location_summary
 marts.mart_automation_ai_summary
 ```
 
+Start the local read-only dashboard API:
+
+```powershell
+.\.venv\Scripts\python.exe projects/02-job-market-analytics/api/app.py
+```
+
+The API runs at `http://127.0.0.1:5001` by default and exposes:
+
+```text
+GET /health
+GET /api/v1/kpis
+GET /api/v1/job-titles
+GET /api/v1/industries
+GET /api/v1/locations
+GET /api/v1/automation-ai
+```
+
+Start the first React dashboard:
+
+```powershell
+cd projects/02-job-market-analytics/dashboard
+npm install
+npm run dev
+```
+
+The dashboard reads from the PostgreSQL Silver table and DBT marts through the thin Flask API. It does not use the Figma mock numbers or rebuild any medallion-layer logic in the frontend.
+
 Raw data files and generated downstream data artifacts are local-only and ignored by Git.
 
 ## Project Structure
@@ -171,7 +197,9 @@ Raw data files and generated downstream data artifacts are local-only and ignore
 - [`data/`](data/): local medallion-aligned storage for Bronze, Silver, and Gold artifacts.
 - [`src/`](src/): ingestion, processing, quality, utility, and job modules.
 - [`dbt/`](dbt/): DBT project with DuckDB and PostgreSQL targets sharing staging, intermediate, and mart models over Silver.
-- [`docs/`](docs/): project and layer documentation.
+- [`api/`](api/): thin read-only Flask API for dashboard access to PostgreSQL Silver and DBT marts.
+- [`dashboard/`](dashboard/): React, Vite, and TypeScript dashboard over the modeled outputs.
+- [`docs/`](docs/): project, layer, and API documentation.
 - [`notebooks/`](notebooks/): exploratory notebook for source profiling.
 - [`tests/`](tests/): unit and integration test placeholders.
 
