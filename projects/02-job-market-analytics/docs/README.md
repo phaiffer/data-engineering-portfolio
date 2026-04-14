@@ -7,12 +7,13 @@ The current project stage is Bronze-first. It establishes raw source ingestion a
 ## Current Docs
 
 - [Bronze](bronze.md): raw landing, file inventory, main CSV selection, and profiling metadata.
+- [Silver Plan](silver_plan.md): Silver v1 grain, rename, type, null, and normalization plan.
+- [Silver](silver.md): current row-preserving Silver implementation and run instructions.
 
 ## Roadmap Docs
 
 Future documentation should be added only when those layers are implemented:
 
-- Silver standardization rules and data contract.
 - Gold dimensional model and metric definitions.
 - DBT model lineage and tests.
 - Serving or dashboard notes if those layers are introduced later.
