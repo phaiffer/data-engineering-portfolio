@@ -51,18 +51,18 @@ export const apiClient = {
   getKpis: () => request<DashboardKpis>("/api/v1/kpis"),
   getJobTitleSummary: () =>
     request<JobTitleSummaryRow[]>(
-      "/api/v1/job-title-summary?order_by=average_salary_usd&limit=8",
+      "/api/v1/job-titles?order_by=average_salary_usd&limit=8",
     ),
   getIndustrySummary: () =>
     request<IndustrySummaryRow[]>(
-      "/api/v1/industry-summary?order_by=total_records&limit=1000",
+      "/api/v1/industries?order_by=total_records&limit=1000",
     ),
   getLocationSummary: () =>
     request<LocationSummaryRow[]>(
-      "/api/v1/location-summary?order_by=average_salary_usd&limit=8",
+      "/api/v1/locations?order_by=average_salary_usd&limit=8",
     ),
   getAutomationAiSummary: () =>
     request<AutomationAiSummaryRow[]>(
-      "/api/v1/automation-ai-summary?order_by=total_records&limit=1000",
+      "/api/v1/automation-ai?order_by=total_records&limit=1000",
     ),
 };

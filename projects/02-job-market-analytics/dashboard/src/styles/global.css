@@ -339,6 +339,10 @@ button {
   margin-bottom: 24px;
 }
 
+.metric-grid .section-state {
+  grid-column: 1 / -1;
+}
+
 .metric-card,
 .section-block {
   border: 1px solid var(--border);

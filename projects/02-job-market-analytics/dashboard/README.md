@@ -2,11 +2,11 @@
 
 React, Vite, and TypeScript dashboard for the job-market analytics portfolio case.
 
-The dashboard is visually aligned with the Figma concept, but the metrics come from the project's modeled outputs instead of mock values.
+The dashboard is visually aligned with the Figma concept, and all main dashboard reads come from the local project 02 Flask API instead of mock values.
 
 ## Read Path
 
-The browser consumes the small local Flask API in `../api/`.
+The browser consumes the read-only local Flask API in `../api/`.
 
 The API reads from PostgreSQL:
 
@@ -17,6 +17,15 @@ The API reads from PostgreSQL:
 - `marts.mart_automation_ai_summary` for AI adoption and automation-risk analysis.
 
 No frontend logic rebuilds Bronze, Silver, Gold, or DBT transformations.
+
+Dashboard sections map to these API endpoints:
+
+- KPI row: `GET /api/v1/kpis`
+- Job title chart: `GET /api/v1/job-titles`
+- Industry chart and table: `GET /api/v1/industries`
+- Location chart: `GET /api/v1/locations`
+- Automation vs AI chart: `GET /api/v1/automation-ai`
+- API status badge: `GET /health`
 
 ## Environment
 
@@ -42,7 +51,13 @@ npm install
 
 ## Run Locally
 
-From the repository root, start the read-only API:
+Start the stack in this order:
+
+1. PostgreSQL with the validated project 02 marts available.
+2. The read-only Flask API.
+3. The Vite dashboard.
+
+From the repository root, start the API:
 
 ```powershell
 .\.venv\Scripts\python.exe projects/02-job-market-analytics/api/app.py

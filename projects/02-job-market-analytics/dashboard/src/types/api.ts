@@ -9,6 +9,7 @@ export type ApiErrorEnvelope = {
 };
 
 export type HealthStatus = {
+  database: string;
   service: string;
   status: string;
   source: string;
