@@ -3,4 +3,3 @@ kagglehub
 python-dotenv
 psycopg[binary]
 Flask
-dbt-duckdb==1.10.1

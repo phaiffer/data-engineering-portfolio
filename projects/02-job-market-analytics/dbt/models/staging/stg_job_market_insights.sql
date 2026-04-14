@@ -1,6 +1,10 @@
 with source as (
 
-    select * from {{ source('local_silver', 'ai_job_market_insights_silver') }}
+    {% if target.type == 'postgres' %}
+        select * from {{ source('postgres_silver', 'job_market_insights_silver') }}
+    {% else %}
+        select * from {{ source('duckdb_silver', 'ai_job_market_insights_silver') }}
+    {% endif %}
 
 )
 
@@ -12,7 +16,7 @@ select
     cast(ai_adoption_level as varchar) as ai_adoption_level,
     cast(automation_risk as varchar) as automation_risk,
     cast(required_skills as varchar) as required_skills,
-    cast(salary_usd as double) as salary_usd,
+    cast(salary_usd as {{ job_market_float_type() }}) as salary_usd,
     case
         when lower(cast(remote_friendly as varchar)) in ('yes', 'true', '1') then 'yes'
         when lower(cast(remote_friendly as varchar)) in ('no', 'false', '0') then 'no'

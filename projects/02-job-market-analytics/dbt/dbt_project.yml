@@ -6,6 +6,8 @@ profile: job_market_analytics
 
 model-paths:
   - models
+macro-paths:
+  - macros
 test-paths:
   - tests
 

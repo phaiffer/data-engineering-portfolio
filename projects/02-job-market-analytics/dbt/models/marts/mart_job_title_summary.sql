@@ -8,7 +8,7 @@ select
     job_title,
     count(*) as total_records,
     avg(salary_usd) as average_salary_usd,
-    median(salary_usd) as median_salary_usd,
+    {{ job_market_median('salary_usd') }} as median_salary_usd,
     min(salary_usd) as min_salary_usd,
     max(salary_usd) as max_salary_usd,
     avg(cast(is_remote_friendly as integer)) as remote_friendly_share,

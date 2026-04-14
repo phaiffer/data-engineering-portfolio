@@ -5,3 +5,12 @@ job_market_analytics:
       type: duckdb
       path: ../data/job_market_analytics.duckdb
       threads: 4
+    postgres:
+      type: postgres
+      host: "{{ env_var('JOB_MARKET_POSTGRES_HOST', 'localhost') }}"
+      port: "{{ env_var('JOB_MARKET_POSTGRES_PORT', 5432) | int }}"
+      dbname: "{{ env_var('JOB_MARKET_POSTGRES_DB', 'job_market_analytics') }}"
+      schema: "{{ env_var('JOB_MARKET_DBT_SCHEMA', 'analytics_dbt') }}"
+      user: "{{ env_var('JOB_MARKET_POSTGRES_USER', 'postgres') }}"
+      password: "{{ env_var('JOB_MARKET_POSTGRES_PASSWORD', 'postgres') }}"
+      threads: 4

@@ -6,7 +6,7 @@ Job market analytics case study using the Kaggle dataset `uom190346a/ai-powered-
 
 This project is the second portfolio case study in the monorepo. It complements the first flagship project, [`01-hospital-analytics`](../01-hospital-analytics/), by shifting the analytical domain from hospital operations to labor and job-market analytics.
 
-The goal is to establish a clean foundation for job-market analytics: land the raw Kaggle dataset, inventory the raw files, profile the main analytical file, standardize row-preserving Silver records, produce curated Gold summaries, and add a real local DBT layer for SQL-first analytical modeling.
+The goal is to establish a clean foundation for job-market analytics: land the raw Kaggle dataset, inventory the raw files, profile the main analytical file, standardize row-preserving Silver records, produce curated Gold summaries, and add DBT modeling paths for SQL-first analytical modeling.
 
 ## Why This Case Exists
 
@@ -17,6 +17,7 @@ This project is intentionally different. It is focused on:
 - labor and job-market analytics;
 - reusable dimensional thinking;
 - stronger SQL and DBT modeling;
+- PostgreSQL-backed relational loading;
 - clear raw-to-modeled boundaries;
 - an honest Bronze-first implementation that can evolve into curated analytical marts.
 
@@ -37,7 +38,8 @@ Kaggle dataset
 -> Bronze raw landing and profiling
 -> Silver standardized job-market records
 -> Gold dimensional or mart-style analytical outputs
--> DBT staging, intermediate, and mart models over Silver
+-> DBT path A: DuckDB staging, intermediate, and marts over the Silver CSV
+-> DBT path B: PostgreSQL staging, intermediate, and marts over loaded Silver data
 -> Future serving or dashboard layer, if useful
 ```
 
@@ -54,7 +56,9 @@ Implemented in this foundation step:
 - Silver v1 row-preserving standardization with Pandas;
 - Gold v1 curated analytical summaries with Pandas;
 - local DBT project using DuckDB over the Silver artifact;
-- DBT staging, intermediate, and mart models;
+- PostgreSQL Silver loader for `analytics.job_market_insights_silver`;
+- DBT PostgreSQL target over the loaded Silver table;
+- shared DBT staging, intermediate, and mart models;
 - lightweight DBT source, model, and singular tests;
 - lightweight exploratory notebook;
 - documentation for the current Bronze, Silver, and Gold scopes.
@@ -99,16 +103,26 @@ Run the Gold summary job:
 python projects/02-job-market-analytics/src/jobs/run_gold.py
 ```
 
-Run the DBT analytical modeling layer:
+Run the DBT DuckDB analytical modeling path:
 
 ```powershell
 cd projects/02-job-market-analytics/dbt
-dbt debug --profiles-dir .
-dbt run --profiles-dir .
-dbt test --profiles-dir .
+dbt debug --profiles-dir . --target dev
+dbt run --profiles-dir . --target dev
+dbt test --profiles-dir . --target dev
 ```
 
-DBT was verified with Python 3.12 and `dbt-duckdb`. If your active virtualenv uses Python 3.14 and DBT fails during import, run these commands from a Python 3.12 or 3.13 environment.
+DBT was verified with Python 3.12. If your active virtualenv uses Python 3.14 and DBT fails during import, run these commands from a Python 3.12 or 3.13 environment. The DBT-specific dependencies live in `projects/02-job-market-analytics/dbt/requirements.txt`.
+
+To run the PostgreSQL modeling path, configure `projects/02-job-market-analytics/.env`, load Silver into PostgreSQL, and run DBT with the PostgreSQL target:
+
+```powershell
+python projects/02-job-market-analytics/src/jobs/run_postgres_load.py
+cd projects/02-job-market-analytics/dbt
+dbt debug --profiles-dir . --target postgres
+dbt run --profiles-dir . --target postgres
+dbt test --profiles-dir . --target postgres
+```
 
 The Bronze metadata artifact is written under:
 
@@ -134,13 +148,19 @@ The local DBT DuckDB database is written to:
 projects/02-job-market-analytics/data/job_market_analytics.duckdb
 ```
 
+The PostgreSQL Silver load writes to:
+
+```text
+analytics.job_market_insights_silver
+```
+
 Raw data files and generated downstream data artifacts are local-only and ignored by Git.
 
 ## Project Structure
 
 - [`data/`](data/): local medallion-aligned storage for Bronze, Silver, and Gold artifacts.
 - [`src/`](src/): ingestion, processing, quality, utility, and job modules.
-- [`dbt/`](dbt/): local DuckDB-backed DBT project with staging, intermediate, and mart models over Silver.
+- [`dbt/`](dbt/): DBT project with DuckDB and PostgreSQL targets sharing staging, intermediate, and mart models over Silver.
 - [`docs/`](docs/): project and layer documentation.
 - [`notebooks/`](notebooks/): exploratory notebook for source profiling.
 - [`tests/`](tests/): unit and integration test placeholders.
