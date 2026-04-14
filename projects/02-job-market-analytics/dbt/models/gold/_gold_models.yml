@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: placeholder_gold
+    description: Placeholder for future Gold analytical marts.

@@ -43,3 +43,6 @@ dist/
 projects/01-hospital-analytics/data/bronze/raw/
 projects/01-hospital-analytics/data/silver/
 projects/01-hospital-analytics/data/gold/
+projects/02-job-market-analytics/data/bronze/raw/
+projects/02-job-market-analytics/data/silver/
+projects/02-job-market-analytics/data/gold/

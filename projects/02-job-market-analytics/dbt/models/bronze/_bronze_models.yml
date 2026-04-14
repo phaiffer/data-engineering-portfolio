@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: placeholder_bronze
+    description: Placeholder for future Bronze source-facing DBT models.

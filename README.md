@@ -2,7 +2,7 @@
 
 Portfolio monorepo for end-to-end data engineering case studies.
 
-This repository is organized around realistic project scenarios that show how raw data can move through ingestion, medallion-style processing, analytical serving, API access, and dashboard consumption. The current flagship case is a hospital analytics workflow that is already implemented locally through a PostgreSQL serving layer, Flask API, and React dashboard.
+This repository is organized around realistic project scenarios that show how raw data can move through ingestion, medallion-style processing, analytical serving, API access, and dashboard consumption. The current flagship case is a hospital analytics workflow that is already implemented locally through a PostgreSQL serving layer, Flask API, and React dashboard. The second case introduces job market analytics with a Bronze-first foundation and a stronger DBT-oriented modeling direction.
 
 ## Current Flagship Project
 
@@ -28,6 +28,19 @@ The screenshot above is captured from the implemented dashboard and shows the cu
 - Flask API endpoints over the PostgreSQL serving views.
 - React + Vite dashboard that consumes the Flask API.
 - Layer-specific documentation for Bronze, Silver, Gold, Serving, API, and Dashboard.
+- A second Bronze-first job market analytics case scaffold with Kaggle ingestion, raw profiling, exploratory notebook, and DBT modeling direction.
+
+## Next Case Study
+
+[`projects/02-job-market-analytics/`](projects/02-job-market-analytics/) is the next portfolio case study.
+
+It uses the Kaggle dataset `uom190346a/ai-powered-job-market-insights` and currently focuses on the foundation layer:
+
+```text
+Kaggle ingestion -> Bronze raw landing -> Bronze profiling metadata -> future Silver/Gold/DBT modeling
+```
+
+This case intentionally does not duplicate the hospital project dashboard or API yet. Its purpose is to show a different analytical domain, job market and labor analytics, while moving the portfolio toward cleaner dimensional modeling and DBT-oriented transformation governance.
 
 ## Planned Future Iterations
 
@@ -45,6 +58,7 @@ These items are roadmap items, not current production claims.
 - [`shared/`](shared/): shared templates, conventions, and reusable placeholders.
 - [`projects/`](projects/): individual portfolio case studies.
 - [`projects/01-hospital-analytics/`](projects/01-hospital-analytics/): current end-to-end flagship project.
+- [`projects/02-job-market-analytics/`](projects/02-job-market-analytics/): Bronze-first labor analytics case with DBT-oriented modeling scaffold.
 
 ## Local Python Setup
 

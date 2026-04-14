@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: placeholder_silver
+    description: Placeholder for future Silver job-market standardization models.
