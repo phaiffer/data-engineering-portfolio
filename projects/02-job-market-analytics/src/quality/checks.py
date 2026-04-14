@@ -65,3 +65,65 @@ def validate_silver_dataframe(
         "numeric_summary": summarize_numeric_columns(silver_dataframe, ["salary_usd"]),
         "is_valid": row_count_preserved and not missing_columns and not extra_columns,
     }
+
+
+def validate_gold_outputs(
+    *,
+    outputs: dict[str, pd.DataFrame],
+    expected_columns: dict[str, list[str]],
+) -> dict[str, Any]:
+    """Return lightweight validation results for Gold output tables."""
+    output_summaries: dict[str, dict[str, Any]] = {}
+    all_valid = True
+
+    for name, dataframe in outputs.items():
+        expected = expected_columns.get(name, [])
+        missing_columns = [column for column in expected if column not in dataframe.columns]
+        extra_columns = [column for column in dataframe.columns if column not in expected]
+        share_columns = [column for column in dataframe.columns if column.endswith("_share")]
+
+        invalid_share_columns: dict[str, int] = {}
+        for column in share_columns:
+            invalid_count = int((~dataframe[column].between(0, 1) & dataframe[column].notna()).sum())
+            if invalid_count:
+                invalid_share_columns[column] = invalid_count
+
+        negative_salary_counts: dict[str, int] = {}
+        salary_columns = [column for column in dataframe.columns if column.endswith("salary_usd")]
+        for column in salary_columns:
+            negative_count = int((dataframe[column] < 0).sum())
+            if negative_count:
+                negative_salary_counts[column] = negative_count
+
+        has_positive_group_counts = True
+        if "total_records" in dataframe.columns:
+            has_positive_group_counts = bool((dataframe["total_records"] > 0).all())
+
+        is_valid = (
+            not dataframe.empty
+            and not missing_columns
+            and not extra_columns
+            and not invalid_share_columns
+            and not negative_salary_counts
+            and has_positive_group_counts
+        )
+        all_valid = all_valid and is_valid
+
+        output_summaries[name] = {
+            "row_count": int(len(dataframe)),
+            "column_count": int(len(dataframe.columns)),
+            "expected_columns": expected,
+            "missing_columns": missing_columns,
+            "extra_columns": extra_columns,
+            "share_columns": share_columns,
+            "invalid_share_columns": invalid_share_columns,
+            "negative_salary_counts": negative_salary_counts,
+            "has_positive_group_counts": has_positive_group_counts,
+            "is_valid": is_valid,
+        }
+
+    return {
+        "output_count": len(outputs),
+        "outputs": output_summaries,
+        "is_valid": all_valid,
+    }
