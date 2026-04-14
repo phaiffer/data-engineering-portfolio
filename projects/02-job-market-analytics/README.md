@@ -6,7 +6,7 @@ Job market analytics case study using the Kaggle dataset `uom190346a/ai-powered-
 
 This project is the second portfolio case study in the monorepo. It complements the first flagship project, [`01-hospital-analytics`](../01-hospital-analytics/), by shifting the analytical domain from hospital operations to labor and job-market analytics.
 
-The goal is to establish a clean foundation for job-market analytics: land the raw Kaggle dataset, inventory the raw files, profile the main analytical file, standardize row-preserving Silver records, produce curated Gold summaries, and prepare the project for future DBT-oriented analytical modeling.
+The goal is to establish a clean foundation for job-market analytics: land the raw Kaggle dataset, inventory the raw files, profile the main analytical file, standardize row-preserving Silver records, produce curated Gold summaries, and add a real local DBT layer for SQL-first analytical modeling.
 
 ## Why This Case Exists
 
@@ -16,7 +16,7 @@ This project is intentionally different. It is focused on:
 
 - labor and job-market analytics;
 - reusable dimensional thinking;
-- stronger SQL and DBT direction;
+- stronger SQL and DBT modeling;
 - clear raw-to-modeled boundaries;
 - an honest Bronze-first implementation that can evolve into curated analytical marts.
 
@@ -37,7 +37,7 @@ Kaggle dataset
 -> Bronze raw landing and profiling
 -> Silver standardized job-market records
 -> Gold dimensional or mart-style analytical outputs
--> Future DBT models
+-> DBT staging, intermediate, and mart models over Silver
 -> Future serving or dashboard layer, if useful
 ```
 
@@ -53,13 +53,14 @@ Implemented in this foundation step:
 - JSON metadata generation for the selected main CSV;
 - Silver v1 row-preserving standardization with Pandas;
 - Gold v1 curated analytical summaries with Pandas;
+- local DBT project using DuckDB over the Silver artifact;
+- DBT staging, intermediate, and mart models;
+- lightweight DBT source, model, and singular tests;
 - lightweight exploratory notebook;
-- DBT scaffold notes and placeholder model files;
 - documentation for the current Bronze, Silver, and Gold scopes.
 
 Not implemented yet:
 
-- production DBT models;
 - PostgreSQL serving;
 - Flask API;
 - React dashboard;
@@ -98,6 +99,17 @@ Run the Gold summary job:
 python projects/02-job-market-analytics/src/jobs/run_gold.py
 ```
 
+Run the DBT analytical modeling layer:
+
+```powershell
+cd projects/02-job-market-analytics/dbt
+dbt debug --profiles-dir .
+dbt run --profiles-dir .
+dbt test --profiles-dir .
+```
+
+DBT was verified with Python 3.12 and `dbt-duckdb`. If your active virtualenv uses Python 3.14 and DBT fails during import, run these commands from a Python 3.12 or 3.13 environment.
+
 The Bronze metadata artifact is written under:
 
 ```text
@@ -116,18 +128,24 @@ The Gold artifacts and metadata are written under:
 projects/02-job-market-analytics/data/gold/
 ```
 
+The local DBT DuckDB database is written to:
+
+```text
+projects/02-job-market-analytics/data/job_market_analytics.duckdb
+```
+
 Raw data files and generated downstream data artifacts are local-only and ignored by Git.
 
 ## Project Structure
 
 - [`data/`](data/): local medallion-aligned storage for Bronze, Silver, and Gold artifacts.
 - [`src/`](src/): ingestion, processing, quality, utility, and job modules.
-- [`dbt/`](dbt/): DBT scaffold for future analytical modeling.
+- [`dbt/`](dbt/): local DuckDB-backed DBT project with staging, intermediate, and mart models over Silver.
 - [`docs/`](docs/): project and layer documentation.
 - [`notebooks/`](notebooks/): exploratory notebook for source profiling.
 - [`tests/`](tests/): unit and integration test placeholders.
 
 ## Future Iterations
 
-- Promote the DBT scaffold into real staging, intermediate, and mart models once the Silver and Gold contracts are clear.
+- Add deeper DBT documentation, exposures, and CI after the local modeling path stabilizes.
 - Add serving and visualization only after the analytical model has a stable shape.

@@ -6,12 +6,17 @@ profile: job_market_analytics
 
 model-paths:
   - models
+test-paths:
+  - tests
 
 models:
   job_market_analytics:
-    bronze:
+    staging:
       +materialized: view
-    silver:
+      +schema: staging
+    intermediate:
       +materialized: view
-    gold:
+      +schema: intermediate
+    marts:
       +materialized: table
+      +schema: marts

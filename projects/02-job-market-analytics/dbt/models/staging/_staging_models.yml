@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: stg_job_market_insights
+    description: >
+      Staging model over the Silver v1 job-market artifact. The model preserves the
+      Silver row grain and performs only DBT-facing type normalization.
+    columns:
+      - name: job_title
+        description: Normalized job title token.
+        tests:
+          - not_null
+      - name: industry
+        description: Normalized industry token.
+        tests:
+          - not_null
+      - name: company_size
+        description: Normalized company-size category.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['small', 'medium', 'large']
+      - name: location
+        description: Normalized location token.
+        tests:
+          - not_null
+      - name: ai_adoption_level
+        description: Normalized AI adoption category.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high']
+      - name: automation_risk
+        description: Normalized automation risk category.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high']
+      - name: required_skills
+        description: Normalized required-skill token.
+        tests:
+          - not_null
+      - name: salary_usd
+        description: Salary value as a numeric USD amount.
+        tests:
+          - not_null
+      - name: remote_friendly
+        description: Normalized remote-friendly indicator.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['yes', 'no']
+      - name: job_growth_projection
+        description: Normalized job growth projection category.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['growth', 'stable', 'decline']

@@ -1,0 +1,131 @@
+version: 2
+
+models:
+  - name: mart_job_title_summary
+    description: >
+      Mart summary at one row per normalized job_title, aligned with the Python Gold
+      job_title_summary output.
+    columns:
+      - name: job_title
+        description: Normalized job title token. Grain column for this mart.
+        tests:
+          - not_null
+          - unique
+      - name: total_records
+        description: Count of Silver records for the job title.
+        tests:
+          - not_null
+      - name: average_salary_usd
+        description: Average salary in USD for the job title.
+      - name: median_salary_usd
+        description: Median salary in USD for the job title.
+      - name: min_salary_usd
+        description: Minimum salary in USD for the job title.
+      - name: max_salary_usd
+        description: Maximum salary in USD for the job title.
+      - name: remote_friendly_share
+        description: Share of records where remote_friendly equals yes.
+      - name: high_automation_risk_share
+        description: Share of records where automation_risk equals high.
+      - name: high_ai_adoption_share
+        description: Share of records where ai_adoption_level equals high.
+      - name: growth_projection_share
+        description: Share of records where job_growth_projection equals growth.
+
+  - name: mart_industry_summary
+    description: >
+      Mart summary at one row per normalized industry, aligned with the Python Gold
+      industry_summary output.
+    columns:
+      - name: industry
+        description: Normalized industry token. Grain column for this mart.
+        tests:
+          - not_null
+          - unique
+      - name: total_records
+        description: Count of Silver records for the industry.
+        tests:
+          - not_null
+      - name: average_salary_usd
+        description: Average salary in USD for the industry.
+      - name: median_salary_usd
+        description: Median salary in USD for the industry.
+      - name: min_salary_usd
+        description: Minimum salary in USD for the industry.
+      - name: max_salary_usd
+        description: Maximum salary in USD for the industry.
+      - name: remote_friendly_share
+        description: Share of records where remote_friendly equals yes.
+      - name: high_automation_risk_share
+        description: Share of records where automation_risk equals high.
+      - name: high_ai_adoption_share
+        description: Share of records where ai_adoption_level equals high.
+      - name: growth_projection_share
+        description: Share of records where job_growth_projection equals growth.
+
+  - name: mart_location_summary
+    description: >
+      Mart summary at one row per normalized location, aligned with the Python Gold
+      location_summary output.
+    columns:
+      - name: location
+        description: Normalized location token. Grain column for this mart.
+        tests:
+          - not_null
+          - unique
+      - name: total_records
+        description: Count of Silver records for the location.
+        tests:
+          - not_null
+      - name: average_salary_usd
+        description: Average salary in USD for the location.
+      - name: median_salary_usd
+        description: Median salary in USD for the location.
+      - name: min_salary_usd
+        description: Minimum salary in USD for the location.
+      - name: max_salary_usd
+        description: Maximum salary in USD for the location.
+      - name: remote_friendly_share
+        description: Share of records where remote_friendly equals yes.
+      - name: high_automation_risk_share
+        description: Share of records where automation_risk equals high.
+      - name: high_ai_adoption_share
+        description: Share of records where ai_adoption_level equals high.
+      - name: growth_projection_share
+        description: Share of records where job_growth_projection equals growth.
+
+  - name: mart_automation_ai_summary
+    description: >
+      Mart summary at one row per automation_risk and ai_adoption_level combination,
+      aligned with the Python Gold automation_ai_summary output.
+    tests:
+      - unique:
+          arguments:
+            column_name: "automation_risk || '-' || ai_adoption_level"
+    columns:
+      - name: automation_risk
+        description: Normalized automation risk category. Part of the mart grain.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high']
+      - name: ai_adoption_level
+        description: Normalized AI adoption category. Part of the mart grain.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high']
+      - name: total_records
+        description: Count of Silver records for the automation and AI adoption combination.
+        tests:
+          - not_null
+      - name: average_salary_usd
+        description: Average salary in USD for the automation and AI adoption combination.
+      - name: median_salary_usd
+        description: Median salary in USD for the automation and AI adoption combination.
+      - name: remote_friendly_share
+        description: Share of records where remote_friendly equals yes.
+      - name: growth_projection_share
+        description: Share of records where job_growth_projection equals growth.

@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: int_job_market_enriched
+    description: >
+      Intermediate row-level model that adds source-supported boolean flags used
+      repeatedly by the mart summaries.
+    columns:
+      - name: job_title
+        description: Normalized job title token.
+        tests:
+          - not_null
+      - name: industry
+        description: Normalized industry token.
+        tests:
+          - not_null
+      - name: company_size
+        description: Normalized company-size category.
+      - name: location
+        description: Normalized location token.
+        tests:
+          - not_null
+      - name: ai_adoption_level
+        description: Normalized AI adoption category.
+        tests:
+          - not_null
+      - name: automation_risk
+        description: Normalized automation risk category.
+        tests:
+          - not_null
+      - name: required_skills
+        description: Normalized required-skill token.
+      - name: salary_usd
+        description: Salary value as a numeric USD amount.
+        tests:
+          - not_null
+      - name: remote_friendly
+        description: Normalized remote-friendly indicator.
+      - name: job_growth_projection
+        description: Normalized job growth projection category.
+      - name: is_remote_friendly
+        description: True when remote_friendly equals yes.
+        tests:
+          - not_null
+      - name: is_high_automation_risk
+        description: True when automation_risk equals high.
+        tests:
+          - not_null
+      - name: is_high_ai_adoption
+        description: True when ai_adoption_level equals high.
+        tests:
+          - not_null
+      - name: is_growth_projection
+        description: True when job_growth_projection equals growth.
+        tests:
+          - not_null

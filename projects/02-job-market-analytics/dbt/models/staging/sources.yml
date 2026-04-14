@@ -1,0 +1,70 @@
+version: 2
+
+sources:
+  - name: local_silver
+    description: >
+      Local Silver artifact produced by the Python Silver v1 pipeline. DBT uses this
+      standardized row-level CSV as its modeling input instead of reading raw Bronze files.
+    tables:
+      - name: ai_job_market_insights_silver
+        description: >
+          Row-preserving job-market insight records with normalized categorical values
+          and numeric salary values.
+        config:
+          external_location: "read_csv_auto('{{ var('silver_dataset_path', '../data/silver/ai_job_market_insights_silver.csv') }}', header=true)"
+        columns:
+          - name: job_title
+            description: Normalized job title token from the Silver artifact.
+            tests:
+              - not_null
+          - name: industry
+            description: Normalized industry token from the Silver artifact.
+            tests:
+              - not_null
+          - name: company_size
+            description: Normalized company-size category.
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['small', 'medium', 'large']
+          - name: location
+            description: Normalized location token from the Silver artifact.
+            tests:
+              - not_null
+          - name: ai_adoption_level
+            description: Normalized AI adoption category.
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['low', 'medium', 'high']
+          - name: automation_risk
+            description: Normalized automation risk category.
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['low', 'medium', 'high']
+          - name: required_skills
+            description: Normalized required-skill token.
+            tests:
+              - not_null
+          - name: salary_usd
+            description: Salary value standardized as a numeric USD amount.
+            tests:
+              - not_null
+          - name: remote_friendly
+            description: Normalized remote-friendly indicator.
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['yes', 'no']
+          - name: job_growth_projection
+            description: Normalized job growth projection category.
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['growth', 'stable', 'decline']
