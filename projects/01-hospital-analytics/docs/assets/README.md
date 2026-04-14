@@ -1,23 +1,18 @@
-# Presentation Assets
+# Presentation Asset Index
 
-This directory is reserved for future portfolio assets for the hospital analytics case study.
+This directory contains portfolio presentation assets for the hospital analytics case study. Assets should represent the current implementation and should not claim planned functionality as complete.
 
-No generated screenshots or fictional diagrams are included yet. Add only assets captured from the real project as the implementation and presentation mature.
+## Current Assets
 
-Recommended future assets:
+- [`screenshots/dashboard-overview.png`](screenshots/dashboard-overview.png): current main screenshot of the React dashboard consuming the Flask API and PostgreSQL serving layer.
 
-- Architecture diagram showing the implemented flow from ingestion to dashboard.
-- Dashboard screenshots captured from the local React + Vite app.
-- API screenshots or response examples from the local Flask endpoints.
-- Pipeline flow images that clarify Bronze, Silver, Gold, serving, API, and dashboard boundaries.
-- Optional database view diagram for the PostgreSQL `analytics` and `serving` schemas.
+## Future Asset Candidates
 
-Suggested naming:
+Future screenshots may be added later for:
 
-- `architecture-flow.png`
-- `dashboard-overview.png`
-- `api-health-response.png`
-- `api-kpis-response.png`
-- `postgres-serving-views.png`
+- KPI summary views.
+- Chart detail views.
+- Flask API response validation.
+- PostgreSQL `analytics` and `serving` schema validation.
 
-Keep this folder honest: assets should represent the current implementation, not planned future capabilities.
+Do not reference future assets from project documentation until the files exist in this directory.

@@ -8,13 +8,15 @@ This repository is organized around realistic project scenarios that show how ra
 
 [`projects/01-hospital-analytics/`](projects/01-hospital-analytics/) is the main case study in this repository.
 
-It demonstrates a local analytics pipeline for hospital patient-flow data:
+It demonstrates a local analytics pipeline for hospital patient-flow data, from Kaggle ingestion through medallion-style processing, PostgreSQL serving views, a Flask API, and a React dashboard.
 
 ```text
 Kaggle ingestion -> Bronze profiling -> Silver processing -> Gold outputs -> PostgreSQL serving -> Flask API -> React dashboard
 ```
 
-The project is intentionally portfolio-oriented: the implementation is small enough to inspect, but it covers the core handoff points of a real analytical data product.
+![Hospital analytics dashboard overview](projects/01-hospital-analytics/docs/assets/screenshots/dashboard-overview.png)
+
+The screenshot above is captured from the implemented dashboard and shows the current frontend consuming the serving/API layer. For the complete case study, see the [Hospital Analytics README](projects/01-hospital-analytics/).
 
 ## What Is Implemented
 

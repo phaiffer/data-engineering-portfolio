@@ -1,41 +1,42 @@
 # Hospital Analytics
 
-End-to-end hospital analytics portfolio case built around a local medallion-style data pipeline, PostgreSQL serving layer, Flask API, and React dashboard.
+End-to-end hospital analytics case study built around a local medallion-style data pipeline, PostgreSQL serving layer, Flask API, and React dashboard.
 
-## Project Summary
+## Project Overview
 
-This project shows how a raw hospital patient-flow dataset can be turned into analytical outputs for downstream consumption. The current implementation covers the full local path from Kaggle ingestion to dashboard visualization:
+This project demonstrates how a raw hospital patient-flow dataset can be transformed into curated analytical outputs for dashboard consumption. The implementation follows a portfolio-grade data engineering path: land and profile the source data, standardize it into a cleaner analytical grain, publish Gold outputs into PostgreSQL, expose them through a Flask API, and consume them from a React dashboard.
+
+The goal is not to present a production healthcare platform. The goal is to show clear data layer boundaries, practical serving patterns, and an inspectable end-to-end implementation that can be reviewed locally.
+
+## Architecture Flow
 
 ```text
-Kaggle ingestion -> Bronze -> Silver -> Gold -> PostgreSQL serving -> Flask API -> React dashboard
+Kaggle Dataset
+-> Bronze
+-> Silver
+-> Gold
+-> PostgreSQL (analytics / serving)
+-> Flask API
+-> React Dashboard
 ```
 
-The project is not presented as a production healthcare platform. It is a portfolio-grade case study focused on data engineering structure, layer separation, serving patterns, and clear documentation.
+Layer responsibilities:
 
-## Problem Framing
+- **Kaggle Dataset:** source patient-flow data used for the local portfolio case.
+- **Bronze:** raw landed files, inventory metadata, and profiling while preserving source fidelity.
+- **Silver:** row-preserving cleaned patient-flow records with standardized names, safer types, trimmed text fields, and normalized null handling.
+- **Gold:** dashboard-ready analytical outputs for daily flow, department referrals, demographics, and KPIs.
+- **PostgreSQL:** local `analytics` tables and `serving` views over curated Gold outputs.
+- **Flask API:** JSON endpoints over the PostgreSQL serving views.
+- **React Dashboard:** Vite/TypeScript frontend that consumes the Flask API.
 
-Hospital operations teams often need curated views of patient-flow activity, including daily volumes, referral patterns, demographic segments, wait time, and satisfaction indicators. Raw source files are not ideal for direct dashboard consumption because they mix ingestion concerns, raw schema quirks, and analytical logic.
+## Dashboard Preview
 
-This case study separates those concerns into explicit pipeline layers, then exposes curated outputs through a database-backed API and dashboard.
+The current dashboard overview screenshot is captured from the implemented React dashboard and is included as proof of the serving-to-frontend path.
 
-## Current Architecture
+![Hospital analytics dashboard overview](docs/assets/screenshots/dashboard-overview.png)
 
-- **Ingestion:** downloads the Kaggle dataset into the local Bronze raw area.
-- **Bronze:** inventories and profiles the raw CSV while preserving raw fidelity.
-- **Silver:** standardizes column names, trims text fields, converts blanks to nulls, applies safe Pandas type casts, and writes a row-preserving cleaned dataset.
-- **Gold:** creates curated analytical outputs for daily patient flow, department referrals, and demographics.
-- **PostgreSQL serving:** loads Gold CSV outputs into local PostgreSQL tables and creates stable serving views.
-- **Flask API:** exposes the serving views through JSON endpoints.
-- **React + Vite dashboard:** consumes the Flask API and visualizes the curated analytical outputs.
-
-Architecture diagram: to be added in [`docs/assets/`](docs/assets/).
-Dashboard screenshots: to be added in [`docs/assets/`](docs/assets/).
-
-## Medallion Layers
-
-- **Bronze:** raw landed data plus profiling metadata. This layer documents what arrived without applying business transformations.
-- **Silver:** cleaned and standardized patient-flow records at the current row grain of one patient admission or flow event.
-- **Gold:** dashboard-ready aggregates and summaries built from Silver outputs.
+More screenshots may be added later as the project presentation expands. Missing future views are intentionally not referenced here so the README stays accurate in GitHub.
 
 ## Implemented Stack
 
@@ -50,25 +51,6 @@ Dashboard screenshots: to be added in [`docs/assets/`](docs/assets/).
 - TypeScript
 - Recharts
 
-## Future Stack Candidates
-
-- PySpark or Databricks for distributed processing once the local Spark environment is unblocked.
-- DBT models for transformation governance and stronger analytical modeling.
-- Deployment, orchestration, CI/CD, infrastructure automation, and API hardening.
-
-These are future iterations, not current production components.
-
-## Folder Overview
-
-- [`data/`](data/): local medallion-aligned data storage for Bronze, Silver, and Gold artifacts.
-- [`src/`](src/): ingestion, processing, quality, serving, utility, and job modules.
-- [`api/`](api/): lightweight Flask API over PostgreSQL serving views.
-- [`dashboard/`](dashboard/): React + Vite dashboard over the Flask API.
-- [`docs/`](docs/): layer documentation, implementation notes, and demo guide.
-- [`dbt/`](dbt/): DBT scaffold and placeholder models for future transformation work.
-- [`notebooks/`](notebooks/): exploratory and validation notebooks.
-- [`tests/`](tests/): unit and integration test placeholders.
-
 ## Implemented Components
 
 - [Bronze Layer](docs/bronze.md): raw file inventory, main CSV selection, profiling, and metadata output.
@@ -79,6 +61,52 @@ These are future iterations, not current production components.
 - [Dashboard](dashboard/README.md): React + Vite frontend consuming the Flask API.
 - [Demo / Run Guide](docs/demo.md): concise local execution flow for demos and reviewers.
 
+## How to Run Locally
+
+Use the [Demo / Run Guide](docs/demo.md) for the full local walkthrough. The main review flow is:
+
+1. Activate the Python virtual environment from the repository root.
+2. Refresh Gold outputs if needed.
+3. Load PostgreSQL serving tables and views.
+4. Start the Flask API.
+5. Start the React dashboard.
+6. Open the Vite local URL in the browser.
+
+Typical local commands:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python projects/01-hospital-analytics/src/jobs/run_gold.py
+python projects/01-hospital-analytics/src/jobs/run_serving.py
+python projects/01-hospital-analytics/api/app.py
+```
+
+In a second terminal:
+
+```powershell
+cd projects/01-hospital-analytics/dashboard
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+npm install
+npm run dev
+```
+
+Local PostgreSQL credentials are read from `.env`; use `.env.example` as the template. The dashboard expects the Flask API base URL to be available through `VITE_API_BASE_URL`, typically:
+
+```text
+VITE_API_BASE_URL=http://127.0.0.1:5000
+```
+
+## Project Structure
+
+- [`data/`](data/): local medallion-aligned storage for Bronze, Silver, and Gold artifacts.
+- [`src/`](src/): ingestion, processing, quality, serving, utility, and job modules.
+- [`api/`](api/): lightweight Flask API over PostgreSQL serving views.
+- [`dashboard/`](dashboard/): React + Vite dashboard over the Flask API.
+- [`docs/`](docs/): layer documentation, implementation notes, demo guide, and presentation assets.
+- [`dbt/`](dbt/): DBT scaffold and placeholder models for future transformation work.
+- [`notebooks/`](notebooks/): exploratory and validation notebooks.
+- [`tests/`](tests/): unit and integration test placeholders.
+
 ## Current Status
 
 The local end-to-end path is implemented and documented:
@@ -87,51 +115,16 @@ The local end-to-end path is implemented and documented:
 raw Kaggle dataset -> local medallion files -> PostgreSQL serving views -> Flask JSON API -> React dashboard
 ```
 
-The implementation is suitable for portfolio review and local demonstration. It remains intentionally lightweight: it does not include production orchestration, authentication, deployment infrastructure, Spark execution, or production DBT models.
+The project is suitable for portfolio review and local demonstration. It remains intentionally lightweight: it does not include production orchestration, authentication, deployment infrastructure, Spark execution, or production DBT models.
 
 ## Future Iterations
 
+- Add additional screenshots for KPI, chart, API, and PostgreSQL validation views when captured from the real project.
+- Add a simple architecture diagram that reflects the implemented flow.
 - Replace or complement Pandas jobs with PySpark when the local environment supports it.
 - Promote DBT placeholders into real models and tests.
 - Add orchestration and CI checks for repeatable pipeline execution.
-- Add deployment documentation or infrastructure only after the local case is stable.
-- Add honest presentation assets such as diagrams, dashboard screenshots, and API screenshots.
+- Add deployment documentation or infrastructure after the local case is stable.
 - Expand test coverage around processing, serving, and API behavior.
 
-## Setup
-
-Install Python runtime dependencies from the repository root:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-For notebook exploration and validation work, install the development extras:
-
-```powershell
-python -m pip install -r requirements-dev.txt
-```
-
-Dashboard dependencies are managed separately in [`dashboard/`](dashboard/) with npm:
-
-```powershell
-cd projects/01-hospital-analytics/dashboard
-npm install
-```
-
-## How to Run Locally
-
-Use the [Demo / Run Guide](docs/demo.md) for the concise end-to-end flow.
-
-For layer-specific details, use the [project docs index](docs/README.md). The main local flow is:
-
-1. Activate the Python virtual environment.
-2. Run or refresh Gold and PostgreSQL serving outputs as needed.
-3. Start the Flask API.
-4. Start the React dashboard.
-5. Open the Vite local URL in the browser.
-
-Local PostgreSQL credentials are read from `.env`; use `.env.example` as the template.
+These are future iterations, not current production claims.
