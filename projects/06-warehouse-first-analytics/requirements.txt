@@ -1,0 +1,19 @@
+# Project-level Python dependencies
+# dbt dependencies live under dbt/requirements.txt
+
+# Notebook validation
+jupyter>=1.0.0
+notebook>=7.0.0
+ipykernel>=6.0.0
+
+# BigQuery Python client (used in source validation notebook)
+google-cloud-bigquery>=3.10.0
+google-cloud-bigquery-storage>=2.22.0
+db-dtypes>=1.1.0
+
+# Data handling
+pandas>=2.0.0
+pyarrow>=14.0.0
+
+# Utilities
+python-dotenv>=1.0.0

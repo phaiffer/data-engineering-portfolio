@@ -1,0 +1,6 @@
+# dbt BigQuery adapter and core
+dbt-core>=1.7.0,<2.0.0
+dbt-bigquery>=1.7.0,<2.0.0
+
+# Optional: dbt utilities package (installed via packages.yml, not pip)
+# dbt-utils is declared in dbt/packages.yml

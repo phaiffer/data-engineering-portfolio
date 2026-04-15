@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: int_questions_with_answers
+    description: >
+      Enriched question rows joined with aggregated answer metrics and accepted
+      answer timestamps. Grain: one row per question in the staging window.
+      Provides the central fact used by answer latency and question outcome marts.
+    columns:
+      - name: question_id
+        description: Unique question post ID.
+        tests:
+          - not_null
+          - unique
+      - name: question_created_at
+        description: UTC timestamp of question creation.
+        tests:
+          - not_null
+      - name: has_accepted_answer
+        description: True when the question has an accepted answer.
+        tests:
+          - not_null
+      - name: hours_to_first_answer
+        description: >
+          Hours elapsed between question creation and the earliest answer
+          in the staging window. Null if no answers exist.
+      - name: hours_to_accepted_answer
+        description: >
+          Hours elapsed between question creation and the accepted answer.
+          Null if no accepted answer exists.
+      - name: created_month_start
+        description: First day of the month in which the question was created.
+        tests:
+          - not_null
+
+  - name: int_question_tag_exploded
+    description: >
+      One row per (question, tag) pair. Explodes the pipe-delimited tags_clean
+      column from staging to enable tag-level aggregations.
+    columns:
+      - name: question_id
+        description: Question post ID.
+        tests:
+          - not_null
+      - name: tag_name
+        description: Individual tag name from the exploded tag list.
+        tests:
+          - not_null
+
+  - name: int_user_question_activity
+    description: >
+      Per-user summary of question-asking behavior within the staging window,
+      joined with user reputation context. Grain: one row per user.
+    columns:
+      - name: user_id
+        description: Unique user ID.
+        tests:
+          - not_null
+          - unique
+      - name: total_questions
+        description: Number of questions asked by this user in the window.
+        tests:
+          - not_null
+      - name: reputation_tier
+        description: Reputation tier derived in staging (may be null if user not found).

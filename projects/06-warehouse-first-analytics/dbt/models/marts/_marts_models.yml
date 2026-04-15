@@ -1,0 +1,127 @@
+version: 2
+
+models:
+  - name: mart_monthly_question_activity
+    description: >
+      Monthly summary of Stack Overflow question volume, engagement, and resolution
+      rates within the staging window. Grain: one row per calendar month.
+      Materialized as a BigQuery table.
+    columns:
+      - name: month_start
+        description: First day of the calendar month.
+        tests:
+          - not_null
+          - unique
+      - name: year
+        description: Calendar year.
+        tests:
+          - not_null
+      - name: month
+        description: Calendar month (1–12).
+        tests:
+          - not_null
+      - name: total_questions
+        description: Number of questions created in this month.
+        tests:
+          - not_null
+      - name: unanswered_rate_pct
+        description: Percentage of questions with zero answers. 0–100.
+      - name: accepted_answer_rate_pct
+        description: Percentage of questions with an accepted answer. 0–100.
+      - name: avg_hours_to_first_answer
+        description: Average hours between question creation and first answer.
+
+  - name: mart_tag_activity
+    description: >
+      Per-tag aggregation of question volume, engagement, and resolution rates
+      within the staging window. Only includes tags with >= 10 questions in the window.
+      Grain: one row per tag.
+    columns:
+      - name: tag_name
+        description: Tag slug.
+        tests:
+          - not_null
+          - unique
+      - name: questions_in_window
+        description: Number of questions carrying this tag in the staging window.
+        tests:
+          - not_null
+      - name: accepted_answer_rate_pct
+        description: Percentage of this tag's questions that have an accepted answer.
+      - name: unanswered_rate_pct
+        description: Percentage of this tag's questions with zero answers.
+
+  - name: mart_answer_latency
+    description: >
+      Monthly response-time distribution for Stack Overflow questions that received
+      at least one answer within the staging window.
+      Grain: one row per calendar month.
+    columns:
+      - name: month_start
+        description: First day of the calendar month.
+        tests:
+          - not_null
+          - unique
+      - name: questions_with_answers
+        description: Number of answered questions in this month.
+        tests:
+          - not_null
+      - name: median_hours_to_first_answer
+        description: Median hours to receive a first answer.
+      - name: p90_hours_to_first_answer
+        description: 90th percentile hours to receive a first answer.
+
+  - name: mart_question_outcomes
+    description: >
+      Denormalized question-level fact mart with outcome classification and
+      score tiers. Grain: one row per question in the staging window.
+    columns:
+      - name: question_id
+        description: Unique question post ID.
+        tests:
+          - not_null
+          - unique
+      - name: outcome_category
+        description: >
+          Derived outcome: resolved, answered_no_accept, unanswered, or unknown.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [resolved, answered_no_accept, unanswered, unknown]
+      - name: score_tier
+        description: >
+          Derived score bucket: viral, popular, good, decent, neutral, downvoted.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [viral, popular, good, decent, neutral, downvoted]
+      - name: created_month_start
+        description: First day of the creation month.
+        tests:
+          - not_null
+
+  - name: mart_user_reputation_segments
+    description: >
+      Question-asking behavior aggregated by reputation tier. Shows how user
+      experience level correlates with question quality and resolution outcomes.
+      Grain: one row per reputation tier (5 rows total).
+    columns:
+      - name: reputation_tier
+        description: Reputation tier label.
+        tests:
+          - not_null
+          - unique
+          - accepted_values:
+              values: [new, contributor, established, advanced, expert]
+      - name: tier_rank
+        description: Display ordering (1=new … 5=expert).
+        tests:
+          - not_null
+      - name: user_count
+        description: Number of users in this tier who asked questions in the window.
+        tests:
+          - not_null
+      - name: total_questions
+        description: Total questions asked by users in this tier.
+        tests:
+          - not_null

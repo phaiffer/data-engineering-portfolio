@@ -1,0 +1,21 @@
+# Copy this file to ~/.dbt/profiles.yml and fill in your values.
+# Do NOT commit the real profiles.yml - it contains your GCP project ID.
+#
+# Authentication options (choose one):
+#   a) oauth        - uses gcloud CLI credentials (recommended for local dev)
+#   b) service_account - uses a JSON key file (CI / service accounts)
+
+stackoverflow_analytics:
+  target: bigquery
+  outputs:
+    bigquery:
+      type: bigquery
+      method: oauth                          # or: service-account
+      project: your-gcp-project-id          # replace with your GCP project
+      dataset: stackoverflow_analytics       # dbt will create this dataset
+      location: US
+      threads: 4
+      timeout_seconds: 300
+      # Uncomment for service-account authentication:
+      # method: service-account
+      # keyfile: /path/to/service-account-key.json

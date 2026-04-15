@@ -1,0 +1,119 @@
+version: 2
+
+sources:
+  - name: stackoverflow
+    description: >
+      Stack Overflow public dataset available in BigQuery public data.
+      Project: bigquery-public-data, dataset: stackoverflow.
+      Tables contain the full history of Stack Overflow questions, answers,
+      users, and tags. The questions and answers share the same physical schema
+      and are split into separate tables by post type.
+
+      Important caveats:
+      - Tables are not partitioned in the public dataset; cost control relies on
+        WHERE filters on creation_date (a TIMESTAMP column).
+      - Data is periodically refreshed by Google but is not real-time.
+      - posts_questions and posts_answers exclude the body column in some
+        public-data snapshots to reduce size; body usage is intentionally avoided
+        in this project.
+      - The users table includes all registered users (including deleted/anonymous
+        stubs with negative IDs); staging filters these out.
+    database: bigquery-public-data
+    schema: stackoverflow
+    tables:
+      - name: posts_questions
+        description: >
+          One row per Stack Overflow question. Grain: post id.
+          Contains title, tags, score, view_count, answer_count,
+          accepted_answer_id, owner_user_id, and creation_date.
+        columns:
+          - name: id
+            description: Unique post ID for the question.
+          - name: title
+            description: Question title text.
+          - name: tags
+            description: >
+              Pipe-delimited list of tags applied to the question,
+              e.g. "<python><pandas><dataframe>". Angle brackets included.
+          - name: score
+            description: Net vote score (upvotes minus downvotes).
+          - name: view_count
+            description: Cumulative page view count.
+          - name: answer_count
+            description: Number of posted answers.
+          - name: accepted_answer_id
+            description: >
+              ID of the accepted answer post, or NULL if no answer was accepted.
+          - name: owner_user_id
+            description: User ID of the question author; NULL for anonymous posts.
+          - name: creation_date
+            description: UTC timestamp when the question was posted.
+          - name: last_activity_date
+            description: UTC timestamp of the most recent activity on this question.
+          - name: comment_count
+            description: Number of comments on this question.
+          - name: favorite_count
+            description: Number of users who bookmarked/favorited this question.
+
+      - name: posts_answers
+        description: >
+          One row per Stack Overflow answer. Grain: post id.
+          The parent_id column references the question this answer belongs to.
+        columns:
+          - name: id
+            description: Unique post ID for the answer.
+          - name: parent_id
+            description: ID of the parent question post.
+          - name: score
+            description: Net vote score of the answer.
+          - name: owner_user_id
+            description: User ID of the answer author; NULL for anonymous posts.
+          - name: creation_date
+            description: UTC timestamp when the answer was posted.
+          - name: last_activity_date
+            description: UTC timestamp of the most recent edit or comment activity.
+          - name: comment_count
+            description: Number of comments on this answer.
+
+      - name: users
+        description: >
+          One row per registered Stack Overflow user. Grain: user id.
+          Includes reputation, vote counts, and account dates.
+          Users with id <= 0 are system/anonymous stubs and are excluded in staging.
+        columns:
+          - name: id
+            description: Unique user ID. Positive values are real registered users.
+          - name: display_name
+            description: User's public display name.
+          - name: reputation
+            description: >
+              Cumulative reputation score earned through upvotes, accepted answers,
+              and bounties.
+          - name: creation_date
+            description: UTC timestamp when the user account was created.
+          - name: last_access_date
+            description: UTC timestamp of the user's most recent login.
+          - name: up_votes
+            description: Total upvotes the user has cast.
+          - name: down_votes
+            description: Total downvotes the user has cast.
+          - name: views
+            description: Number of times this user profile has been viewed.
+          - name: location
+            description: Free-text location string entered by the user (nullable).
+
+      - name: tags
+        description: >
+          One row per tag used on Stack Overflow. Grain: tag id.
+          The count column reflects the number of questions currently tagged.
+        columns:
+          - name: id
+            description: Unique tag ID.
+          - name: tag_name
+            description: Tag slug, e.g. "python", "sql", "docker".
+          - name: count
+            description: Number of questions currently carrying this tag.
+          - name: excerpt_post_id
+            description: Post ID of the tag excerpt wiki, if present.
+          - name: wiki_post_id
+            description: Post ID of the full tag wiki, if present.

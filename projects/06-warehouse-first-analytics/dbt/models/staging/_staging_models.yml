@@ -1,0 +1,128 @@
+version: 2
+
+models:
+  - name: stg_stackoverflow__questions
+    description: >
+      Cleaned and lightly transformed questions from the Stack Overflow public
+      dataset. Grain: one row per question. Filtered to questions created on or
+      after `stackoverflow_min_year` (default 2021) to control BigQuery scan cost.
+    columns:
+      - name: question_id
+        description: Unique question post ID.
+        tests:
+          - not_null
+          - unique
+      - name: question_title
+        description: Question title string.
+        tests:
+          - not_null
+      - name: tags_clean
+        description: Pipe-delimited tag string with angle brackets removed.
+      - name: score
+        description: Net vote score. Can be negative.
+        tests:
+          - not_null
+      - name: view_count
+        description: Cumulative view count.
+        tests:
+          - not_null
+      - name: answer_count
+        description: Number of posted answers. Zero means unanswered.
+        tests:
+          - not_null
+      - name: has_accepted_answer
+        description: True when the question has an accepted answer.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: is_unanswered
+        description: True when answer_count is zero.
+        tests:
+          - not_null
+      - name: created_at
+        description: UTC timestamp of question creation.
+        tests:
+          - not_null
+      - name: created_year
+        description: Year portion of created_at.
+        tests:
+          - not_null
+      - name: created_month
+        description: Month portion of created_at (1–12).
+        tests:
+          - not_null
+      - name: created_month_start
+        description: First day of the month in which the question was created.
+        tests:
+          - not_null
+
+  - name: stg_stackoverflow__answers
+    description: >
+      Cleaned answers from the Stack Overflow public dataset.
+      Grain: one row per answer. Filtered to the same year window as questions.
+    columns:
+      - name: answer_id
+        description: Unique answer post ID.
+        tests:
+          - not_null
+          - unique
+      - name: question_id
+        description: Parent question post ID.
+        tests:
+          - not_null
+      - name: score
+        description: Net vote score of the answer. Can be negative.
+        tests:
+          - not_null
+      - name: created_at
+        description: UTC timestamp of answer creation.
+        tests:
+          - not_null
+      - name: created_year
+        description: Year portion of created_at.
+        tests:
+          - not_null
+
+  - name: stg_stackoverflow__users
+    description: >
+      Registered Stack Overflow users (id > 0). Grain: one row per user.
+    columns:
+      - name: user_id
+        description: Unique user ID (positive integers only).
+        tests:
+          - not_null
+          - unique
+      - name: display_name
+        description: User's public display name.
+        tests:
+          - not_null
+      - name: reputation
+        description: Cumulative reputation score.
+        tests:
+          - not_null
+      - name: reputation_tier
+        description: Derived tier label based on reputation thresholds.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [new, contributor, established, advanced, expert]
+
+  - name: stg_stackoverflow__tags
+    description: >
+      Stack Overflow tag reference table. Grain: one row per tag.
+    columns:
+      - name: tag_id
+        description: Unique tag ID.
+        tests:
+          - not_null
+          - unique
+      - name: tag_name
+        description: Tag slug in lowercase.
+        tests:
+          - not_null
+          - unique
+      - name: question_count
+        description: Number of questions currently carrying this tag.
+        tests:
+          - not_null

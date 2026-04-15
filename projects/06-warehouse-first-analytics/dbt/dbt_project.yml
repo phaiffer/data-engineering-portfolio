@@ -1,0 +1,37 @@
+name: stackoverflow_analytics
+version: 1.0.0
+config-version: 2
+
+profile: stackoverflow_analytics
+
+model-paths:
+  - models
+macro-paths:
+  - macros
+test-paths:
+  - tests
+
+target-path: target
+clean-targets:
+  - target
+  - dbt_packages
+
+# Variable defaults: override via --vars at runtime or in profiles.yml
+vars:
+  # Minimum year for creation_date filters in staging models.
+  # Restricting to recent years dramatically reduces BigQuery scan volume.
+  # The full posts table is ~70 GB+ - a 4-year window drops this to ~15-20 GB.
+  # Override: dbt run --vars '{"stackoverflow_min_year": 2022}'
+  stackoverflow_min_year: 2021
+
+models:
+  stackoverflow_analytics:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
