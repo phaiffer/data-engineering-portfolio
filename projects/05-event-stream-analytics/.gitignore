@@ -1,0 +1,46 @@
+# ==============================================================================
+# Runtime artifact policy
+# ==============================================================================
+#
+# All files under data/ are generated locally at runtime and are NOT tracked in
+# version control. They grow with every publisher, consumer, and replay run and
+# are not meaningful as committed history.
+#
+# Directory structure is preserved via .gitkeep files, which ARE tracked.
+# To reset to a clean state, delete the generated files inside data/ and re-run
+# the pipeline from the beginning.
+# ==============================================================================
+
+# Bronze raw JSONL batches
+data/bronze/raw/**/batch_*.jsonl
+
+# Bronze metadata and state artifacts
+data/bronze/metadata/*.json
+data/bronze/state/*.json
+
+# Silver Parquet outputs
+data/silver/tables/**/*.parquet
+
+# Silver metadata and state artifacts
+data/silver/metadata/*.json
+data/silver/state/*.json
+
+# Gold Parquet outputs
+data/gold/tables/**/*.parquet
+
+# Gold metadata and state artifacts
+data/gold/metadata/*.json
+data/gold/state/*.json
+
+# Python environment and cache
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Environment overrides
+.env
