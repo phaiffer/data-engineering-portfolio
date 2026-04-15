@@ -7,3 +7,5 @@ Use notebooks to inspect landed raw files, validate assumptions, and understand 
 Current notebook:
 
 - `01_dataset_profiling.ipynb`: lightweight exploration of the Olist raw landing area and the Bronze-selected CSV.
+- `02_silver_validation.ipynb`: lightweight validation of source-aligned Silver CSV outputs.
+- `03_gold_output_validation.ipynb`: lightweight validation of Gold v1 analytical outputs and simple revenue sanity checks.

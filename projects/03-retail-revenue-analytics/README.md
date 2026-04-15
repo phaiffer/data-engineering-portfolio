@@ -1,19 +1,26 @@
 # Retail Revenue Analytics
 
-Foundation for a retail and e-commerce analytics case study using the Kaggle dataset `olistbr/brazilian-ecommerce`.
+Retail and e-commerce analytics case study using the Kaggle dataset `olistbr/brazilian-ecommerce`.
 
-This is the third portfolio case in the repository. It is intentionally limited to ingestion, raw inventory, and Bronze profiling so the project can grow toward dimensional modeling without pretending those decisions have already been made.
+This is the third portfolio case in the repository. It now implements a local Bronze, source-aligned Silver, and cautious Gold v1 layer for revenue and business KPI summaries. Dimensional modeling, DBT, orchestration, API, dashboard, cloud deployment, and production contracts remain future work.
 
 ## Why This Case Exists
 
 The repository already contains:
 
-- `01-hospital-analytics`: a hospital operations analytics case.
-- `02-job-market-analytics`: a job market analytics case with local medallion processing, DBT modeling, API, and dashboard layers.
+- `01-hospital-analytics`: a hospital operations analytics case with serving-oriented outputs.
+- `02-job-market-analytics`: a job market analytics case with Python processing, DBT marts, API, and dashboard layers.
 
-This case adds a different analytical shape: retail revenue analytics. It creates a foundation for future fact and dimension modeling around orders, order items, products, customers, sellers, payments, and dates.
+This third case adds a different analytical shape: retail revenue analytics over a multi-table marketplace dataset.
 
-The current phase proves that the repository can support a batch-oriented analytical pipeline foundation for a multi-table business domain. It does not yet claim finished marts, KPIs, orchestration, serving APIs, dashboards, or cloud deployment.
+The project is meant to prove:
+
+- source-aware Silver design;
+- dimensional modeling readiness;
+- fact and dimension thinking without prematurely creating final marts;
+- careful revenue KPI definitions;
+- batch-oriented analytical pipeline foundations;
+- a clean path toward future DBT marts and orchestration.
 
 ## Dataset Choice
 
@@ -22,114 +29,136 @@ This project uses the Olist Brazilian E-Commerce Public Dataset from Kaggle:
 - Kaggle handle: `olistbr/brazilian-ecommerce`
 - Local raw folder name: `olist_brazilian_ecommerce`
 
-Olist is a strong fit for this portfolio case because it has multiple related CSV files instead of one flat toy table. The dataset supports future modeling work around retail events and entities, including orders, order items, payments, customers, sellers, products, reviews, geolocation, and timestamps.
+Olist is a strong fit because it has multiple related CSV files instead of one flat sales table. The landed dataset includes orders, order items, payments, products, category translations, customers, sellers, reviews, and geolocation.
 
-That structure makes it suitable for later dimensional modeling toward outputs such as `fact_sales`, `dim_product`, `dim_customer`, `dim_seller`, and `dim_date`. Those outputs are not implemented in this foundation phase.
+That structure supports future modeling around facts such as order items, orders, and payments, plus dimensions such as product, customer, seller, date, order status, and geography.
 
 ## Current Architecture Flow
 
 ```text
 Kaggle dataset
--> Bronze raw landing
--> Bronze raw file inventory
--> Bronze first-pass profiling of the largest supported CSV
--> JSON metadata artifact
+-> Bronze raw landing and profiling
+-> Silver source-aligned standardized tables
+-> Gold revenue KPI summaries
+-> future dimensional modeling / DBT marts / orchestration
 ```
 
-Bronze stays raw. It does not rename columns, cast business types, deduplicate, filter, aggregate, create business keys, or define analytical fact/dimension semantics.
+The current project is local-first and inspectable. It does not claim production maturity.
 
-## Future Architecture Direction
+## Implemented Layers
 
-Planned future growth can move in this direction after the raw sources are inspected:
+### Bronze
+
+Bronze lands the Olist dataset locally, inventories all raw files, profiles the largest supported CSV with Pandas, and writes metadata.
+
+The largest-CSV profiling rule is only a raw-stage convenience. It is not a final fact-grain decision.
+
+### Silver
+
+Silver v1 produces one source-aligned CSV per selected core table:
 
 ```text
-Bronze raw files
--> Silver standardized source-aligned tables
--> Dimensional modeling decisions
--> Gold revenue KPI marts
--> DBT marts
--> Orchestration
+orders
+order_items
+order_payments
+products
+product_category_name_translation
+customers
+sellers
 ```
 
-Likely future modeling topics include:
+Silver preserves each source table grain. It applies only safe standardization: column-name normalization, whitespace trimming, blank-string null handling, and configured datetime/numeric parsing.
 
-- order and order item grain analysis;
-- customer, product, seller, and date dimensions;
-- revenue, freight, payment, and order lifecycle KPIs;
-- source freshness and data quality checks;
-- DBT marts after stable Silver contracts exist;
-- orchestration after the local batch workflow is stable.
+Silver does not aggregate, deduplicate, create surrogate keys, or join everything into one canonical table.
 
-## Implemented Now
+### Gold v1
 
-- Kaggle ingestion through `kagglehub`.
-- Local raw landing under `data/bronze/raw/olist_brazilian_ecommerce/`.
-- Recursive inventory of all raw landed files, including hidden Kaggle operational artifacts.
-- CSV-only eligibility for Bronze profiling.
-- Main CSV selection by largest file size with deterministic path tie-break.
-- Lightweight Pandas profiling of the selected CSV.
-- Readable Bronze metadata JSON under `data/bronze/metadata/`.
-- Exploratory notebook that reuses `src/` helpers.
+Gold v1 produces first-pass analytical outputs:
 
-## Not Implemented Yet
+```text
+kpi_overview.csv
+daily_revenue_summary.csv
+category_revenue_summary.csv
+seller_revenue_summary.csv
+customer_state_revenue_summary.csv
+payment_type_summary.csv
+order_status_summary.csv
+```
 
-- Silver cleaned or standardized tables.
-- Fact tables or dimension tables.
-- Gold KPI marts.
-- DBT project or DBT models.
-- Orchestration.
-- Spark.
-- API.
-- Dashboard.
-- Cloud infrastructure.
-- Production data contracts or SLAs.
+Revenue measures are item-side:
+
+- `item_revenue = sum(order_items.price)`
+- `freight_value = sum(order_items.freight_value)`
+- `gross_merchandise_value = sum(order_items.price + order_items.freight_value)`
+
+Payments are summarized separately by payment type and are not joined to order items for revenue totals. This avoids double counting when an order has multiple payment rows.
+
+## Documentation
+
+- [Bronze layer](docs/bronze.md)
+- [Source tables](docs/source_tables.md)
+- [Silver plan](docs/silver_plan.md)
+- [Silver layer](docs/silver.md)
+- [Modeling plan](docs/modeling_plan.md)
+- [Gold layer](docs/gold.md)
 
 ## How to Run Locally
 
-From the repository root, activate the Python environment and install the repository dependencies if needed:
+From the repository root, activate the Python environment and install dependencies if needed:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ```
 
-Run ingestion:
+Run the local pipeline:
 
 ```powershell
 python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
-```
-
-Run Bronze inventory and profiling:
-
-```powershell
 python projects/03-retail-revenue-analytics/src/jobs/run_bronze.py
+python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
+python projects/03-retail-revenue-analytics/src/jobs/run_gold.py
 ```
 
-Generated data artifacts are local-only and should be recreated by running the jobs.
+Generated data artifacts are local outputs under `data/`.
 
 ## Project Structure
 
 ```text
 projects/03-retail-revenue-analytics/
-|-- data/                # Local medallion-aligned data area
-|-- docs/                # Layer documentation and project notes
-|-- notebooks/           # Exploratory profiling notebook
-|-- src/                 # Ingestion, Bronze processing, and job entrypoints
-|-- tests/               # Future validation surface
+|-- data/                # Local Bronze, Silver, and Gold artifacts
+|-- docs/                # Source, layer, and modeling documentation
+|-- notebooks/           # Exploratory and validation notebooks
+|-- src/                 # Ingestion and processing jobs
+|-- tests/               # Focused helper tests
 `-- README.md            # Case study overview
 ```
 
-## Current Status
+## Current Limitations
 
-This project is in the foundation phase. The implemented code is useful for landing and inspecting the Olist raw dataset, but it intentionally stops before analytical modeling.
+- Gold v1 is not a finished accounting model.
+- Gold v1 is not a final dimensional mart design.
+- No refund, cancellation, chargeback, or settlement reconciliation is implemented.
+- Order status is retained rather than silently filtering to delivered orders.
+- Reviews and geolocation are documented but deferred from Silver v1.
+- DBT is not implemented yet.
+- No Spark, orchestration, API, dashboard, cloud infrastructure, production SLAs, or production data contracts are claimed.
 
-The largest-CSV profiling rule is a raw-stage convenience for first-pass inspection. It is not a final business-grain decision and should not be interpreted as choosing the final sales fact table.
+## Future Dimensional Modeling Direction
 
-## Future Iterations
+Likely future facts:
 
-- Add source-specific raw table notes after inspecting all Olist CSV files.
-- Define Silver table contracts that preserve the source relationships clearly.
-- Decide the sales fact grain based on orders, order items, payments, and timestamps.
-- Add dimensions for product, customer, seller, geography, and date after the grain is documented.
-- Add Gold revenue KPI marts only after Silver and dimensional contracts are stable.
-- Add DBT and orchestration only when they have a clear role in the case study.
+- `fact_order_items`: primary item-side revenue fact.
+- `fact_orders`: order lifecycle and status fact.
+- `fact_payments`: payment behavior fact.
+
+Likely future dimensions:
+
+- `dim_product`
+- `dim_customer`
+- `dim_seller`
+- `dim_date`
+- `dim_order_status`
+- `dim_geography` after geolocation rules are defined
+
+Future DBT marts should be added only after the Silver contracts and dimensional grain decisions are stable enough to justify them.

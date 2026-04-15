@@ -10,9 +10,13 @@ data/
     raw/
     metadata/
   silver/
+    tables/
+    metadata/
   gold/
+    outputs/
+    metadata/
 ```
 
-Bronze raw files are landed locally from Kaggle and kept unchanged. Silver and Gold directories are reserved for future iterations; they are not implemented in the foundation phase.
+Bronze raw files are landed locally from Kaggle and kept unchanged. Silver tables are source-aligned standardized CSVs. Gold outputs are first-pass analytical summaries for revenue and business KPI inspection.
 
-Raw files and generated metadata artifacts are local outputs. Recreate them by running the ingestion and Bronze jobs from the repository root.
+Raw files and generated artifacts are local outputs. Recreate them by running the ingestion, Bronze, Silver, and Gold jobs from the repository root.
