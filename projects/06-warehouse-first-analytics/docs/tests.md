@@ -104,6 +104,12 @@ Verifies that all five expected reputation tiers appear in
 that tier asked questions in the staging window, which would be unexpected for any
 multi-year window and likely signals a modeling bug.
 
+Stability note: this test is reliable for any window of 6+ months. For very narrow
+windows (single month) the `expert` tier could theoretically be absent; in practice
+this does not occur over multi-year defaults. The original draft used `at` as a CTE
+alias, which is a reserved keyword in BigQuery SQL — corrected to unambiguous table
+references.
+
 ---
 
 ## What is Not Tested

@@ -217,6 +217,27 @@ jupyter notebook 01_source_validation.ipynb
 
 ---
 
+## Validation Status
+
+**dbt debug** and the BigQuery connection were confirmed to work correctly with the
+`phaiffertech` GCP project during development (dbt-core 1.11.8, dbt-bigquery 1.11.1,
+oauth authentication). `dbt run` and `dbt test` require Application Default Credentials
+(`gcloud auth application-default login`) which must be set up interactively per the
+instructions above.
+
+The `dbt debug` command confirms:
+- `profiles.yml` is valid
+- `dbt_project.yml` is valid
+- `bigquery` adapter version is detected correctly
+- Connection succeeds once ADC credentials are in place
+
+`dbt run` and `dbt test` have not been executed end-to-end in CI for this portfolio
+project; they require a GCP project with BigQuery enabled and appropriate IAM permissions.
+The SQL models have been reviewed for correctness against the BigQuery dialect, and all
+known syntax issues (reserved keyword aliases, function compatibility) have been addressed.
+
+---
+
 ## Troubleshooting
 
 **`404 Not found: Dataset` error**

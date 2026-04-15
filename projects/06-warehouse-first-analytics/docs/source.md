@@ -55,7 +55,7 @@ One row per Stack Overflow answer. Same schema as questions; split by post type.
 
 ### `users`
 
-One row per registered user. Much smaller than posts tables (~5 M rows, ~2 GB).
+One row per registered user. Much smaller than posts tables (~21 M rows, ~2 GB).
 
 | Column | Type | Notes |
 |---|---|---|

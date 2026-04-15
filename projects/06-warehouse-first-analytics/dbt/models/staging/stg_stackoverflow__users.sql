@@ -1,7 +1,7 @@
 -- stg_stackoverflow__users
 -- Grain: one row per registered Stack Overflow user (id > 0).
 --
--- The users table is small relative to posts (~5 M rows) so no year filter
+-- The users table is small relative to posts (~21 M rows, ~2 GB) so no year filter
 -- is applied here. System and anonymous user stubs (id <= 0) are excluded.
 
 with source as (
