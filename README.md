@@ -1,81 +1,40 @@
 # Data Engineering Portfolio
 
-`phaiffer/data-engineering-portfolio` is a repository of three local-first analytics case studies:
+`phaiffer/data-engineering-portfolio` is a local-first portfolio of four complementary analytics case studies:
 
 - [`projects/01-hospital-analytics/`](projects/01-hospital-analytics/)
 - [`projects/02-job-market-analytics/`](projects/02-job-market-analytics/)
 - [`projects/03-retail-revenue-analytics/`](projects/03-retail-revenue-analytics/)
+- [`projects/04-urban-mobility-analytics/`](projects/04-urban-mobility-analytics/)
 
-Together they show a progression from end-to-end local analytics delivery to stronger SQL and DBT modeling, and then to the clearest dimensional-modeling and analytics-serving case in the portfolio.
+Together they show a clear progression:
 
-In under two minutes, a reviewer should be able to see:
+- project 01 proves end-to-end local analytics delivery;
+- project 02 strengthens the SQL and DBT modeling story;
+- project 03 is the strongest dimensional-modeling and analytics-serving case;
+- project 04 is the strongest orchestration, incremental, and partition-aware pipeline case.
 
-- what this repository is;
-- what each case proves;
-- how the cases differ;
-- why project 03 is the strongest dimensional-modeling example;
-- how to run the work locally;
-- what is implemented today versus what remains roadmap.
+In a quick review, this README should make it easy to understand what the repository is, what each project proves, how the projects differ, how to run them locally, and what is implemented today versus what is still roadmap.
 
 ## Why This Portfolio Exists
 
-This portfolio exists to show practical data engineering work in a format that is easy to inspect locally.
+This repository exists to show practical data engineering work in a format that is easy to inspect locally.
 
-The goal is not to present a production platform. The goal is to show how raw datasets can move through clear analytical layers, become queryable outputs, and end up in small but real API and dashboard surfaces.
+It is not presented as a production platform. The value is in clear analytical layers, credible local run paths, readable project boundaries, and small but real serving surfaces where they already exist.
 
-Across the repository, the recurring themes are:
+Across the portfolio, recurring themes include:
 
-- medallion-style data processing;
-- clear boundaries between raw, standardized, and analytical layers;
-- lightweight serving patterns;
-- recruiter-friendly presentation without inflating maturity claims.
+- medallion-style processing;
+- explicit boundaries between raw, standardized, and analytical layers;
+- lightweight APIs and dashboards where they add review value;
+- incremental improvement from one case study to the next without pretending every project solves the same problem.
 
 ## Portfolio Case Studies Overview
 
-### 01. Hospital Analytics
-
-[`projects/01-hospital-analytics/`](projects/01-hospital-analytics/) is the foundation case.
-
-It proves a full local analytics product flow:
-
-- ingestion from a Kaggle source;
-- Bronze, Silver, and Gold processing;
-- PostgreSQL serving tables and views;
-- Flask API endpoints;
-- React dashboard consumption.
-
-This is the case that shows the repository can deliver a complete analytics path from raw data to a reviewable frontend.
-
-### 02. Job Market Analytics
-
-[`projects/02-job-market-analytics/`](projects/02-job-market-analytics/) extends the portfolio into a stronger SQL and DBT workflow.
-
-It proves:
-
-- Python medallion processing;
-- DBT DuckDB and DBT PostgreSQL modeling paths;
-- relational marts;
-- read-only API patterns;
-- dashboard delivery over modeled outputs.
-
-This is the case that makes the SQL and DBT layer materially stronger than project 01.
-
-### 03. Retail Revenue Analytics
-
-[`projects/03-retail-revenue-analytics/`](projects/03-retail-revenue-analytics/) is the strongest analytics engineering case in the repository today.
-
-It proves:
-
-- multi-table retail source handling;
-- Bronze profiling over a more realistic dataset shape;
-- source-aligned Silver tables;
-- Gold KPI summaries;
-- DBT DuckDB dimensional marts;
-- fact and dimension modeling;
-- read-only API access over marts;
-- dashboard consumption over the API.
-
-This is the clearest dimensional-modeling and analytics-serving example in the portfolio.
+- [`01-hospital-analytics`](projects/01-hospital-analytics/): the foundation end-to-end case, from ingestion to PostgreSQL, Flask, and React.
+- [`02-job-market-analytics`](projects/02-job-market-analytics/): a stronger SQL and DBT case with DuckDB and PostgreSQL modeling paths.
+- [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/): the strongest fact/dimension and analytics-serving case, backed by a richer multi-table retail source.
+- [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/): the strongest orchestration and incremental batch pipeline case, built around official monthly NYC TLC data.
 
 ## Case-by-Case Breakdown
 
@@ -83,33 +42,33 @@ This is the clearest dimensional-modeling and analytics-serving example in the p
 
 **Domain:** hospital patient flow and operational reporting.
 
-**What it proves today:**
+**What it proves:**
 
-- local ingestion and medallion processing;
-- row-preserving standardization in Silver;
-- dashboard-oriented Gold outputs;
-- PostgreSQL as a serving layer;
-- Flask API plus React dashboard as a complete local review surface.
+- ingestion plus Bronze, Silver, and Gold processing;
+- PostgreSQL as a local serving layer;
+- Flask API endpoints over served outputs;
+- React dashboard consumption;
+- a complete local analytics product flow from raw data to a reviewable frontend.
 
-**How it is positioned in the portfolio:**
+**How it is positioned:**
 
-This is the best "end-to-end analytics product flow" example. It is less SQL-modeling-heavy than projects 02 and 03, but it is the clearest proof that the repository can move from raw data to a working dashboard-backed experience.
+This is the clearest proof that the portfolio can deliver an end-to-end local analytics experience. It is less modeling-heavy than projects 02 and 03, but it is the best "raw data to dashboard" foundation case.
 
 ### Project 02 - Job Market Analytics
 
 **Domain:** labor-market and AI-impact analytics.
 
-**What it proves today:**
+**What it proves:**
 
-- Python Bronze, Silver, and Gold processing;
-- DBT DuckDB marts over the Silver artifact;
-- DBT PostgreSQL marts over loaded Silver data;
-- a stronger SQL modeling layer than project 01;
-- read-only API and dashboard patterns over modeled outputs.
+- Python medallion processing;
+- DBT DuckDB and DBT PostgreSQL modeling paths;
+- mart-style SQL modeling over standardized data;
+- read-only API patterns;
+- dashboard delivery over modeled outputs.
 
-**How it is positioned in the portfolio:**
+**How it is positioned:**
 
-This is the bridge case between a pipeline-first implementation and a more analytics-engineering-oriented modeling layer. It is stronger than project 01 in SQL and DBT depth, but it is still more mart-oriented than full dimensional modeling.
+This is the bridge between project 01's end-to-end delivery story and project 03's stronger dimensional-modeling story. It proves materially stronger SQL and DBT work than project 01 without overclaiming full warehouse maturity.
 
 ### Project 03 - Retail Revenue Analytics
 
@@ -117,36 +76,54 @@ This is the bridge case between a pipeline-first implementation and a more analy
 
 **Why the source matters:**
 
-Olist is a stronger modeling dataset than a single flat file because it lands as multiple related tables such as orders, order items, payments, products, customers, and sellers. That makes it a better portfolio case for source-aware Silver design, careful joins, and mart-building discipline.
+Olist lands as multiple related tables such as orders, order items, payments, products, customers, and sellers. That makes it a better portfolio case for source-aligned Silver design, careful joins, and dimensional marts than a single flat-file source.
 
-**What it proves today:**
+**What it proves:**
 
-- Bronze profiling across a multi-table retail source;
-- source-aligned Silver tables rather than an early all-in-one flattening step;
-- Python Gold KPI summaries for first-pass business review;
+- multi-table retail source handling;
+- source-aligned Silver tables;
+- Gold KPI summaries for first-pass business review;
 - DBT DuckDB staging, intermediate, and mart layers;
-- a fact-like sales table plus supporting dimensions;
-- read-only Flask API endpoints over the modeled marts;
-- a React dashboard consuming the API.
+- fact plus supporting dimensions;
+- read-only API endpoints over modeled marts;
+- dashboard consumption over the API;
+- Docker-assisted demo packaging for local review.
 
-**Why it is the strongest dimensional-modeling case:**
+**How it is positioned:**
 
-Project 03 includes `fct_sales` plus supporting dimensions such as `dim_product`, `dim_customer`, `dim_seller`, and `dim_date`, along with business-facing marts. That makes it the strongest dimensional-modeling and analytics-serving case in the repository today.
+Project 03 is the strongest dimensional-modeling and analytics-serving case in the repository today. It is the clearest example of fact-and-dimension thinking, business-facing marts, and a thin serving layer over modeled outputs.
 
-**Important modeling caveats:**
+### Project 04 - Urban Mobility Analytics
 
-- Revenue measures are analytical item-side measures, not accounting-grade revenue.
-- Payment summaries are behavior-oriented and modeled separately from item-side sales measures.
-- Raw payment rows are aggregated to order grain before being added as context, which helps avoid naive duplication when orders have multiple payment rows.
-- The marts are credible local analytical contracts, not an overclaimed enterprise warehouse.
+**Domain:** urban mobility analytics built around Yellow Taxi trip data.
+
+**Source:** official NYC TLC Yellow Taxi trip records.
+
+**Why the source matters:**
+
+Unlike the earlier Kaggle-based cases, this project uses an official public source with naturally month-based files. That makes it a better fit for incremental ingestion planning, rerunnable monthly processing, and partition-aware local storage.
+
+**What it proves:**
+
+- official public-source ingestion;
+- month-based incremental pipeline design;
+- partitioned Parquet outputs in Bronze, Silver, and Gold;
+- readable JSON state tracking for reruns and inspection;
+- Prefect orchestration with real task boundaries;
+- local-first batch pipeline operations over a recognizable public dataset.
+
+**How it is positioned:**
+
+Project 04 is materially different from the first three cases. It does not add an API or dashboard in this phase. Instead, it focuses on orchestration, incremental execution, partition-aware storage, and rerun behavior. It is the strongest orchestration and pipeline-operations case in the portfolio today, without claiming to be a production scheduler or platform.
 
 ## Comparison / Capability Matrix
 
-| Case | Domain | Ingestion | Bronze | Silver | Gold | DBT | Warehouse / DB | API | Dashboard | Dimensional Modeling |
-|------|--------|-----------|--------|--------|------|-----|----------------|-----|-----------|----------------------|
-| [`01-hospital-analytics`](projects/01-hospital-analytics/) | Hospital operations | Kaggle to local raw files | Yes | Yes | Yes | Scaffold only | PostgreSQL serving layer | Flask | React | Limited; not the primary focus |
-| [`02-job-market-analytics`](projects/02-job-market-analytics/) | Job market / AI impact | Kaggle to local raw files | Yes | Yes | Yes | Yes: DuckDB + PostgreSQL marts | DuckDB + PostgreSQL | Read-only Flask | React | Moderate; stronger marts than 01 |
-| [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/) | Retail / e-commerce | Kaggle Olist multi-table source | Yes | Yes: source-aligned tables | Yes | Yes: DuckDB staging, intermediate, and marts | DuckDB | Read-only Flask | React | Strongest; fact + dimensions |
+| Case | Domain | Ingestion | Bronze | Silver | Gold | DBT | Warehouse / DB | API | Dashboard | Dimensional Modeling | Orchestration | Incremental / Partitioned |
+| ---- | ------ | --------- | ------ | ------ | ---- | --- | -------------- | --- | --------- | -------------------- | ------------- | ------------------------- |
+| [`01-hospital-analytics`](projects/01-hospital-analytics/) | Hospital operations | Kaggle to local raw files | Yes | Yes | Yes | Scaffold only | PostgreSQL serving layer | Flask | React | Limited; not the main focus | No | No |
+| [`02-job-market-analytics`](projects/02-job-market-analytics/) | Job market / AI impact | Kaggle to local raw files | Yes | Yes | Yes | DuckDB + PostgreSQL marts | DuckDB + PostgreSQL | Read-only Flask | React | Moderate; stronger marts than 01 | No | No |
+| [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/) | Retail / e-commerce | Kaggle multi-table source | Yes | Yes; source-aligned tables | Yes | DuckDB staging, intermediate, and marts | DuckDB | Read-only Flask | React | Strongest; fact + dimensions | No | No |
+| [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/) | Urban mobility / Yellow Taxi | Official NYC TLC monthly files | Yes | Yes; partitioned Parquet | Yes; partitioned summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus in this phase | Prefect, local-first | Strongest |
 
 ## Repository Structure
 
@@ -155,53 +132,57 @@ data-engineering-portfolio/
 |-- projects/
 |   |-- 01-hospital-analytics/
 |   |-- 02-job-market-analytics/
-|   `-- 03-retail-revenue-analytics/
+|   |-- 03-retail-revenue-analytics/
+|   `-- 04-urban-mobility-analytics/
 |-- docs/
 |-- shared/
 |-- requirements.txt
 `-- requirements-dev.txt
 ```
 
-- `projects/` contains the portfolio case studies.
+- `projects/` contains the four portfolio case studies.
 - `docs/` contains repository-level notes.
-- `shared/` contains shared templates, conventions, and reusable repository assets.
-- `requirements.txt` contains the root Python dependencies used across the local portfolio setup.
+- `shared/` contains templates, conventions, and shared assets.
 
 ## Local Setup
 
 From the repository root:
 
-```powershell
+```bash
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Optional notebook and validation extras:
+Install project-specific extras only when needed:
 
-```powershell
+```bash
+python -m pip install -r projects/02-job-market-analytics/dbt/requirements.txt
+python -m pip install -r projects/03-retail-revenue-analytics/dbt/requirements.txt
+python -m pip install -r projects/04-urban-mobility-analytics/requirements.txt
+```
+
+Optional repository-wide extras:
+
+```bash
 python -m pip install -r requirements-dev.txt
 ```
 
-Each dashboard has its own frontend dependencies. Run `npm install` inside the relevant `dashboard/` directory before `npm run dev`.
+Practical local notes:
 
-## Project-Specific Run Notes
-
-- **Project 01** uses PostgreSQL as the serving database for the API and dashboard path.
-- **Project 02** supports two DBT paths: DuckDB for local modeling and PostgreSQL for the served mart and API path.
-- **Project 03** is DuckDB-first for its current modeled marts and does not require PostgreSQL for the implemented API and dashboard path.
-- **Projects 01 and 02** read local PostgreSQL settings from project-level `.env` files; start from each project's `.env.example`.
-- **All dashboards** include a `dashboard/.env.example` with the expected local API base URL.
-- The DBT helper commands already committed in projects 02 and 03 are PowerShell scripts under each project's `dbt/scripts/` directory.
+- projects 01, 02, and 03 use Node.js for the dashboard layer;
+- projects 01 and 02 use PostgreSQL for their served local review path;
+- projects 01, 02, and 03 ingest from Kaggle-based sources;
+- project 04 pulls from the official public NYC TLC source instead of Kaggle.
 
 ## How to Run Each Case
 
 ### 01. Hospital Analytics
 
-Full local path from raw data to dashboard:
+Configure local PostgreSQL settings from `projects/01-hospital-analytics/.env.example`, then run:
 
-```powershell
+```bash
 python projects/01-hospital-analytics/src/jobs/run_ingestion.py
 python projects/01-hospital-analytics/src/jobs/run_bronze.py
 python projects/01-hospital-analytics/src/jobs/run_silver.py
@@ -210,145 +191,145 @@ python projects/01-hospital-analytics/src/jobs/run_serving.py
 python projects/01-hospital-analytics/api/app.py
 ```
 
-Then start the dashboard:
+Dashboard:
 
-```powershell
+```bash
 cd projects/01-hospital-analytics/dashboard
-if (!(Test-Path .env)) { Copy-Item .env.example .env }
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-Default local API base URL:
-
-```text
-http://127.0.0.1:5000
-```
+Default local API base URL: `http://127.0.0.1:5000`
 
 ### 02. Job Market Analytics
 
-Build the Python medallion outputs first:
+Configure local PostgreSQL settings from `projects/02-job-market-analytics/.env.example`, then run the Python medallion flow:
 
-```powershell
+```bash
 python projects/02-job-market-analytics/src/jobs/run_ingestion.py
 python projects/02-job-market-analytics/src/jobs/run_bronze.py
 python projects/02-job-market-analytics/src/jobs/run_silver.py
 python projects/02-job-market-analytics/src/jobs/run_gold.py
+python projects/02-job-market-analytics/src/jobs/run_postgres_load.py
 ```
 
-For the full PostgreSQL-backed mart, API, and dashboard path:
+Run the PostgreSQL DBT path from `projects/02-job-market-analytics/dbt`:
 
 ```powershell
-python projects/02-job-market-analytics/src/jobs/run_postgres_load.py
-cd projects/02-job-market-analytics/dbt
 .\scripts\run_dbt_postgres.ps1 debug
 .\scripts\run_dbt_postgres.ps1 run
 .\scripts\run_dbt_postgres.ps1 test
-cd ../../..
-python projects/02-job-market-analytics/api/app.py
 ```
 
-Then start the dashboard:
+Start the API and dashboard:
 
-```powershell
+```bash
+python projects/02-job-market-analytics/api/app.py
 cd projects/02-job-market-analytics/dashboard
-Copy-Item .env.example .env
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-Default local API base URL:
+Default local API base URL: `http://127.0.0.1:5001`
 
-```text
-http://127.0.0.1:5001
-```
-
-Local DuckDB modeling is also implemented through:
-
-```powershell
-cd projects/02-job-market-analytics/dbt
-.\scripts\run_dbt_duckdb.ps1 debug
-.\scripts\run_dbt_duckdb.ps1 run
-.\scripts\run_dbt_duckdb.ps1 test
-```
+DuckDB modeling is also implemented through `projects/02-job-market-analytics/dbt/scripts/run_dbt_duckdb.ps1`.
 
 ### 03. Retail Revenue Analytics
 
-Implemented layered flow:
+Run the layered pipeline and DuckDB marts:
 
-```text
-ingestion -> Bronze -> Silver -> Gold -> DBT DuckDB marts -> Flask API -> React dashboard
-```
-
-Run the full local path:
-
-```powershell
+```bash
 python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
 python projects/03-retail-revenue-analytics/src/jobs/run_bronze.py
 python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
 python projects/03-retail-revenue-analytics/src/jobs/run_gold.py
 cd projects/03-retail-revenue-analytics/dbt
-.\scripts\run_dbt_duckdb.ps1 debug
-.\scripts\run_dbt_duckdb.ps1 run
-.\scripts\run_dbt_duckdb.ps1 test
+python -m dbt.cli.main debug --profiles-dir . --target duckdb
+python -m dbt.cli.main run --profiles-dir . --target duckdb
+python -m dbt.cli.main test --profiles-dir . --target duckdb
 cd ../../..
 python projects/03-retail-revenue-analytics/api/app.py
 ```
 
-Then start the dashboard:
+Dashboard:
 
-```powershell
+```bash
 cd projects/03-retail-revenue-analytics/dashboard
-Copy-Item .env.example .env
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-Default local API base URL:
+Default local API base URL: `http://127.0.0.1:5002`
 
-```text
-http://127.0.0.1:5002
+Project 03 also includes a Docker-assisted demo path:
+
+```bash
+cd projects/03-retail-revenue-analytics
+docker compose up --build retail-api retail-dashboard
 ```
 
-Use `http://`, not `https://`, for the local API URL in project 03.
+### 04. Urban Mobility Analytics
+
+Project 04 has no dashboard or API in this phase. The review surface is the batch pipeline itself plus the generated Parquet and JSON metadata.
+
+Install the project requirements, then run either the jobs individually or the Prefect flow:
+
+```bash
+python -m pip install -r projects/04-urban-mobility-analytics/requirements.txt
+python projects/04-urban-mobility-analytics/src/jobs/run_ingestion.py
+python projects/04-urban-mobility-analytics/src/jobs/run_bronze.py
+python projects/04-urban-mobility-analytics/src/jobs/run_silver.py
+python projects/04-urban-mobility-analytics/src/jobs/run_gold.py
+python projects/04-urban-mobility-analytics/src/jobs/run_flow.py
+```
+
+High-level run path:
+
+```text
+ingestion -> Bronze -> Silver -> Gold
+```
+
+Orchestration entrypoint:
+
+```text
+Prefect flow via projects/04-urban-mobility-analytics/src/jobs/run_flow.py
+```
+
+The default local review window is `2024-01` through `2024-02`. Override it with `--start-month`, `--end-month`, and `--force` when you want to rerun a selected month range.
 
 ## What The Portfolio Proves Today
 
-Today, this repository proves that the portfolio can support more than one kind of analytics product while keeping a consistent local review workflow.
+Today this repository shows four different but connected proof points:
 
-It currently demonstrates:
+- **Project 01:** end-to-end local analytics delivery from raw ingestion to PostgreSQL, API, and dashboard.
+- **Project 02:** stronger SQL and DBT modeling through DuckDB and PostgreSQL marts.
+- **Project 03:** the strongest fact/dimension and analytics-serving pattern in the portfolio.
+- **Project 04:** orchestration, incremental execution, partition-aware storage, and readable rerun behavior.
 
-- three distinct analytical domains, not one repeated project with renamed labels;
-- medallion-style processing across all three cases;
-- API and dashboard delivery in all three cases;
-- a stronger SQL and DBT modeling layer in project 02 than in project 01;
-- the clearest fact-and-dimension analytics-serving pattern in project 03.
-
-For recruiter review, the progression is the important part:
-
-- **Project 01:** proves end-to-end delivery.
-- **Project 02:** proves stronger SQL and DBT modeling.
-- **Project 03:** proves the strongest dimensional modeling and analytical serving pattern in the portfolio.
+Taken together, the portfolio shows breadth without pretending every project has the same goal or maturity level.
 
 ## Roadmap
 
-Likely next steps across the portfolio:
+Future work across the portfolio may include:
 
-- orchestration once the local workflows are stable enough to justify it;
+- richer scheduling and observability beyond the current local-first orchestration in project 04;
 - broader automated validation and CI;
-- richer architecture and lineage assets where they reflect real implementations;
-- deployment and infrastructure notes only after real deployed environments exist;
-- deeper marts and analytical contracts where requirements justify them.
+- warehouse-first patterns where a future case truly benefits from them;
+- streaming or near-real-time scenarios when they are justified by the use case;
+- deployment notes only when real deployed environments exist.
 
-These are roadmap items, not implemented guarantees.
+These are future directions, not implemented repository-wide guarantees.
 
 ## Honesty / Non-Claims
 
 To keep the portfolio technically credible:
 
-- these are local-first portfolio projects;
-- no production deployment is claimed at the repository level;
-- no enterprise authentication, authorization, multi-tenant security, or infrastructure maturity is claimed unless explicitly documented in a project;
+- this is a local-first portfolio, not a repository-level production platform claim;
+- no enterprise authentication, authorization, infrastructure maturity, or operational SLA claim is made unless a project explicitly documents it;
 - roadmap items are future work, not present features;
 - project 03 revenue outputs are analytical item-side measures, not accounting-grade revenue;
-- project 03 payment summaries are intended for payment-behavior analysis and are modeled carefully to avoid naive duplication.
+- project 04 orchestration is a local-first Prefect implementation, not a claim of a production scheduler or data platform;
+- projects without an API or dashboard are intentionally scoped that way rather than presented as unfinished production systems.
