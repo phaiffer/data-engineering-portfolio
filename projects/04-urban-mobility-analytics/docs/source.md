@@ -35,6 +35,8 @@ That file organization maps well to a local incremental model:
 - one month lands into one Bronze raw partition;
 - Silver and Gold can safely rerun only the selected months.
 
+The selected month is the source-planning unit, not a guarantee that every trip record inside the file has a pickup timestamp inside that same month.
+
 ## Important Columns Used In This Project
 
 The current implementation focuses on documented fields that are stable and analytically useful:
@@ -65,7 +67,9 @@ The current implementation focuses on documented fields that are stable and anal
 - TLC monthly files can be large, so this project keeps the default window small.
 - Schema details can evolve over time. The implementation handles optional numeric columns such as `cbd_congestion_fee` when they appear.
 - This phase does not yet join Taxi Zone lookup metadata, so location analysis stays at the numeric location ID level.
-- The source is monthly by pickup period, but the pipeline still records timestamp parsing quality and flags rows that appear outside the selected source month.
+- A monthly TLC file can contain a small number of records whose parsed pickup timestamp falls outside the nominal source month.
+- The pipeline treats that as a source-data characteristic: ingestion still tracks the file by source month, while Silver and Gold partition downstream outputs by resolved pickup year and month.
+- Spillover rows are visible in metadata and notebook validation rather than being silently filtered away.
 
 ## Why The Default Window Is Small
 

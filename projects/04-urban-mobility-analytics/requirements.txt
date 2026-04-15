@@ -5,3 +5,4 @@ prefect>=2.14
 requests>=2.31
 python-dotenv>=1.0
 pytest>=8.0
+ipykernel>=6.29

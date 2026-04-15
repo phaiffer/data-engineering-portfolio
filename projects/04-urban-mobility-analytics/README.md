@@ -83,6 +83,34 @@ The default configuration keeps the project practical for local execution:
 
 That gives a small, reproducible baseline while leaving a clear path for future month-by-month extension.
 
+## Environment Requirements
+
+This project expects a project-compatible Python environment instead of relying on the repository root dependencies alone.
+
+`requirements.txt` includes the packages needed for:
+
+- Pandas and `pyarrow` for the preferred local Parquet notebook path;
+- DuckDB for Gold summary generation;
+- Prefect for local orchestration;
+- `pytest` for the project tests;
+- `ipykernel` so the environment can be used directly as a notebook kernel.
+
+Recommended setup from the repository root:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r projects/04-urban-mobility-analytics/requirements.txt
+```
+
+If you want to use this environment as a dedicated notebook kernel:
+
+```bash
+python -m ipykernel install --user --name urban-mobility-analytics --display-name "Urban Mobility Analytics"
+```
+
+The notebook prefers Pandas with `pyarrow`. If `pyarrow` is missing but `duckdb` is available in the active kernel, it falls back to DuckDB for local Parquet inspection. If neither path is available, it raises a clear environment error.
+
 ## Local Storage Layout
 
 ```text
@@ -110,6 +138,14 @@ data/
 
 The generated Parquet and JSON artifacts remain local and inspectable.
 
+The partitioning semantics are intentionally split:
+
+- ingestion is planned by source month;
+- Silver and Gold are partitioned by resolved pickup year and month;
+- filenames still retain the source-month identifier for traceability.
+
+That means a selected source-month file can create a few spillover pickup partitions when the official TLC data includes records whose parsed pickup timestamp falls outside the nominal month. This is treated as a source-data characteristic and is recorded in metadata instead of being silently filtered out.
+
 ## Incremental Strategy
 
 Incremental in this project means month-based rerunnable processing with readable local state files.
@@ -120,6 +156,8 @@ Incremental in this project means month-based rerunnable processing with readabl
 - Gold tracks aggregated months and rewrites only the selected month outputs when forced;
 - reruns skip completed months by default;
 - `--force` allows a selected month window to be rebuilt.
+
+State is tracked by source month even when the resulting Silver and Gold partitions spill into adjacent pickup months.
 
 State files live under:
 
@@ -163,16 +201,6 @@ Core KPIs include:
 - average total amount;
 - average fare amount.
 
-## Setup
-
-From the repository root:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -r projects/04-urban-mobility-analytics/requirements.txt
-```
-
 If your shell exposes only `python3`, use that interpreter while keeping the same file paths.
 
 ## Run Manually
@@ -203,6 +231,39 @@ Or with explicit bounds:
 python projects/04-urban-mobility-analytics/src/jobs/run_flow.py --start-month 2024-01 --end-month 2024-02
 ```
 
+## Run The Tests
+
+```bash
+python -m pytest projects/04-urban-mobility-analytics/tests
+```
+
+## Notebook Usage
+
+The validation notebook is intentionally lightweight and should be run with the same environment used for the project jobs.
+
+Supported launch locations:
+
+- repository root;
+- `projects/04-urban-mobility-analytics/`;
+- `projects/04-urban-mobility-analytics/notebooks/`.
+
+The notebook bootstraps `src/` automatically from those locations and raises a clear `RuntimeError` when launched from somewhere else.
+
+Before opening the notebook, land at least one source month:
+
+```bash
+python projects/04-urban-mobility-analytics/src/jobs/run_ingestion.py --start-month 2024-01 --end-month 2024-01
+```
+
+The notebook then validates:
+
+- raw file presence;
+- sample schema and preview rows;
+- row count and selected columns;
+- pickup and dropoff timestamp bounds;
+- null counts for selected fields;
+- source-month timestamp spillover in the official raw file.
+
 ## Documentation
 
 - [Documentation index](docs/README.md)
@@ -222,6 +283,7 @@ python projects/04-urban-mobility-analytics/src/jobs/run_flow.py --start-month 2
 - The pipeline is local-first and not optimized for very large historical backfills.
 - Prefect is used as a local orchestration surface, not a deployed scheduler.
 - There is no serving layer, DBT layer, dashboard, or API in this phase.
+- The notebook is a validation surface, not a reusable transformation layer.
 
 ## Future Directions
 

@@ -15,6 +15,8 @@ The selected month window is the core unit of rerun behavior.
 
 Each state file records completed source months and lightweight run details.
 
+Those state files are keyed by source month because the official TLC publication pattern is month-based.
+
 ## Default Behavior
 
 When a month is already marked complete in a layer state file:
@@ -22,6 +24,8 @@ When a month is already marked complete in a layer state file:
 - reruns skip it by default;
 - the state remains readable and inspectable;
 - later months can still be added without rebuilding everything.
+
+This remains true even if the processed month writes a few Silver or Gold partitions outside the nominal source month because of parsed pickup-time spillover in the raw data.
 
 ## Forced Rebuilds
 
@@ -43,6 +47,8 @@ That keeps the incremental model simple and honest:
 - Bronze tracks profiled raw months.
 - Silver tracks standardized months and rewrites only those month outputs when forced.
 - Gold tracks aggregated months and rewrites only those month outputs when forced.
+
+Silver and Gold still partition outputs by resolved pickup year and month, so source-month state tracking and downstream pickup partitions intentionally describe different aspects of the same run.
 
 ## Why This Fits The Case
 

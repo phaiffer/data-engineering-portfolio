@@ -14,6 +14,12 @@ data/silver/tables/trips/pickup_year=YYYY/pickup_month=MM/yellow_taxi_trips_YYYY
 
 The filename tracks the selected source month. The directory path tracks the resolved pickup partition used for local analytics.
 
+That distinction is intentional:
+
+- source-month planning stays aligned with the official TLC file layout;
+- Silver partitioning stays aligned with parsed pickup time;
+- metadata records the resulting partition details for each processed source month.
+
 ## Standardization Rules
 
 - normalize column names to lowercase snake case;
@@ -24,7 +30,7 @@ The filename tracks the selected source month. The directory path tracks the res
 - derive `trip_duration_minutes`;
 - retain `source_year`, `source_month`, and `source_month_id` for traceability.
 
-When a record lands outside the selected source month based on its parsed pickup timestamp, the Silver write path follows the resolved pickup partition and the metadata records that anomaly instead of silently hiding it.
+When a record lands outside the selected source month based on its parsed pickup timestamp, the Silver write path follows the resolved pickup partition and the metadata records that anomaly instead of silently hiding it. This is documented as source spillover, not treated as a pipeline defect.
 
 ## Quality Checks
 

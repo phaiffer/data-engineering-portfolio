@@ -33,8 +33,11 @@ Each Gold table is partitioned by pickup year and month:
 data/gold/tables/<table_name>/pickup_year=YYYY/pickup_month=MM/<table_name>_YYYY-MM.parquet
 ```
 
+As in Silver, the filename retains the selected source month while the directory reflects the resolved pickup partition. A single source-month file can therefore produce a few spillover Gold partitions when the official raw file contains out-of-month pickup timestamps.
+
 ## Modeling Notes
 
 - Gold reads the partitioned Silver Parquet outputs with DuckDB.
 - The summaries are month-rerunnable and local-first.
+- Gold inherits the Silver partition semantics instead of forcing all records back into the nominal source month.
 - This phase avoids zone enrichment, dashboard-driven marts, and a public serving contract.
