@@ -111,7 +111,7 @@ Silver standardizes one row per event:
 
 ### Gold
 
-Gold builds streaming-oriented summaries from Silver:
+Gold rebuilds category and minute-bucket summaries from landed Silver Parquet:
 
 - `minute_event_summary`
 - `event_type_summary`
