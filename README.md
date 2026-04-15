@@ -1,18 +1,20 @@
 # Data Engineering Portfolio
 
-`phaiffer/data-engineering-portfolio` is a local-first portfolio of four complementary analytics case studies:
+`phaiffer/data-engineering-portfolio` is a local-first portfolio of five complementary analytics case studies:
 
 - [`projects/01-hospital-analytics/`](projects/01-hospital-analytics/)
 - [`projects/02-job-market-analytics/`](projects/02-job-market-analytics/)
 - [`projects/03-retail-revenue-analytics/`](projects/03-retail-revenue-analytics/)
 - [`projects/04-urban-mobility-analytics/`](projects/04-urban-mobility-analytics/)
+- [`projects/05-event-stream-analytics/`](projects/05-event-stream-analytics/)
 
 Together they show a clear progression:
 
 - project 01 proves end-to-end local analytics delivery;
 - project 02 strengthens the SQL and DBT modeling story;
 - project 03 is the strongest dimensional-modeling and analytics-serving case;
-- project 04 is the strongest orchestration, incremental, and partition-aware pipeline case.
+- project 04 is the strongest orchestration, incremental, and partition-aware pipeline case;
+- project 05 is the strongest event-driven, broker-based, and replayable stream pipeline case.
 
 In a quick review, this README should make it easy to understand what the repository is, what each project proves, how the projects differ, how to run them locally, and what is implemented today versus what is still roadmap.
 
@@ -35,6 +37,7 @@ Across the portfolio, recurring themes include:
 - [`02-job-market-analytics`](projects/02-job-market-analytics/): a stronger SQL and DBT case with DuckDB and PostgreSQL modeling paths.
 - [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/): the strongest fact/dimension and analytics-serving case, backed by a richer multi-table retail source.
 - [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/): the strongest orchestration and incremental batch pipeline case, built around official monthly NYC TLC data.
+- [`05-event-stream-analytics`](projects/05-event-stream-analytics/): the strongest event-driven and replayable stream pipeline case, built on the official Wikimedia EventStreams RecentChange feed via Redpanda.
 
 ## Case-by-Case Breakdown
 
@@ -116,14 +119,40 @@ Unlike the earlier Kaggle-based cases, this project uses an official public sour
 
 Project 04 is materially different from the first three cases. It does not add an API or dashboard in this phase. Instead, it focuses on orchestration, incremental execution, partition-aware storage, and rerun behavior. It is the strongest orchestration and pipeline-operations case in the portfolio today, without claiming to be a production scheduler or platform.
 
+### Project 05 - Event Stream Analytics
+
+**Domain:** event stream analytics built on the official Wikimedia EventStreams RecentChange feed.
+
+**Source:** official Wikimedia SSE stream (`stream.wikimedia.org/v2/stream/recentchange`).
+
+**Why the source matters:**
+
+Unlike the batch files used in projects 01 through 04, this source is a live public event stream. That makes it a natural fit for broker-backed ingestion, bounded local capture, checkpointing, and replay-aware pipeline design. The engineering story is fundamentally different from any of the earlier cases.
+
+**What it proves:**
+
+- event-driven ingestion via a live public SSE stream;
+- Redpanda message broker decoupling publisher from consumer;
+- explicit producer and consumer boundaries;
+- Bronze raw JSONL landing with readable checkpoint artifacts;
+- Silver row-preserving standardization into partitioned Parquet;
+- Gold category and minute-bucket analytical summaries rebuilt from Silver;
+- offline replay from landed Bronze, which stays reproducible after broker retention moves on;
+- local-first, bounded, and inspectable throughout.
+
+**How it is positioned:**
+
+Project 05 is the event-driven complement to the batch-first cases. It does not add a dashboard or API in this phase. Instead, it focuses on broker-based ingestion architecture, checkpointing, and replay-aware pipeline design. It is the strongest streaming and event-pipeline case in the portfolio, without claiming to be a production streaming platform.
+
 ## Comparison / Capability Matrix
 
-| Case | Domain | Ingestion | Bronze | Silver | Gold | DBT | Warehouse / DB | API | Dashboard | Dimensional Modeling | Orchestration | Incremental / Partitioned |
-| ---- | ------ | --------- | ------ | ------ | ---- | --- | -------------- | --- | --------- | -------------------- | ------------- | ------------------------- |
-| [`01-hospital-analytics`](projects/01-hospital-analytics/) | Hospital operations | Kaggle to local raw files | Yes | Yes | Yes | Scaffold only | PostgreSQL serving layer | Flask | React | Limited; not the main focus | No | No |
-| [`02-job-market-analytics`](projects/02-job-market-analytics/) | Job market / AI impact | Kaggle to local raw files | Yes | Yes | Yes | DuckDB + PostgreSQL marts | DuckDB + PostgreSQL | Read-only Flask | React | Moderate; stronger marts than 01 | No | No |
-| [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/) | Retail / e-commerce | Kaggle multi-table source | Yes | Yes; source-aligned tables | Yes | DuckDB staging, intermediate, and marts | DuckDB | Read-only Flask | React | Strongest; fact + dimensions | No | No |
-| [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/) | Urban mobility / Yellow Taxi | Official NYC TLC monthly files | Yes | Yes; partitioned Parquet | Yes; partitioned summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus in this phase | Prefect, local-first | Strongest |
+| Case | Domain | Ingestion | Bronze | Silver | Gold | DBT | Warehouse / DB | API | Dashboard | Dimensional Modeling | Orchestration | Incremental / Partitioned | Streaming / Event-Driven |
+| ---- | ------ | --------- | ------ | ------ | ---- | --- | -------------- | --- | --------- | -------------------- | ------------- | ------------------------- | ------------------------ |
+| [`01-hospital-analytics`](projects/01-hospital-analytics/) | Hospital operations | Kaggle to local raw files | Yes | Yes | Yes | Scaffold only | PostgreSQL serving layer | Flask | React | Limited; not the main focus | No | No | No |
+| [`02-job-market-analytics`](projects/02-job-market-analytics/) | Job market / AI impact | Kaggle to local raw files | Yes | Yes | Yes | DuckDB + PostgreSQL marts | DuckDB + PostgreSQL | Read-only Flask | React | Moderate; stronger marts than 01 | No | No | No |
+| [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/) | Retail / e-commerce | Kaggle multi-table source | Yes | Yes; source-aligned tables | Yes | DuckDB staging, intermediate, and marts | DuckDB | Read-only Flask | React | Strongest; fact + dimensions | No | No | No |
+| [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/) | Urban mobility / Yellow Taxi | Official NYC TLC monthly files | Yes | Yes; partitioned Parquet | Yes; partitioned summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus in this phase | Prefect, local-first | Strongest | No |
+| [`05-event-stream-analytics`](projects/05-event-stream-analytics/) | Event stream / Wikimedia RecentChange | Official live SSE stream via Redpanda | Yes; raw JSONL landing | Yes; partitioned Parquet | Yes; category and minute-bucket summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus | Not the main focus | Partitioned; checkpoint-based | Strongest |
 
 ## Repository Structure
 
@@ -133,14 +162,15 @@ data-engineering-portfolio/
 |   |-- 01-hospital-analytics/
 |   |-- 02-job-market-analytics/
 |   |-- 03-retail-revenue-analytics/
-|   `-- 04-urban-mobility-analytics/
+|   |-- 04-urban-mobility-analytics/
+|   `-- 05-event-stream-analytics/
 |-- docs/
 |-- shared/
 |-- requirements.txt
 `-- requirements-dev.txt
 ```
 
-- `projects/` contains the four portfolio case studies.
+- `projects/` contains the five portfolio case studies.
 - `docs/` contains repository-level notes.
 - `shared/` contains templates, conventions, and shared assets.
 
@@ -169,12 +199,21 @@ Optional repository-wide extras:
 python -m pip install -r requirements-dev.txt
 ```
 
+Install project-specific extras for project 05:
+
+```bash
+python -m pip install -r projects/05-event-stream-analytics/requirements.txt
+```
+
+Project 05 also requires Docker to start the local Redpanda broker.
+
 Practical local notes:
 
 - projects 01, 02, and 03 use Node.js for the dashboard layer;
 - projects 01 and 02 use PostgreSQL for their served local review path;
 - projects 01, 02, and 03 ingest from Kaggle-based sources;
-- project 04 pulls from the official public NYC TLC source instead of Kaggle.
+- project 04 pulls from the official public NYC TLC source instead of Kaggle;
+- project 05 pulls from the official live Wikimedia SSE stream and requires Docker for the Redpanda broker.
 
 ## How to Run Each Case
 
@@ -300,14 +339,48 @@ Prefect flow via projects/04-urban-mobility-analytics/src/jobs/run_flow.py
 
 The default local review window is `2024-01` through `2024-02`. Override it with `--start-month`, `--end-month`, and `--force` when you want to rerun a selected month range.
 
+### 05. Event Stream Analytics
+
+Project 05 has no dashboard or API in this phase. The review surface is the broker pipeline, the landed Bronze JSONL files, and the Gold analytical summaries.
+
+Start the Redpanda broker:
+
+```bash
+cd projects/05-event-stream-analytics
+docker compose up -d
+```
+
+Run the publisher, Bronze consumer, Silver, and Gold layers:
+
+```bash
+python projects/05-event-stream-analytics/src/jobs/run_publisher.py --max-events 100 --max-seconds 60
+python projects/05-event-stream-analytics/src/jobs/run_bronze_consumer.py --max-events 100 --max-seconds 60
+python projects/05-event-stream-analytics/src/jobs/run_silver.py
+python projects/05-event-stream-analytics/src/jobs/run_gold.py
+```
+
+Replay Silver and Gold from already-landed Bronze (no live stream or broker required):
+
+```bash
+python projects/05-event-stream-analytics/src/jobs/run_replay.py
+```
+
+Stop the broker when finished:
+
+```bash
+cd projects/05-event-stream-analytics
+docker compose down
+```
+
 ## What The Portfolio Proves Today
 
-Today this repository shows four different but connected proof points:
+Today this repository shows five different but connected proof points:
 
 - **Project 01:** end-to-end local analytics delivery from raw ingestion to PostgreSQL, API, and dashboard.
 - **Project 02:** stronger SQL and DBT modeling through DuckDB and PostgreSQL marts.
 - **Project 03:** the strongest fact/dimension and analytics-serving pattern in the portfolio.
 - **Project 04:** orchestration, incremental execution, partition-aware storage, and readable rerun behavior.
+- **Project 05:** event-driven ingestion, broker-based producer/consumer separation, replayable Bronze landing, and local streaming architecture patterns.
 
 Taken together, the portfolio shows breadth without pretending every project has the same goal or maturity level.
 
@@ -315,11 +388,11 @@ Taken together, the portfolio shows breadth without pretending every project has
 
 Future work across the portfolio may include:
 
-- richer scheduling and observability beyond the current local-first orchestration in project 04;
+- richer observability beyond current local-first instrumentation;
 - broader automated validation and CI;
 - warehouse-first patterns where a future case truly benefits from them;
-- streaming or near-real-time scenarios when they are justified by the use case;
-- deployment notes only when real deployed environments exist.
+- streaming-to-serving scenarios if later justified by a concrete use case;
+- cloud deployment notes only when real deployed environments exist.
 
 These are future directions, not implemented repository-wide guarantees.
 
@@ -332,4 +405,5 @@ To keep the portfolio technically credible:
 - roadmap items are future work, not present features;
 - project 03 revenue outputs are analytical item-side measures, not accounting-grade revenue;
 - project 04 orchestration is a local-first Prefect implementation, not a claim of a production scheduler or data platform;
+- project 05 is a bounded local streaming case; it is not a claim of a production streaming platform, exactly-once delivery guarantees, or cloud infrastructure maturity;
 - projects without an API or dashboard are intentionally scoped that way rather than presented as unfinished production systems.
