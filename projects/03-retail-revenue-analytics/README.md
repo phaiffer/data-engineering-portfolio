@@ -11,7 +11,7 @@ The repository already contains:
 - `01-hospital-analytics`: a hospital operations analytics case with serving-oriented outputs.
 - `02-job-market-analytics`: a job market analytics case with Python processing, DBT marts, API, and dashboard layers.
 
-This third case adds a retail marketplace domain with stronger dimensional modeling emphasis. It shows how a multi-table source can move from raw files to source-aligned Silver tables, then into fact, dimension, and mart-style SQL models.
+This third case adds a retail marketplace domain with stronger dimensional modeling emphasis. It shows how a multi-table source can move from raw files to source-aligned Silver tables, then into fact, dimension, mart-style SQL models, a read-only API, and a local dashboard.
 
 The project proves:
 
@@ -21,7 +21,8 @@ The project proves:
 - payment duplication avoidance;
 - DBT as a local modeling and testing layer;
 - a thin analytical serving contract over modeled marts;
-- a clean path toward future orchestration or dashboard layers without adding them prematurely.
+- a React presentation layer over the analytical API;
+- a clean path toward future orchestration without adding it prematurely.
 
 ## Dataset Choice
 
@@ -41,7 +42,7 @@ Kaggle dataset
 -> Gold Python KPI summaries
 -> DBT DuckDB staging/intermediate/marts
 -> Flask read-only API
--> future dashboard / orchestration / deployment
+-> React dashboard
 ```
 
 ## Implemented Layers
@@ -104,6 +105,12 @@ The API reads from the already-modeled DuckDB marts and returns JSON responses f
 
 The API is thin by design. It does not run DBT, rebuild marts, recalculate business logic from raw files, or write data.
 
+### React Dashboard
+
+The dashboard consumes the API and presents the case as a local analytics product. It includes KPI cards, daily revenue trend, category performance, seller performance, customer state performance, order status, and payment type sections.
+
+The dashboard keeps business logic in the modeled layers and API contract. React handles API consumption, rendering, formatting, loading states, empty states, and error states.
+
 ## Revenue And Grain Rules
 
 The central sales grain is one row per `order_id` and `order_item_id`.
@@ -128,6 +135,7 @@ Payment fields in `fct_sales` are order-level context. They can repeat across mu
 - [DBT layer](docs/dbt.md)
 - [Dimensional marts](docs/marts.md)
 - [API layer](docs/api.md)
+- [Dashboard layer](docs/dashboard.md)
 - [Modeling plan](docs/modeling_plan.md)
 
 ## How to Run Locally
@@ -169,6 +177,20 @@ Default API URL:
 http://127.0.0.1:5002
 ```
 
+Start the dashboard:
+
+```powershell
+cd projects/03-retail-revenue-analytics/dashboard
+npm install
+npm run dev
+```
+
+Default dashboard URL:
+
+```text
+http://127.0.0.1:5173
+```
+
 Generated data artifacts are local outputs under `data/`.
 
 ## Project Structure
@@ -178,6 +200,7 @@ projects/03-retail-revenue-analytics/
 |-- data/                # Local generated artifacts
 |-- dbt/                 # DuckDB DBT modeling and tests
 |-- api/                 # Thin read-only Flask API over DuckDB marts
+|-- dashboard/           # React + Vite dashboard over the API
 |-- docs/                # Source, layer, mart, and modeling documentation
 |-- notebooks/           # Exploratory and validation notebooks
 |-- src/                 # Python ingestion and processing jobs
@@ -193,7 +216,8 @@ projects/03-retail-revenue-analytics/
 - Order status is retained rather than silently filtering to delivered orders.
 - Reviews and geolocation are documented but deferred from Silver v1 and DBT marts.
 - The API is local and read-only, not production hardened.
-- No Spark, PostgreSQL dependency, orchestration, dashboard, cloud infrastructure, production SLAs, or production data contracts are claimed.
+- The dashboard is a local analytical presentation layer, not a production commerce application.
+- No Spark, PostgreSQL dependency, orchestration, cloud infrastructure, production SLAs, or production data contracts are claimed.
 
 ## Future Work
 

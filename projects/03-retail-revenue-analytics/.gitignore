@@ -9,3 +9,8 @@ data/*.duckdb
 dbt/target/
 dbt/logs/
 dbt/dbt_packages/
+
+# Dashboard source/config files that should remain versioned despite root JSON ignores
+!dashboard/package.json
+!dashboard/package-lock.json
+!dashboard/tsconfig.json
