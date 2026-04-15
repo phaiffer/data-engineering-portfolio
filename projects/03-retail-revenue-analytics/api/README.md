@@ -44,12 +44,33 @@ http://127.0.0.1:5002
 
 The local API is HTTP-only. Do not use `https://127.0.0.1:5002`.
 
+## Run With Docker
+
+From the project directory:
+
+```bash
+cd projects/03-retail-revenue-analytics
+docker compose up --build retail-api
+```
+
+The API container:
+
+- listens on `0.0.0.0:5002` inside Docker;
+- publishes `5002:5002` to the host;
+- reads the DuckDB mart database from the bind-mounted `./data` directory;
+- expects the mounted database at
+  `/workspace/projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb`.
+
+The image does not include generated data. Build the DuckDB file first or mount an existing local `data/` directory.
+
 ## Local Dashboard CORS
 
 The API allows explicit CORS origins through `RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS`.
 The default list includes common Vite origins:
 
 ```text
+http://127.0.0.1:4173
+http://localhost:4173
 http://127.0.0.1:5173
 http://localhost:5173
 http://127.0.0.1:5174
@@ -112,3 +133,9 @@ If the dashboard says the API is unavailable:
 - Confirm the Flask API is running.
 - Confirm `VITE_API_BASE_URL` uses `http://`.
 - Confirm the dashboard origin is listed in `RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS` or is an allowed local dev origin.
+
+For the Docker-assisted path, also confirm:
+
+- the `retail-api` container is running;
+- `./data/retail_revenue_analytics.duckdb` exists on the host;
+- the bind mount is present inside the container.

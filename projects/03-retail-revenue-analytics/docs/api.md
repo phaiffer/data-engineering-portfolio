@@ -14,12 +14,28 @@ The API does not perform analytical transformations. Business logic belongs in P
 
 Do not use `https://127.0.0.1:5002` for local development. Flask is not serving TLS in this project.
 
+## Docker Runtime
+
+The project also includes a Docker packaging path for the API:
+
+- Dockerfile: `docker/api.Dockerfile`
+- Compose service: `retail-api`
+- Exposed host port: `5002`
+- Mounted DuckDB path inside the container:
+  `/workspace/projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb`
+
+The API container does not bake generated DuckDB data into the image. It reads the bind-mounted `data/` directory at runtime.
+
+If the mounted DuckDB file is missing, the API still starts, but `/health` returns a degraded status and mart endpoints cannot serve modeled results yet.
+
 ## Local CORS
 
 The API supports explicit CORS origin control through `RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS`.
 
 The default local dashboard origins include:
 
+- `http://127.0.0.1:4173`
+- `http://localhost:4173`
 - `http://127.0.0.1:5173`
 - `http://localhost:5173`
 - `http://127.0.0.1:5174`
@@ -30,6 +46,8 @@ The default local dashboard origins include:
 - `http://localhost:5179`
 
 When `RETAIL_REVENUE_API_ALLOW_LOCAL_DEV_CORS=true`, the API also allows HTTP `localhost` and `127.0.0.1` browser origins on local Vite-style ports from `5173` through `5199`. This makes local Vite port fallback ergonomic without using unrestricted wildcard CORS.
+
+In the Docker Compose demo path, the API is configured to allow the containerized dashboard origin on port `4173` while still keeping the local Vite convenience rule enabled.
 
 Direct browser navigation to `/health` does not require CORS. Dashboard `fetch` calls do. That means `/health` can open directly while the dashboard is still blocked if the Vite origin is not allowed.
 
@@ -201,3 +219,10 @@ If the dashboard reports an unavailable API, check:
 - `VITE_API_BASE_URL` points to `http://127.0.0.1:5002`;
 - the Vite origin appears in the API CORS list or falls in the local dev origin rule;
 - the browser console is not reporting a CORS, SSL, or generic fetch failure.
+
+For the Docker-assisted path, also check:
+
+- the `retail-api` container is running;
+- the project `data/` directory is mounted;
+- the mounted DuckDB file exists at `data/retail_revenue_analytics.duckdb`;
+- the dashboard image was built with the intended browser-facing API URL.

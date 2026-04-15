@@ -1,0 +1,47 @@
+services:
+  retail-api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    environment:
+      RETAIL_REVENUE_API_HOST: 0.0.0.0
+      RETAIL_REVENUE_API_PORT: 5002
+      RETAIL_REVENUE_DUCKDB_PATH: /workspace/projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb
+      RETAIL_REVENUE_DBT_SCHEMA: marts
+      RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS: http://127.0.0.1:4173,http://localhost:4173
+      RETAIL_REVENUE_API_ALLOW_LOCAL_DEV_CORS: "true"
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./data:/workspace/projects/03-retail-revenue-analytics/data
+
+  retail-dashboard:
+    build:
+      context: .
+      dockerfile: docker/dashboard.Dockerfile
+      args:
+        VITE_API_BASE_URL: ${RETAIL_REVENUE_DASHBOARD_API_BASE_URL:-http://127.0.0.1:5002}
+    depends_on:
+      - retail-api
+    ports:
+      - "4173:4173"
+
+  retail-pipeline:
+    profiles:
+      - pipeline
+    build:
+      context: .
+      dockerfile: docker/pipeline.Dockerfile
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    working_dir: /workspace/projects/03-retail-revenue-analytics
+    environment:
+      HOME: /tmp
+      KAGGLE_USERNAME: ${KAGGLE_USERNAME:-}
+      KAGGLE_KEY: ${KAGGLE_KEY:-}
+      RETAIL_REVENUE_DUCKDB_PATH: /workspace/projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb
+      DBT_PROFILES_DIR: /workspace/projects/03-retail-revenue-analytics/dbt
+    volumes:
+      - ./:/workspace/projects/03-retail-revenue-analytics
+    command:
+      - sleep
+      - infinity

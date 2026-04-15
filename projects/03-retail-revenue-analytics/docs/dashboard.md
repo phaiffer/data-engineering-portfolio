@@ -27,6 +27,22 @@ The local Flask API is HTTP-only. A URL such as `https://127.0.0.1:5002` is wron
 
 Direct browser navigation to `/health` is not the same as a dashboard `fetch` request. Opening `/health` directly does not require CORS, while the dashboard does because it runs from a Vite origin such as `http://127.0.0.1:5173` or `http://127.0.0.1:5179`.
 
+## Docker Packaging Path
+
+The Docker packaging path builds the dashboard as static assets and serves them from a lightweight container on:
+
+```text
+http://127.0.0.1:4173
+```
+
+In that path, the browser-facing API URL is baked into the dashboard build through `VITE_API_BASE_URL`. The default Docker Compose value is still:
+
+```text
+http://127.0.0.1:5002
+```
+
+That host URL is intentional. The browser runs on the host machine, so using a Docker-internal hostname such as `http://retail-api:5002` in the frontend would break host-side access.
+
 ## Main Sections
 
 - Overview header with scope notes and API connection status.
@@ -82,6 +98,12 @@ If the API is reachable directly but unavailable from the dashboard, check:
 - `RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS`;
 - `RETAIL_REVENUE_API_ALLOW_LOCAL_DEV_CORS`;
 - browser console messages for CORS, SSL, or generic fetch failures.
+
+For the Docker-assisted path, also check:
+
+- the dashboard was rebuilt after changing `RETAIL_REVENUE_DASHBOARD_API_BASE_URL`;
+- the current dashboard origin is `http://127.0.0.1:4173` or `http://localhost:4173`;
+- the API container is reachable at `http://127.0.0.1:5002`.
 
 ## Non-Goals
 

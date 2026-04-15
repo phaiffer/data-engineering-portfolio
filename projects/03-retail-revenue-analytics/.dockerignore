@@ -1,0 +1,29 @@
+# Local Python caches and environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+
+# Local runtime configuration
+.env
+api/.env
+dashboard/.env
+
+# Generated data and DBT runtime artifacts
+data/bronze/raw/
+data/bronze/metadata/
+data/silver/
+data/gold/
+data/*.duckdb
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+
+# Frontend build output and dependencies
+dashboard/node_modules/
+dashboard/dist/
+
+# Local-only project material not needed for container builds
+notebooks/
+tests/

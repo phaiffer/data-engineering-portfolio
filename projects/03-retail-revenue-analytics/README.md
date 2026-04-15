@@ -22,6 +22,7 @@ The project proves:
 - DBT as a local modeling and testing layer;
 - a thin analytical serving contract over modeled marts;
 - a React presentation layer over the analytical API;
+- a cleaner Docker packaging path for local demos and reproducibility;
 - a clean path toward future orchestration without adding it prematurely.
 
 ## Dataset Choice
@@ -136,9 +137,12 @@ Payment fields in `fct_sales` are order-level context. They can repeat across mu
 - [Dimensional marts](docs/marts.md)
 - [API layer](docs/api.md)
 - [Dashboard layer](docs/dashboard.md)
+- [Docker packaging](docs/docker.md)
 - [Modeling plan](docs/modeling_plan.md)
 
-## How to Run Locally
+## How to Run
+
+### Manual Local Path
 
 From the repository root, activate the Python environment and install dependencies if needed:
 
@@ -195,6 +199,80 @@ http://127.0.0.1:5173
 
 If Vite falls back to another local port, the API allows common local Vite origins and HTTP `localhost` or `127.0.0.1` origins on ports `5173` through `5199` for local development.
 
+### Docker-Assisted Local Path
+
+Docker support is included for a cleaner demo path:
+
+- `docker/api.Dockerfile` for the Flask API;
+- `docker/dashboard.Dockerfile` for the dashboard static build and lightweight web server;
+- `docker-compose.yml` for the local demo stack;
+- `docker/pipeline.Dockerfile` for explicit Python job and DBT commands when needed.
+
+The Docker path is still local-first. It improves packaging and startup ergonomics, but it does not turn the project into a production deployment.
+
+The normal Docker demo flow expects the DuckDB mart database to already exist under:
+
+```text
+projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb
+```
+
+From the project directory:
+
+```bash
+cd projects/03-retail-revenue-analytics
+docker compose up --build retail-api retail-dashboard
+```
+
+Expected host URLs:
+
+```text
+API:       http://127.0.0.1:5002
+Dashboard: http://127.0.0.1:4173
+```
+
+The dashboard image uses a browser-facing API URL baked into the build. By default that is:
+
+```text
+http://127.0.0.1:5002
+```
+
+That host URL is intentional. The browser needs a host-reachable API endpoint rather than a Docker-internal hostname.
+
+### Optional Pipeline Container
+
+The optional `retail-pipeline` service exists for explicit commands only. It does not run during the normal `docker compose up` path.
+
+On Linux, prefer passing your host UID and GID when you run the pipeline container so bind-mounted DBT artifacts are written with your user ownership instead of `root`.
+
+Examples:
+
+```bash
+cd projects/03-retail-revenue-analytics
+HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_bronze.py
+HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_silver.py
+HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_gold.py
+HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline sh -lc "cd dbt && python -m dbt.cli.main run --profiles-dir . --target duckdb"
+```
+
+Use the same Kaggle credentials you would use locally if you want to run ingestion inside the pipeline container.
+
+`dbt/logs/` and `dbt/target/` are generated local artifacts. They should not be treated as source files, and the Docker workflow should not rely on them being root-owned.
+
+If an older Docker run left those folders owned by `root`, recover with:
+
+```bash
+cd projects/03-retail-revenue-analytics
+sudo chown -R "$USER":"$(id -gn)" dbt/logs dbt/target
+```
+
+Or remove and recreate them:
+
+```bash
+cd projects/03-retail-revenue-analytics
+sudo rm -rf dbt/logs dbt/target
+mkdir -p dbt/logs dbt/target
+```
+
 ## Local Connectivity Troubleshooting
 
 Opening `http://127.0.0.1:5002/health` directly in a browser confirms the route is reachable, but it does not prove the dashboard can fetch it. Browser `fetch` from Vite also depends on CORS.
@@ -213,6 +291,13 @@ http://127.0.0.1:5002
 
 If the dashboard reports the API as unavailable, check that the Flask process is running, `VITE_API_BASE_URL` uses HTTP, and the current Vite origin is allowed by the API CORS configuration.
 
+For the Docker-assisted path, also check that:
+
+- `retail-api` is published on `http://127.0.0.1:5002`;
+- `retail-dashboard` is published on `http://127.0.0.1:4173`;
+- the DuckDB file exists under `data/retail_revenue_analytics.duckdb`;
+- the dashboard image was built with a host-reachable API URL.
+
 Generated data artifacts are local outputs under `data/`.
 
 ## Project Structure
@@ -223,10 +308,12 @@ projects/03-retail-revenue-analytics/
 |-- dbt/                 # DuckDB DBT modeling and tests
 |-- api/                 # Thin read-only Flask API over DuckDB marts
 |-- dashboard/           # React + Vite dashboard over the API
+|-- docker/              # Dockerfiles and container-specific requirements
 |-- docs/                # Source, layer, mart, and modeling documentation
 |-- notebooks/           # Exploratory and validation notebooks
 |-- src/                 # Python ingestion and processing jobs
 |-- tests/               # Focused Python helper tests
+|-- docker-compose.yml   # Local Docker demo stack
 `-- README.md            # Case study overview
 ```
 
@@ -239,6 +326,7 @@ projects/03-retail-revenue-analytics/
 - Reviews and geolocation are documented but deferred from Silver v1 and DBT marts.
 - The API is local and read-only, not production hardened.
 - The dashboard is a local analytical presentation layer, not a production commerce application.
+- The Docker setup improves local packaging and demo ergonomics, but it is not production infrastructure.
 - No Spark, PostgreSQL dependency, orchestration, cloud infrastructure, production SLAs, or production data contracts are claimed.
 
 ## Future Work

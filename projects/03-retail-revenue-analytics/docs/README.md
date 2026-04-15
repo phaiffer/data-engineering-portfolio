@@ -12,6 +12,7 @@ Curated documentation for the retail revenue analytics case study.
 - [Dimensional marts](marts.md): dimensions, fact-like mart, business marts, grains, and caveats.
 - [API layer](api.md): read-only Flask API over DuckDB marts, endpoints, filters, and limitations.
 - [Dashboard layer](dashboard.md): local React dashboard over the API, sections, KPI caveats, and non-goals.
+- [Docker packaging](docker.md): API and dashboard containers, Compose demo path, mounted DuckDB data, and optional pipeline container usage.
 - [Project README](../README.md): case study purpose, dataset choice, architecture direction, and run commands.
 
 Future documentation should be added only when the corresponding implementation exists.

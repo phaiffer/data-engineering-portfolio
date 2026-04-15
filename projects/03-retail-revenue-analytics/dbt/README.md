@@ -80,6 +80,32 @@ Equivalent manual command:
 uv run --python 3.12 --with-requirements requirements.txt python -m dbt.cli.main run --profiles-dir . --target duckdb
 ```
 
+## Generated Artifacts And Linux Permissions
+
+`logs/` and `target/` are generated local DBT artifacts. They are not source files, and they are safe to delete when you want a clean local rerun.
+
+If you run DBT through the optional Docker pipeline service on Linux, prefer passing the host UID and GID so bind-mounted outputs stay owned by your normal user:
+
+```bash
+cd projects/03-retail-revenue-analytics
+HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline sh -lc "cd dbt && python -m dbt.cli.main run --profiles-dir . --target duckdb"
+```
+
+If an older Docker run already left `logs/` or `target/` owned by `root`, recover with:
+
+```bash
+cd projects/03-retail-revenue-analytics
+sudo chown -R "$USER":"$(id -gn)" dbt/logs dbt/target
+```
+
+Or remove and recreate them:
+
+```bash
+cd projects/03-retail-revenue-analytics
+sudo rm -rf dbt/logs dbt/target
+mkdir -p dbt/logs dbt/target
+```
+
 ## Tests
 
 DBT tests cover:

@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ENV_PATH = PROJECT_ROOT / ".env"
 DEFAULT_CORS_ALLOWED_ORIGINS = (
+    "http://127.0.0.1:4173",
+    "http://localhost:4173",
     "http://127.0.0.1:5173",
     "http://localhost:5173",
     "http://127.0.0.1:5174",

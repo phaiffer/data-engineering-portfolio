@@ -71,6 +71,24 @@ http://127.0.0.1:5173
 
 Vite may choose another local port if `5173` is already in use. The API allows common local Vite origins and HTTP `localhost` or `127.0.0.1` ports from `5173` through `5199` when local-dev CORS is enabled.
 
+## Run With Docker
+
+From the project directory:
+
+```bash
+cd projects/03-retail-revenue-analytics
+docker compose up --build retail-api retail-dashboard
+```
+
+Expected Docker-assisted URLs:
+
+```text
+API:       http://127.0.0.1:5002
+Dashboard: http://127.0.0.1:4173
+```
+
+The Docker dashboard path builds static assets and serves them from a lightweight container. The browser-facing API URL is baked in at build time through `VITE_API_BASE_URL`, so rebuild the dashboard image if you change that URL.
+
 ## Build
 
 ```powershell
@@ -115,6 +133,12 @@ If the dashboard says the API is unavailable:
 - Check that `VITE_API_BASE_URL` uses `http://`.
 - Check the current dashboard origin shown in the header.
 - Check that the API allows that local Vite origin through CORS.
+
+For the Docker-assisted path, also check:
+
+- the dashboard was built with `http://127.0.0.1:5002` or another host-reachable API URL;
+- the API container is listening on host port `5002`;
+- the current browser origin is `http://127.0.0.1:4173` or `http://localhost:4173`.
 
 ## Non-Goals
 

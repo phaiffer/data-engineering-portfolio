@@ -43,7 +43,7 @@ function getApiConfigurationError(value: string): string | null {
     return [
       `Configured API base URL is ${value}.`,
       "The local Flask API for this project is HTTP-only.",
-      "Use http://127.0.0.1:5002 in dashboard/.env.",
+      "Use http://127.0.0.1:5002 as the browser-facing API URL.",
     ].join(" ");
   }
 
