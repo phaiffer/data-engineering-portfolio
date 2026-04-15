@@ -2,7 +2,7 @@
 
 Retail and e-commerce analytics case study using the Kaggle dataset `olistbr/brazilian-ecommerce`.
 
-This is the third portfolio case in the repository. It implements a local Bronze layer, source-aligned Silver tables, cautious Python Gold v1 KPI summaries, and DBT DuckDB dimensional marts. The project remains local-first and portfolio-oriented, with no production maturity claims.
+This is the third portfolio case in the repository. It implements a local Bronze layer, source-aligned Silver tables, cautious Python Gold v1 KPI summaries, DBT DuckDB dimensional marts, and a thin read-only Flask API over those marts. The project remains local-first and portfolio-oriented, with no production maturity claims.
 
 ## Why This Case Exists
 
@@ -20,7 +20,8 @@ The project proves:
 - item-grain sales modeling;
 - payment duplication avoidance;
 - DBT as a local modeling and testing layer;
-- a clean path toward future orchestration or serving layers without adding them prematurely.
+- a thin analytical serving contract over modeled marts;
+- a clean path toward future orchestration or dashboard layers without adding them prematurely.
 
 ## Dataset Choice
 
@@ -39,7 +40,8 @@ Kaggle dataset
 -> Silver source-aligned standardized tables
 -> Gold Python KPI summaries
 -> DBT DuckDB staging/intermediate/marts
--> future orchestration / serving / API / dashboard
+-> Flask read-only API
+-> future dashboard / orchestration / deployment
 ```
 
 ## Implemented Layers
@@ -96,6 +98,12 @@ Business marts:
 
 The DBT path is DuckDB-first and local. It does not require PostgreSQL in this phase.
 
+### Flask Read-Only API
+
+The API reads from the already-modeled DuckDB marts and returns JSON responses for business-friendly endpoints such as KPIs, daily revenue, category performance, seller performance, customer-state performance, order-status summary, and payment-type summary.
+
+The API is thin by design. It does not run DBT, rebuild marts, recalculate business logic from raw files, or write data.
+
 ## Revenue And Grain Rules
 
 The central sales grain is one row per `order_id` and `order_item_id`.
@@ -119,6 +127,7 @@ Payment fields in `fct_sales` are order-level context. They can repeat across mu
 - [Gold layer](docs/gold.md)
 - [DBT layer](docs/dbt.md)
 - [Dimensional marts](docs/marts.md)
+- [API layer](docs/api.md)
 - [Modeling plan](docs/modeling_plan.md)
 
 ## How to Run Locally
@@ -148,6 +157,18 @@ cd projects/03-retail-revenue-analytics/dbt
 .\scripts\run_dbt_duckdb.ps1 test
 ```
 
+Start the API from the repository root after DBT has built the DuckDB marts:
+
+```powershell
+python projects/03-retail-revenue-analytics/api/app.py
+```
+
+Default API URL:
+
+```text
+http://127.0.0.1:5002
+```
+
 Generated data artifacts are local outputs under `data/`.
 
 ## Project Structure
@@ -156,6 +177,7 @@ Generated data artifacts are local outputs under `data/`.
 projects/03-retail-revenue-analytics/
 |-- data/                # Local generated artifacts
 |-- dbt/                 # DuckDB DBT modeling and tests
+|-- api/                 # Thin read-only Flask API over DuckDB marts
 |-- docs/                # Source, layer, mart, and modeling documentation
 |-- notebooks/           # Exploratory and validation notebooks
 |-- src/                 # Python ingestion and processing jobs
@@ -170,7 +192,8 @@ projects/03-retail-revenue-analytics/
 - No refund, cancellation, chargeback, settlement, tax, or revenue recognition logic is implemented.
 - Order status is retained rather than silently filtering to delivered orders.
 - Reviews and geolocation are documented but deferred from Silver v1 and DBT marts.
-- No Spark, PostgreSQL dependency, orchestration, API, dashboard, cloud infrastructure, production SLAs, or production data contracts are claimed.
+- The API is local and read-only, not production hardened.
+- No Spark, PostgreSQL dependency, orchestration, dashboard, cloud infrastructure, production SLAs, or production data contracts are claimed.
 
 ## Future Work
 
