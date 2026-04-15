@@ -45,6 +45,7 @@ export function DashboardPage() {
     : isApiHealthy
       ? "API connected"
       : "API unavailable";
+  const connectionMessage = apiClient.configurationError ?? dashboard.health.error;
 
   return (
     <main className="app-shell">
@@ -73,10 +74,20 @@ export function DashboardPage() {
               <dd>{apiClient.baseUrl}</dd>
             </div>
             <div>
+              <dt>Dashboard origin</dt>
+              <dd>{apiClient.frontendOrigin}</dd>
+            </div>
+            <div>
               <dt>Read path</dt>
               <dd>DuckDB marts through Flask</dd>
             </div>
           </dl>
+          {!dashboard.health.isLoading && connectionMessage ? (
+            <div className="connection-help" role="alert">
+              <strong>Connection check</strong>
+              <p>{connectionMessage}</p>
+            </div>
+          ) : null}
           <button type="button" onClick={() => setRefreshKey((value) => value + 1)}>
             Refresh data
           </button>

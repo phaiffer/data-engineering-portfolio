@@ -15,6 +15,18 @@ React + Vite dashboard
 
 It does not query DuckDB directly, run DBT, recalculate KPI definitions, or use mock analytics for the main experience.
 
+## Local API Connectivity
+
+The dashboard expects the API at:
+
+```text
+http://127.0.0.1:5002
+```
+
+The local Flask API is HTTP-only. A URL such as `https://127.0.0.1:5002` is wrong for this project and can produce browser SSL protocol errors.
+
+Direct browser navigation to `/health` is not the same as a dashboard `fetch` request. Opening `/health` directly does not require CORS, while the dashboard does because it runs from a Vite origin such as `http://127.0.0.1:5173` or `http://127.0.0.1:5179`.
+
 ## Main Sections
 
 - Overview header with scope notes and API connection status.
@@ -46,6 +58,30 @@ Payment summaries describe payment behavior by payment type. They are useful for
 ## Error And Empty States
 
 The dashboard has section-level loading, empty, and error states. If the API is not running or an endpoint fails, the affected section displays the failure honestly. Other sections can still render if their API calls succeed.
+
+The dashboard header shows the configured API base URL and the current frontend origin to make local CORS and protocol issues easier to diagnose.
+
+## Troubleshooting
+
+Wrong:
+
+```text
+https://127.0.0.1:5002
+```
+
+Right:
+
+```text
+http://127.0.0.1:5002
+```
+
+If the API is reachable directly but unavailable from the dashboard, check:
+
+- `VITE_API_BASE_URL` in `dashboard/.env`;
+- the dashboard origin and Vite port;
+- `RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS`;
+- `RETAIL_REVENUE_API_ALLOW_LOCAL_DEV_CORS`;
+- browser console messages for CORS, SSL, or generic fetch failures.
 
 ## Non-Goals
 

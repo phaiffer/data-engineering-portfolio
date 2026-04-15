@@ -35,6 +35,8 @@ Expected API URL:
 http://127.0.0.1:5002
 ```
 
+The local Flask API is HTTP-only. `https://127.0.0.1:5002` will fail with an SSL protocol error.
+
 ## Configure
 
 Copy `.env.example` to `.env` if you need to override the default API base URL:
@@ -50,6 +52,8 @@ Default value:
 VITE_API_BASE_URL=http://127.0.0.1:5002
 ```
 
+Use `http://`, not `https://`, for the local API. The dashboard validates the common bad local HTTPS URLs and shows a clear error in the UI.
+
 ## Run
 
 Install dependencies and start Vite:
@@ -64,6 +68,8 @@ Expected dashboard URL:
 ```text
 http://127.0.0.1:5173
 ```
+
+Vite may choose another local port if `5173` is already in use. The API allows common local Vite origins and HTTP `localhost` or `127.0.0.1` ports from `5173` through `5199` when local-dev CORS is enabled.
 
 ## Build
 
@@ -86,6 +92,29 @@ Implemented sections:
 - Payment type summary from `/api/v1/payment-type-summary`.
 
 The UI includes loading, empty, and endpoint-level error states. If the API is offline, the dashboard reports the unavailable API instead of showing mock analytics.
+
+## Troubleshooting
+
+Opening `http://127.0.0.1:5002/health` directly in a browser only proves the API route is reachable. It does not prove browser `fetch` from the dashboard origin is allowed. CORS can still block dashboard requests.
+
+Wrong:
+
+```text
+VITE_API_BASE_URL=https://127.0.0.1:5002
+```
+
+Right:
+
+```text
+VITE_API_BASE_URL=http://127.0.0.1:5002
+```
+
+If the dashboard says the API is unavailable:
+
+- Check that the Flask API is running.
+- Check that `VITE_API_BASE_URL` uses `http://`.
+- Check the current dashboard origin shown in the header.
+- Check that the API allows that local Vite origin through CORS.
 
 ## Non-Goals
 

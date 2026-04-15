@@ -14,8 +14,11 @@ import type {
 
 const DEFAULT_API_BASE_URL = "http://127.0.0.1:5002";
 
-const apiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || DEFAULT_API_BASE_URL;
+const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const apiBaseUrl = normalizeApiBaseUrl(rawApiBaseUrl);
+const frontendOrigin =
+  typeof window === "undefined" ? "unknown local origin" : window.location.origin;
+const apiConfigurationError = getApiConfigurationError(apiBaseUrl);
 
 export class ApiClientError extends Error {
   constructor(
@@ -25,6 +28,42 @@ export class ApiClientError extends Error {
     super(message);
     this.name = "ApiClientError";
   }
+}
+
+function normalizeApiBaseUrl(value: string): string {
+  const trimmed = value.trim();
+  return (trimmed || DEFAULT_API_BASE_URL).replace(/\/+$/, "");
+}
+
+function getApiConfigurationError(value: string): string | null {
+  if (
+    value === "https://127.0.0.1:5002" ||
+    value === "https://localhost:5002"
+  ) {
+    return [
+      `Configured API base URL is ${value}.`,
+      "The local Flask API for this project is HTTP-only.",
+      "Use http://127.0.0.1:5002 in dashboard/.env.",
+    ].join(" ");
+  }
+
+  return null;
+}
+
+function connectionGuidance(errorMessage?: string): string {
+  const details = [
+    `API not reachable at ${apiBaseUrl}.`,
+    `Dashboard origin: ${frontendOrigin}.`,
+    "Check whether the Flask API is running.",
+    "Check whether the API URL uses http:// rather than https://.",
+    "Check whether local CORS allows the current Vite origin.",
+  ];
+
+  if (errorMessage) {
+    details.push(`Browser fetch detail: ${errorMessage}`);
+  }
+
+  return details.join(" ");
 }
 
 function buildPath(path: string, query?: Record<string, string | number | undefined>): string {
@@ -41,14 +80,18 @@ function buildPath(path: string, query?: Record<string, string | number | undefi
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
+  if (apiConfigurationError) {
+    throw new ApiClientError(apiConfigurationError);
+  }
+
   let response: Response;
   try {
     response = await fetch(`${apiBaseUrl}${path}`);
   } catch (error) {
     throw new ApiClientError(
       error instanceof Error
-        ? `API is not reachable at ${apiBaseUrl}. ${error.message}`
-        : `API is not reachable at ${apiBaseUrl}.`,
+        ? connectionGuidance(error.message)
+        : connectionGuidance(),
     );
   }
 
@@ -91,6 +134,8 @@ async function requestList<T>(path: string): Promise<T[]> {
 
 export const apiClient = {
   baseUrl: apiBaseUrl,
+  frontendOrigin,
+  configurationError: apiConfigurationError,
   getHealth: () => fetchJson<HealthStatus>("/health"),
   getKpis: async () => assertKpiEnvelope(await fetchJson<KpiEnvelope>("/api/v1/kpis")),
   getDailyRevenue: (limit = 180, orderStatus?: string) =>

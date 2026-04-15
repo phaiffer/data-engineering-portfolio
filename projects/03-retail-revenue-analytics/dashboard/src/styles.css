@@ -154,6 +154,23 @@ p {
   overflow-wrap: anywhere;
 }
 
+.connection-help {
+  background: #fff7f4;
+  border: 1px solid #f2b8a8;
+  border-radius: 8px;
+  padding: 0.78rem;
+}
+
+.connection-help strong {
+  color: #8a1f1f;
+}
+
+.connection-help p {
+  color: #8a1f1f;
+  font-size: 0.86rem;
+  margin: 0.25rem 0 0;
+}
+
 .status-pill {
   align-items: center;
   border-radius: 8px;
@@ -365,6 +382,7 @@ td {
 
 .state p {
   margin: 0.25rem 0 0;
+  white-space: pre-line;
 }
 
 .state--loading span {

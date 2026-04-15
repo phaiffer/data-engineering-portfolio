@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from urllib.parse import urlparse
 
 from flask import Flask, jsonify, request
 from werkzeug.exceptions import HTTPException
@@ -27,6 +28,11 @@ from queries import (
     parse_sort_direction,
     validate_sort_field,
 )
+
+
+LOCAL_DEV_CORS_PORT_MIN = 5173
+LOCAL_DEV_CORS_PORT_MAX = 5199
+LOCAL_DEV_CORS_HOSTS = {"127.0.0.1", "localhost"}
 
 
 def _list_response(result: QueryResult):
@@ -63,6 +69,26 @@ def _api_index_payload() -> dict[str, object]:
     }
 
 
+def _is_local_dev_origin(origin: str) -> bool:
+    """Return true for HTTP Vite-style localhost origins in local development."""
+    parsed = urlparse(origin)
+    if parsed.scheme != "http":
+        return False
+    if parsed.hostname not in LOCAL_DEV_CORS_HOSTS:
+        return False
+    if parsed.port is None:
+        return False
+    return LOCAL_DEV_CORS_PORT_MIN <= parsed.port <= LOCAL_DEV_CORS_PORT_MAX
+
+
+def _is_allowed_cors_origin(origin: str | None, api_config) -> bool:
+    if not origin:
+        return False
+    if origin in api_config.cors_allowed_origins:
+        return True
+    return api_config.allow_local_dev_cors and _is_local_dev_origin(origin)
+
+
 def create_app() -> Flask:
     """Create and configure the local retail revenue analytics API."""
     app = Flask(__name__)
@@ -74,11 +100,12 @@ def create_app() -> Flask:
     def add_cors_headers(response):
         origin = request.headers.get("Origin")
         api_config = app.config["API_CONFIG"]
-        if origin in api_config.cors_allowed_origins:
+        if _is_allowed_cors_origin(origin, api_config):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Vary"] = "Origin"
         response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.headers["Access-Control-Max-Age"] = "600"
         return response
 
     @app.get("/health")

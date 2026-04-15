@@ -42,6 +42,28 @@ Default URL:
 http://127.0.0.1:5002
 ```
 
+The local API is HTTP-only. Do not use `https://127.0.0.1:5002`.
+
+## Local Dashboard CORS
+
+The API allows explicit CORS origins through `RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS`.
+The default list includes common Vite origins:
+
+```text
+http://127.0.0.1:5173
+http://localhost:5173
+http://127.0.0.1:5174
+http://localhost:5174
+http://127.0.0.1:5175
+http://localhost:5175
+http://127.0.0.1:5179
+http://localhost:5179
+```
+
+For local development, `RETAIL_REVENUE_API_ALLOW_LOCAL_DEV_CORS=true` also allows HTTP `localhost` and `127.0.0.1` origins on Vite-style ports from `5173` through `5199`. This is local-development behavior only; it is not a production CORS policy.
+
+Directly opening `/health` in a browser is not the same as a dashboard `fetch` request. The browser can load `/health` directly while still blocking dashboard requests if CORS does not allow the Vite origin.
+
 ## Endpoints
 
 - `GET /health`
@@ -70,3 +92,23 @@ Invoke-RestMethod "http://127.0.0.1:5002/api/v1/fct-sales?limit=10&customer_stat
 This API is a local analytical serving layer, not a production commerce backend. It does not implement authentication, authorization, caching, background jobs, orchestration, cloud deployment, or dashboard code.
 
 Item-side revenue metrics come from the modeled `fct_sales` mart. Payment summaries describe payment behavior and should not be interpreted as item-level sales revenue.
+
+## Troubleshooting
+
+Wrong local API URL:
+
+```text
+https://127.0.0.1:5002
+```
+
+Right local API URL:
+
+```text
+http://127.0.0.1:5002
+```
+
+If the dashboard says the API is unavailable:
+
+- Confirm the Flask API is running.
+- Confirm `VITE_API_BASE_URL` uses `http://`.
+- Confirm the dashboard origin is listed in `RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS` or is an allowed local dev origin.

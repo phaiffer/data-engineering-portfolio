@@ -9,6 +9,16 @@ from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ENV_PATH = PROJECT_ROOT / ".env"
+DEFAULT_CORS_ALLOWED_ORIGINS = (
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "http://127.0.0.1:5174",
+    "http://localhost:5174",
+    "http://127.0.0.1:5175",
+    "http://localhost:5175",
+    "http://127.0.0.1:5179",
+    "http://localhost:5179",
+)
 
 
 @dataclass(frozen=True)
@@ -22,6 +32,7 @@ class ApiConfig:
     duckdb_path: Path
     marts_schema: str
     cors_allowed_origins: tuple[str, ...]
+    allow_local_dev_cors: bool
 
 
 def load_config() -> ApiConfig:
@@ -51,8 +62,13 @@ def load_config() -> ApiConfig:
             origin.strip()
             for origin in os.getenv(
                 "RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS",
-                "http://127.0.0.1:5173,http://localhost:5173",
+                ",".join(DEFAULT_CORS_ALLOWED_ORIGINS),
             ).split(",")
             if origin.strip()
         ),
+        allow_local_dev_cors=os.getenv(
+            "RETAIL_REVENUE_API_ALLOW_LOCAL_DEV_CORS",
+            "true",
+        ).lower()
+        == "true",
     )

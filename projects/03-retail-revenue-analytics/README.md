@@ -177,6 +177,8 @@ Default API URL:
 http://127.0.0.1:5002
 ```
 
+The local Flask API is HTTP-only. Use `http://127.0.0.1:5002`, not `https://127.0.0.1:5002`.
+
 Start the dashboard:
 
 ```powershell
@@ -190,6 +192,26 @@ Default dashboard URL:
 ```text
 http://127.0.0.1:5173
 ```
+
+If Vite falls back to another local port, the API allows common local Vite origins and HTTP `localhost` or `127.0.0.1` origins on ports `5173` through `5199` for local development.
+
+## Local Connectivity Troubleshooting
+
+Opening `http://127.0.0.1:5002/health` directly in a browser confirms the route is reachable, but it does not prove the dashboard can fetch it. Browser `fetch` from Vite also depends on CORS.
+
+Wrong API base URL:
+
+```text
+https://127.0.0.1:5002
+```
+
+Right API base URL:
+
+```text
+http://127.0.0.1:5002
+```
+
+If the dashboard reports the API as unavailable, check that the Flask process is running, `VITE_API_BASE_URL` uses HTTP, and the current Vite origin is allowed by the API CORS configuration.
 
 Generated data artifacts are local outputs under `data/`.
 
