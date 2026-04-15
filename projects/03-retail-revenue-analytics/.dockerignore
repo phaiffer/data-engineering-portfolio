@@ -9,6 +9,8 @@ __pycache__/
 .env
 api/.env
 dashboard/.env
+dbt/.user.yml
+dbt/.user.yaml
 
 # Generated data and DBT runtime artifacts
 data/bronze/raw/

@@ -8,24 +8,24 @@ The dashboard consumes the existing read-only Flask API at `http://127.0.0.1:500
 
 From the repository root, make sure the upstream local artifacts exist:
 
-```powershell
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt -r projects/03-retail-revenue-analytics/dbt/requirements.txt
 python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
 python projects/03-retail-revenue-analytics/src/jobs/run_bronze.py
 python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
-python projects/03-retail-revenue-analytics/src/jobs/run_gold.py
 ```
 
-Build the DBT DuckDB marts:
+`run_gold.py` is part of the full manual pipeline, but it is not required to render the dashboard. Build the DBT DuckDB marts:
 
-```powershell
-cd projects/03-retail-revenue-analytics/dbt
-.\scripts\run_dbt_duckdb.ps1 run
-cd ../../..
+```bash
+(cd projects/03-retail-revenue-analytics/dbt && python -m dbt.cli.main run --profiles-dir . --target duckdb)
 ```
 
 Start the API:
 
-```powershell
+```bash
 python projects/03-retail-revenue-analytics/api/app.py
 ```
 
@@ -41,9 +41,9 @@ The local Flask API is HTTP-only. `https://127.0.0.1:5002` will fail with an SSL
 
 Copy `.env.example` to `.env` if you need to override the default API base URL:
 
-```powershell
+```bash
 cd projects/03-retail-revenue-analytics/dashboard
-Copy-Item .env.example .env
+cp .env.example .env
 ```
 
 Default value:
@@ -58,7 +58,7 @@ Use `http://`, not `https://`, for the local API. The dashboard validates the co
 
 Install dependencies and start Vite:
 
-```powershell
+```bash
 npm install
 npm run dev
 ```
@@ -88,6 +88,7 @@ Dashboard: http://127.0.0.1:4173
 ```
 
 The Docker dashboard path builds static assets and serves them from a lightweight container. The browser-facing API URL is baked in at build time through `VITE_API_BASE_URL`, so rebuild the dashboard image if you change that URL.
+Docker improves demo packaging, but it is not required for frontend development.
 
 ## Build
 
@@ -139,6 +140,8 @@ For the Docker-assisted path, also check:
 - the dashboard was built with `http://127.0.0.1:5002` or another host-reachable API URL;
 - the API container is listening on host port `5002`;
 - the current browser origin is `http://127.0.0.1:4173` or `http://localhost:4173`.
+
+If the API health route is degraded or mart-backed endpoints return `503`, rebuild the DuckDB marts before retrying the dashboard.
 
 ## Non-Goals
 

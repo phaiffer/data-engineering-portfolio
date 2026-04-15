@@ -43,6 +43,8 @@ http://127.0.0.1:5002
 
 That host URL is intentional. The browser runs on the host machine, so using a Docker-internal hostname such as `http://retail-api:5002` in the frontend would break host-side access.
 
+Docker is optional for dashboard work. The local Vite path remains the normal way to inspect frontend changes during development.
+
 ## Main Sections
 
 - Overview header with scope notes and API connection status.
@@ -78,6 +80,8 @@ The dashboard has section-level loading, empty, and error states. If the API is 
 The dashboard header shows the configured API base URL and the current frontend origin to make local CORS and protocol issues easier to diagnose.
 
 ## Troubleshooting
+
+If the API health endpoint is degraded or mart-backed API routes return `503`, the dashboard cannot load analytical results because the DuckDB marts are missing.
 
 Wrong:
 

@@ -142,28 +142,91 @@ Payment fields in `fct_sales` are order-level context. They can repeat across mu
 
 ## How to Run
 
+### Quick Demo
+
+The shortest successful review path is:
+
+1. create a local Python environment;
+2. build Silver outputs and DuckDB marts;
+3. start the API and dashboard demo stack.
+
+Bronze and Gold are still implemented and documented, but they are not required for the shortest visible API and dashboard demo.
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+python -m pip install -r requirements.txt -r projects/03-retail-revenue-analytics/dbt/requirements.txt
+python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
+python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
+(cd projects/03-retail-revenue-analytics/dbt && python -m dbt.cli.main run --profiles-dir . --target duckdb)
+(cd projects/03-retail-revenue-analytics && docker compose up --build retail-api retail-dashboard)
+```
+
+Open:
+
+```text
+API:       http://127.0.0.1:5002
+Dashboard: http://127.0.0.1:4173
+```
+
 ### Manual Local Path
 
-From the repository root, activate the Python environment and install dependencies if needed:
+From the repository root, create and activate a Python environment, then install the local Python and DBT dependencies:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt -r projects/03-retail-revenue-analytics/dbt/requirements.txt
+```
+
+PowerShell activation still works with:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
 ```
 
-Run the Python pipeline:
+If the raw Olist files are not already present under `data/bronze/raw/olist_brazilian_ecommerce`, run ingestion first. This step requires the same Kaggle credentials the rest of the repository uses:
 
-```powershell
+```bash
 python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
+```
+
+Run Bronze:
+
+```bash
 python projects/03-retail-revenue-analytics/src/jobs/run_bronze.py
+```
+
+Run Silver:
+
+```bash
 python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
+```
+
+Run Gold:
+
+```bash
 python projects/03-retail-revenue-analytics/src/jobs/run_gold.py
 ```
 
-Run DBT DuckDB:
+Build and validate the DuckDB marts:
+
+```bash
+cd projects/03-retail-revenue-analytics/dbt
+python -m dbt.cli.main debug --profiles-dir . --target duckdb
+python -m dbt.cli.main run --profiles-dir . --target duckdb
+python -m dbt.cli.main test --profiles-dir . --target duckdb
+cd ../../..
+```
+
+The expected mart database path is:
+
+```text
+projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb
+```
+
+If you prefer PowerShell for DBT, the helper script is still available from `projects/03-retail-revenue-analytics/dbt`:
 
 ```powershell
-cd projects/03-retail-revenue-analytics/dbt
 .\scripts\run_dbt_duckdb.ps1 debug
 .\scripts\run_dbt_duckdb.ps1 run
 .\scripts\run_dbt_duckdb.ps1 test
@@ -171,7 +234,7 @@ cd projects/03-retail-revenue-analytics/dbt
 
 Start the API from the repository root after DBT has built the DuckDB marts:
 
-```powershell
+```bash
 python projects/03-retail-revenue-analytics/api/app.py
 ```
 
@@ -183,9 +246,9 @@ http://127.0.0.1:5002
 
 The local Flask API is HTTP-only. Use `http://127.0.0.1:5002`, not `https://127.0.0.1:5002`.
 
-Start the dashboard:
+In a second terminal, start the dashboard:
 
-```powershell
+```bash
 cd projects/03-retail-revenue-analytics/dashboard
 npm install
 npm run dev
@@ -208,7 +271,7 @@ Docker support is included for a cleaner demo path:
 - `docker-compose.yml` for the local demo stack;
 - `docker/pipeline.Dockerfile` for explicit Python job and DBT commands when needed.
 
-The Docker path is still local-first. It improves packaging and startup ergonomics, but it does not turn the project into a production deployment.
+The Docker path is still local-first. It improves packaging and startup ergonomics, but it does not turn the project into a production deployment, and it is not required for day-to-day development.
 
 The normal Docker demo flow expects the DuckDB mart database to already exist under:
 
@@ -244,6 +307,8 @@ The optional `retail-pipeline` service exists for explicit commands only. It doe
 
 On Linux, prefer passing your host UID and GID when you run the pipeline container so bind-mounted DBT artifacts are written with your user ownership instead of `root`.
 
+Use `HOST_UID` and `HOST_GID` in the command examples. `UID` is a readonly shell variable in `bash`, so `HOST_UID` avoids that shell-level footgun.
+
 Examples:
 
 ```bash
@@ -273,7 +338,26 @@ sudo rm -rf dbt/logs dbt/target
 mkdir -p dbt/logs dbt/target
 ```
 
-## Local Connectivity Troubleshooting
+## Troubleshooting
+
+### API returns 503 or `/health` is degraded
+
+The usual cause is a missing DuckDB mart file. The API starts, but it cannot serve mart-backed endpoints until DBT has created:
+
+```text
+projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb
+```
+
+Recover by rebuilding the DBT marts in the manual path, or by confirming the same file exists before you start the Docker demo path.
+
+### Dashboard says the API is unavailable
+
+The usual causes are:
+
+- the API process or container is not running;
+- `VITE_API_BASE_URL` points to the wrong host or port;
+- the URL uses `https://` instead of `http://`;
+- the current browser origin is not allowed by the API CORS settings.
 
 Opening `http://127.0.0.1:5002/health` directly in a browser confirms the route is reachable, but it does not prove the dashboard can fetch it. Browser `fetch` from Vite also depends on CORS.
 
@@ -297,6 +381,31 @@ For the Docker-assisted path, also check that:
 - `retail-dashboard` is published on `http://127.0.0.1:4173`;
 - the DuckDB file exists under `data/retail_revenue_analytics.duckdb`;
 - the dashboard image was built with a host-reachable API URL.
+
+### DBT permission denied on Linux
+
+The usual cause is an older container run that created `dbt/logs/` or `dbt/target/` as `root` on the bind-mounted project directory.
+
+Recover by fixing ownership:
+
+```bash
+cd projects/03-retail-revenue-analytics
+sudo chown -R "$USER":"$(id -gn)" dbt/logs dbt/target
+```
+
+If you also find a root-owned mart database, fix that file too:
+
+```bash
+sudo chown "$USER":"$(id -gn)" data/retail_revenue_analytics.duckdb
+```
+
+Or reset the generated DBT artifacts completely:
+
+```bash
+cd projects/03-retail-revenue-analytics
+sudo rm -rf dbt/logs dbt/target
+mkdir -p dbt/logs dbt/target
+```
 
 Generated data artifacts are local outputs under `data/`.
 

@@ -28,6 +28,8 @@ The API container does not bake generated DuckDB data into the image. It reads t
 
 If the mounted DuckDB file is missing, the API still starts, but `/health` returns a degraded status and mart endpoints cannot serve modeled results yet.
 
+Docker is optional here. The API can also run directly from the local Python environment after the DuckDB marts exist.
+
 ## Local CORS
 
 The API supports explicit CORS origin control through `RETAIL_REVENUE_API_CORS_ALLOWED_ORIGINS`.
@@ -200,6 +202,8 @@ Errors use:
 - No production API hardening claims.
 
 ## Troubleshooting
+
+If `/health` reports a degraded status or mart-backed endpoints return `503`, the usual cause is a missing DuckDB mart file at `data/retail_revenue_analytics.duckdb`.
 
 Wrong:
 

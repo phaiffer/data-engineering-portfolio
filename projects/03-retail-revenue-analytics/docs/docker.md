@@ -3,6 +3,7 @@
 Docker was added to make the retail revenue analytics case easier to demo, easier to move between Linux machines, and easier to run without redoing the API and dashboard setup by hand every time.
 
 This is still a local-first packaging layer. It is not a production container platform.
+Manual local development remains an official path. Docker is included for demo ergonomics and reproducibility, not as a requirement for everyday project work.
 
 ## What Docker Improves
 
@@ -94,6 +95,8 @@ On Linux, pass your host UID and GID when you run the pipeline service:
 cd projects/03-retail-revenue-analytics
 HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_bronze.py
 ```
+
+Use `HOST_UID` and `HOST_GID` in these commands. `UID` is a readonly variable in `bash`, so the `HOST_*` names keep the Linux shell experience predictable.
 
 Python job examples:
 

@@ -12,14 +12,15 @@ The API is intentionally thin:
 
 ## Prerequisites
 
-Build the local DuckDB marts first:
+Build the local DuckDB marts first. For a clean local setup from the repository root:
 
-```powershell
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt -r projects/03-retail-revenue-analytics/dbt/requirements.txt
 python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
 python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
-cd projects/03-retail-revenue-analytics/dbt
-.\scripts\run_dbt_duckdb.ps1 run
-cd ../../..
+(cd projects/03-retail-revenue-analytics/dbt && python -m dbt.cli.main run --profiles-dir . --target duckdb)
 ```
 
 Expected DuckDB path:
@@ -32,7 +33,7 @@ projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb
 
 From the repository root:
 
-```powershell
+```bash
 python projects/03-retail-revenue-analytics/api/app.py
 ```
 
@@ -62,6 +63,7 @@ The API container:
   `/workspace/projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb`.
 
 The image does not include generated data. Build the DuckDB file first or mount an existing local `data/` directory.
+Docker is a demo path here, not a requirement for local API work.
 
 ## Local Dashboard CORS
 
@@ -100,12 +102,12 @@ Directly opening `/health` in a browser is not the same as a dashboard `fetch` r
 
 ## Example Requests
 
-```powershell
-Invoke-RestMethod http://127.0.0.1:5002/health
-Invoke-RestMethod http://127.0.0.1:5002/api/v1/kpis
-Invoke-RestMethod "http://127.0.0.1:5002/api/v1/daily-revenue?limit=10&order_status=delivered"
-Invoke-RestMethod "http://127.0.0.1:5002/api/v1/category-performance?limit=10&sort_by=gross_merchandise_value"
-Invoke-RestMethod "http://127.0.0.1:5002/api/v1/fct-sales?limit=10&customer_state=SP"
+```bash
+curl http://127.0.0.1:5002/health
+curl http://127.0.0.1:5002/api/v1/kpis
+curl "http://127.0.0.1:5002/api/v1/daily-revenue?limit=10&order_status=delivered"
+curl "http://127.0.0.1:5002/api/v1/category-performance?limit=10&sort_by=gross_merchandise_value"
+curl "http://127.0.0.1:5002/api/v1/fct-sales?limit=10&customer_state=SP"
 ```
 
 ## Scope Notes
@@ -139,3 +141,5 @@ For the Docker-assisted path, also confirm:
 - the `retail-api` container is running;
 - `./data/retail_revenue_analytics.duckdb` exists on the host;
 - the bind mount is present inside the container.
+
+If mart-backed endpoints return `503` or `/health` reports a degraded state, rebuild the DuckDB marts first.
