@@ -8,6 +8,8 @@ Curated documentation for the retail revenue analytics case study.
 - [Silver layer](silver.md): implemented Silver outputs, metadata, and run command.
 - [Modeling plan](modeling_plan.md): likely future fact and dimension direction.
 - [Gold layer](gold.md): Gold v1 outputs, KPI definitions, and limitations.
+- [DBT layer](dbt.md): DuckDB DBT project, source strategy, model layers, and tests.
+- [Dimensional marts](marts.md): dimensions, fact-like mart, business marts, grains, and caveats.
 - [Project README](../README.md): case study purpose, dataset choice, architecture direction, and run commands.
 
 Future documentation should be added only when the corresponding implementation exists.

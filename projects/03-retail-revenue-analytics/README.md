@@ -2,7 +2,7 @@
 
 Retail and e-commerce analytics case study using the Kaggle dataset `olistbr/brazilian-ecommerce`.
 
-This is the third portfolio case in the repository. It now implements a local Bronze, source-aligned Silver, and cautious Gold v1 layer for revenue and business KPI summaries. Dimensional modeling, DBT, orchestration, API, dashboard, cloud deployment, and production contracts remain future work.
+This is the third portfolio case in the repository. It implements a local Bronze layer, source-aligned Silver tables, cautious Python Gold v1 KPI summaries, and DBT DuckDB dimensional marts. The project remains local-first and portfolio-oriented, with no production maturity claims.
 
 ## Why This Case Exists
 
@@ -11,16 +11,16 @@ The repository already contains:
 - `01-hospital-analytics`: a hospital operations analytics case with serving-oriented outputs.
 - `02-job-market-analytics`: a job market analytics case with Python processing, DBT marts, API, and dashboard layers.
 
-This third case adds a different analytical shape: retail revenue analytics over a multi-table marketplace dataset.
+This third case adds a retail marketplace domain with stronger dimensional modeling emphasis. It shows how a multi-table source can move from raw files to source-aligned Silver tables, then into fact, dimension, and mart-style SQL models.
 
-The project is meant to prove:
+The project proves:
 
 - source-aware Silver design;
-- dimensional modeling readiness;
-- fact and dimension thinking without prematurely creating final marts;
-- careful revenue KPI definitions;
-- batch-oriented analytical pipeline foundations;
-- a clean path toward future DBT marts and orchestration.
+- careful order, item, payment, product, customer, and seller relationships;
+- item-grain sales modeling;
+- payment duplication avoidance;
+- DBT as a local modeling and testing layer;
+- a clean path toward future orchestration or serving layers without adding them prematurely.
 
 ## Dataset Choice
 
@@ -31,19 +31,16 @@ This project uses the Olist Brazilian E-Commerce Public Dataset from Kaggle:
 
 Olist is a strong fit because it has multiple related CSV files instead of one flat sales table. The landed dataset includes orders, order items, payments, products, category translations, customers, sellers, reviews, and geolocation.
 
-That structure supports future modeling around facts such as order items, orders, and payments, plus dimensions such as product, customer, seller, date, order status, and geography.
-
 ## Current Architecture Flow
 
 ```text
 Kaggle dataset
 -> Bronze raw landing and profiling
 -> Silver source-aligned standardized tables
--> Gold revenue KPI summaries
--> future dimensional modeling / DBT marts / orchestration
+-> Gold Python KPI summaries
+-> DBT DuckDB staging/intermediate/marts
+-> future orchestration / serving / API / dashboard
 ```
-
-The current project is local-first and inspectable. It does not claim production maturity.
 
 ## Implemented Layers
 
@@ -67,31 +64,51 @@ customers
 sellers
 ```
 
-Silver preserves each source table grain. It applies only safe standardization: column-name normalization, whitespace trimming, blank-string null handling, and configured datetime/numeric parsing.
+Silver preserves each source table grain. It applies safe standardization only and does not aggregate, deduplicate, create surrogate keys, or join everything into one canonical table.
 
-Silver does not aggregate, deduplicate, create surrogate keys, or join everything into one canonical table.
+### Python Gold v1
 
-### Gold v1
+Python Gold v1 produces first-pass revenue and business KPI summaries as CSV files. It uses item-side measures from `order_items` and summarizes payments separately by payment type.
 
-Gold v1 produces first-pass analytical outputs:
+### DBT DuckDB Marts
 
-```text
-kpi_overview.csv
-daily_revenue_summary.csv
-category_revenue_summary.csv
-seller_revenue_summary.csv
-customer_state_revenue_summary.csv
-payment_type_summary.csv
-order_status_summary.csv
-```
+DBT reads the Silver CSV outputs and builds:
 
-Revenue measures are item-side:
+Dimensions:
 
-- `item_revenue = sum(order_items.price)`
-- `freight_value = sum(order_items.freight_value)`
-- `gross_merchandise_value = sum(order_items.price + order_items.freight_value)`
+- `dim_product`
+- `dim_customer`
+- `dim_seller`
+- `dim_date`
 
-Payments are summarized separately by payment type and are not joined to order items for revenue totals. This avoids double counting when an order has multiple payment rows.
+Fact-like mart:
+
+- `fct_sales`
+
+Business marts:
+
+- `mart_daily_revenue`
+- `mart_category_performance`
+- `mart_seller_performance`
+- `mart_customer_state_performance`
+- `mart_order_status_summary`
+- `mart_payment_type_summary`
+
+The DBT path is DuckDB-first and local. It does not require PostgreSQL in this phase.
+
+## Revenue And Grain Rules
+
+The central sales grain is one row per `order_id` and `order_item_id`.
+
+Item-side measures:
+
+- `item_price = order_items.price`
+- `freight_value = order_items.freight_value`
+- `gross_merchandise_value = item_price + freight_value`
+
+Raw payment rows are not joined directly to item rows. DBT aggregates payments to one row per order before adding payment context to `fct_sales`.
+
+Payment fields in `fct_sales` are order-level context. They can repeat across multi-item orders and should not be summed as item-level sales revenue.
 
 ## Documentation
 
@@ -99,8 +116,10 @@ Payments are summarized separately by payment type and are not joined to order i
 - [Source tables](docs/source_tables.md)
 - [Silver plan](docs/silver_plan.md)
 - [Silver layer](docs/silver.md)
-- [Modeling plan](docs/modeling_plan.md)
 - [Gold layer](docs/gold.md)
+- [DBT layer](docs/dbt.md)
+- [Dimensional marts](docs/marts.md)
+- [Modeling plan](docs/modeling_plan.md)
 
 ## How to Run Locally
 
@@ -111,7 +130,7 @@ From the repository root, activate the Python environment and install dependenci
 python -m pip install -r requirements.txt
 ```
 
-Run the local pipeline:
+Run the Python pipeline:
 
 ```powershell
 python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
@@ -120,45 +139,42 @@ python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
 python projects/03-retail-revenue-analytics/src/jobs/run_gold.py
 ```
 
+Run DBT DuckDB:
+
+```powershell
+cd projects/03-retail-revenue-analytics/dbt
+.\scripts\run_dbt_duckdb.ps1 debug
+.\scripts\run_dbt_duckdb.ps1 run
+.\scripts\run_dbt_duckdb.ps1 test
+```
+
 Generated data artifacts are local outputs under `data/`.
 
 ## Project Structure
 
 ```text
 projects/03-retail-revenue-analytics/
-|-- data/                # Local Bronze, Silver, and Gold artifacts
-|-- docs/                # Source, layer, and modeling documentation
+|-- data/                # Local generated artifacts
+|-- dbt/                 # DuckDB DBT modeling and tests
+|-- docs/                # Source, layer, mart, and modeling documentation
 |-- notebooks/           # Exploratory and validation notebooks
-|-- src/                 # Ingestion and processing jobs
-|-- tests/               # Focused helper tests
+|-- src/                 # Python ingestion and processing jobs
+|-- tests/               # Focused Python helper tests
 `-- README.md            # Case study overview
 ```
 
 ## Current Limitations
 
-- Gold v1 is not a finished accounting model.
-- Gold v1 is not a final dimensional mart design.
-- No refund, cancellation, chargeback, or settlement reconciliation is implemented.
+- The DBT marts are local analytical contracts, not an enterprise warehouse.
+- `fct_sales` is not an accounting-grade revenue ledger.
+- No refund, cancellation, chargeback, settlement, tax, or revenue recognition logic is implemented.
 - Order status is retained rather than silently filtering to delivered orders.
-- Reviews and geolocation are documented but deferred from Silver v1.
-- DBT is not implemented yet.
-- No Spark, orchestration, API, dashboard, cloud infrastructure, production SLAs, or production data contracts are claimed.
+- Reviews and geolocation are documented but deferred from Silver v1 and DBT marts.
+- No Spark, PostgreSQL dependency, orchestration, API, dashboard, cloud infrastructure, production SLAs, or production data contracts are claimed.
 
-## Future Dimensional Modeling Direction
+## Future Work
 
-Likely future facts:
-
-- `fact_order_items`: primary item-side revenue fact.
-- `fact_orders`: order lifecycle and status fact.
-- `fact_payments`: payment behavior fact.
-
-Likely future dimensions:
-
-- `dim_product`
-- `dim_customer`
-- `dim_seller`
-- `dim_date`
-- `dim_order_status`
-- `dim_geography` after geolocation rules are defined
-
-Future DBT marts should be added only after the Silver contracts and dimensional grain decisions are stable enough to justify them.
+- Add `fact_orders` and `fact_payments` if those grains need first-class marts.
+- Add `dim_order_status` or `dim_geography` after requirements and source rules are clearer.
+- Add DBT docs generation or exposures if the portfolio case needs richer lineage.
+- Add orchestration only after the local workflow is stable enough to benefit from it.

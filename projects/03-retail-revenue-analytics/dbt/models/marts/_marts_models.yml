@@ -1,0 +1,267 @@
+version: 2
+
+models:
+  - name: dim_product
+    description: >
+      Product dimension at one row per product_id, enriched with English category
+      labels when available. Natural product_id is retained as the key.
+    columns:
+      - name: product_id
+        description: Natural product identifier.
+        tests:
+          - not_null
+          - unique
+      - name: product_category_name
+        description: Raw Olist product category name.
+      - name: product_category_name_english
+        description: English category label or safe fallback to the raw category.
+        tests:
+          - not_null
+
+  - name: dim_customer
+    description: Customer dimension at one row per customer_id.
+    columns:
+      - name: customer_id
+        description: Customer order identity.
+        tests:
+          - not_null
+          - unique
+      - name: customer_unique_id
+        description: Stable customer identity across orders when provided.
+        tests:
+          - not_null
+      - name: customer_state
+        description: Customer state code.
+        tests:
+          - not_null
+
+  - name: dim_seller
+    description: Seller dimension at one row per seller_id.
+    columns:
+      - name: seller_id
+        description: Seller identifier.
+        tests:
+          - not_null
+          - unique
+      - name: seller_state
+        description: Seller state code.
+        tests:
+          - not_null
+
+  - name: dim_date
+    description: Date dimension built from purchase dates present in item-grain sales data.
+    columns:
+      - name: date_day
+        description: Purchase date.
+        tests:
+          - not_null
+          - unique
+      - name: year_number
+        description: Calendar year.
+        tests:
+          - not_null
+      - name: month_number
+        description: Calendar month number.
+        tests:
+          - not_null
+      - name: day_of_week_name
+        description: Calendar day of week name.
+        tests:
+          - not_null
+
+  - name: fct_sales
+    description: >
+      Analytical sales fact-like mart at order item grain. Item revenue uses item_price
+      from order_items and gross_merchandise_value equals item_price plus freight_value.
+      Order-level payment summary columns are joined only after payment rows are aggregated
+      to order grain, so raw payment rows do not multiply item rows. This is not an
+      accounting-grade revenue ledger.
+    tests:
+      - unique:
+          arguments:
+            column_name: "order_id || '-' || order_item_id"
+    columns:
+      - name: order_id
+        description: Natural order identifier.
+        tests:
+          - not_null
+      - name: order_item_id
+        description: Item sequence within an order.
+        tests:
+          - not_null
+      - name: product_id
+        description: Natural product identifier.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_id
+      - name: customer_id
+        description: Customer order identity.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_id
+      - name: seller_id
+        description: Seller identifier.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_seller')
+                field: seller_id
+      - name: order_purchase_date
+        description: Purchase date for date dimension joins.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+      - name: order_status
+        description: Source order lifecycle status.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['approved', 'canceled', 'created', 'delivered', 'invoiced', 'processing', 'shipped', 'unavailable']
+      - name: item_price
+        description: Item-side price measure from order_items.
+        tests:
+          - not_null
+      - name: freight_value
+        description: Item-level freight value.
+        tests:
+          - not_null
+      - name: gross_merchandise_value
+        description: item_price plus freight_value at order item grain.
+        tests:
+          - not_null
+      - name: payment_value_total
+        description: >
+          Order-level total payment value. This repeats across item rows for multi-item
+          orders and should not be summed as item revenue.
+
+  - name: mart_daily_revenue
+    description: Revenue summary by purchase date and order status.
+    tests:
+      - unique:
+          arguments:
+            column_name: "cast(order_purchase_date as varchar) || '-' || order_status"
+    columns:
+      - name: order_purchase_date
+        description: Purchase date.
+        tests:
+          - not_null
+      - name: order_status
+        description: Source order lifecycle status.
+        tests:
+          - not_null
+      - name: order_count
+        description: Distinct orders in the group.
+        tests:
+          - not_null
+      - name: gross_merchandise_value
+        description: Sum of item_price plus freight_value.
+        tests:
+          - not_null
+
+  - name: mart_category_performance
+    description: Revenue summary by product category.
+    tests:
+      - unique:
+          arguments:
+            column_name: "coalesce(product_category_name, 'unknown') || '-' || product_category_name_english"
+    columns:
+      - name: product_category_name_english
+        description: English product category label or fallback.
+        tests:
+          - not_null
+      - name: order_item_count
+        description: Number of item rows in the category.
+        tests:
+          - not_null
+      - name: gross_merchandise_value
+        description: Sum of item_price plus freight_value.
+        tests:
+          - not_null
+
+  - name: mart_seller_performance
+    description: Revenue summary by seller.
+    columns:
+      - name: seller_id
+        description: Seller identifier.
+        tests:
+          - not_null
+          - unique
+      - name: seller_state
+        description: Seller state code.
+        tests:
+          - not_null
+      - name: gross_merchandise_value
+        description: Sum of item_price plus freight_value.
+        tests:
+          - not_null
+
+  - name: mart_customer_state_performance
+    description: Revenue summary by customer state.
+    columns:
+      - name: customer_state
+        description: Customer state code.
+        tests:
+          - not_null
+          - unique
+      - name: order_count
+        description: Distinct orders in the state.
+        tests:
+          - not_null
+      - name: gross_merchandise_value
+        description: Sum of item_price plus freight_value.
+        tests:
+          - not_null
+
+  - name: mart_order_status_summary
+    description: Revenue summary by order status.
+    columns:
+      - name: order_status
+        description: Source order lifecycle status.
+        tests:
+          - not_null
+          - unique
+          - accepted_values:
+              arguments:
+                values: ['approved', 'canceled', 'created', 'delivered', 'invoiced', 'processing', 'shipped', 'unavailable']
+      - name: order_count
+        description: Distinct orders in the status.
+        tests:
+          - not_null
+      - name: gross_merchandise_value
+        description: Sum of item_price plus freight_value.
+        tests:
+          - not_null
+
+  - name: mart_payment_type_summary
+    description: >
+      Payment behavior summary by payment type. This model is based on payment
+      rows and does not define item-side sales revenue.
+    columns:
+      - name: payment_type
+        description: Payment method.
+        tests:
+          - not_null
+          - unique
+      - name: payment_count
+        description: Number of payment rows for the payment type.
+        tests:
+          - not_null
+      - name: total_payment_value
+        description: Total reported payment value for the payment type.
+        tests:
+          - not_null
+      - name: average_payment_value
+        description: Average payment row value for the payment type.
+        tests:
+          - not_null

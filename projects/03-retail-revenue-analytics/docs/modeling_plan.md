@@ -1,6 +1,32 @@
 # Dimensional Modeling Plan
 
-This document outlines the likely modeling direction for future iterations. The dimensional model is not implemented yet.
+This document distinguishes the dimensional modeling direction, what is now implemented in DBT, and what remains unresolved.
+
+## Implemented In This Phase
+
+DBT DuckDB now implements a local dimensional modeling layer over the Python Silver outputs.
+
+Implemented dimensions:
+
+- `dim_product`
+- `dim_customer`
+- `dim_seller`
+- `dim_date`
+
+Implemented fact-like mart:
+
+- `fct_sales`
+
+Implemented business marts:
+
+- `mart_daily_revenue`
+- `mart_category_performance`
+- `mart_seller_performance`
+- `mart_customer_state_performance`
+- `mart_order_status_summary`
+- `mart_payment_type_summary`
+
+The implemented model is intentionally modest. It proves dimensional modeling readiness and clear grain handling, but it is not a final enterprise warehouse design.
 
 ## Candidate Fact Grains
 
@@ -8,12 +34,7 @@ This document outlines the likely modeling direction for future iterations. The 
 
 One row per `order_id`.
 
-Useful for:
-
-- order volume;
-- order status;
-- lifecycle timestamps;
-- customer order behavior.
+Useful for order volume, order status, lifecycle timestamps, and customer order behavior.
 
 Limitations:
 
@@ -24,6 +45,8 @@ Limitations:
 
 One row per `order_id` and `order_item_id`.
 
+This is the implemented grain of `fct_sales`.
+
 Useful for:
 
 - item revenue;
@@ -32,7 +55,7 @@ Useful for:
 - seller performance;
 - customer-state performance when joined through orders and customers.
 
-This is likely the best primary analytical grain for retail revenue analytics because Olist item-side sales values live in `order_items.price` and `order_items.freight_value`.
+This is the strongest primary analytical grain for retail revenue analytics because Olist item-side sales values live in `order_items.price` and `order_items.freight_value`.
 
 ### Payment Grain
 
@@ -51,41 +74,37 @@ Limitations:
 - joining payments directly to order items can duplicate revenue;
 - payment values should be reconciled separately from item-side sales measures.
 
-## Why Payments Are Kept Separate
+## Payment Duplication Rule
 
-Payments are not used as the base revenue grain in Gold v1. A naive join between `order_payments` and `order_items` can multiply values when an order has multiple payment rows or multiple item rows.
+Raw payment rows are not joined directly to item rows.
 
-Future modeling can reconcile order-level payment totals to item-side sales totals, but that should be an explicit model with documented allocation or reconciliation rules.
+DBT implements `int_order_payments_summary` at one row per `order_id` before any payment context is available to `fct_sales`. This prevents raw payment rows from multiplying item-grain records.
 
-## Likely Future Dimensions
+Payment columns in `fct_sales` remain order-level context. They can repeat across item rows for multi-item orders and should not be summed as item-level revenue.
+
+## Implemented Dimensions
 
 - `dim_product`: product identity, category, physical attributes, translated category name.
 - `dim_customer`: customer identity and coarse geography.
 - `dim_seller`: seller identity and coarse geography.
-- `dim_date`: reusable date attributes for purchase, approval, delivery, and shipping dates.
-- `dim_order_status`: optional status dimension if status semantics become richer.
-- `dim_geography`: possible later dimension after geolocation deduplication rules are defined.
+- `dim_date`: purchase-date attributes based on dates present in item-grain sales.
 
-## Likely Future Facts
+Natural keys are retained. Surrogate keys are not introduced in this local portfolio phase because the source natural keys are clear enough for inspectable marts.
 
-- `fact_order_items`: likely primary revenue fact at order item grain.
-- `fact_orders`: order lifecycle and status fact at order grain.
-- `fact_payments`: payment behavior fact at payment sequence grain.
+## Future Refinements
 
-## Likely Future KPIs
+Potential future additions:
 
-- order volume;
-- orders with item rows;
-- average order value;
-- item revenue;
-- freight value;
-- gross merchandise value;
-- category performance;
-- seller performance;
-- customer-state performance;
-- payment-type mix;
-- order-status distribution.
+- `dim_order_status` if status semantics deserve their own descriptive table.
+- `dim_geography` after geolocation deduplication rules are defined.
+- `fact_orders` for order lifecycle analysis.
+- `fact_payments` for payment behavior at payment sequence grain.
+- reconciliation models comparing item-side totals to order-level payment totals.
+- DBT exposures or docs generation if the project grows into a richer analytics-engineering case.
 
-## Current Boundary
+## Remaining Caveats
 
-The current implementation stops at source-aligned Silver tables and Gold v1 summary CSVs. It does not create final dimensional marts, DBT models, orchestration, serving APIs, dashboards, or accounting-grade revenue reconciliation.
+- The marts are not an accounting-grade revenue ledger.
+- Refunds, cancellations, chargebacks, settlement timing, and tax/accounting recognition are not modeled.
+- Order status is retained rather than silently filtering to delivered orders.
+- PostgreSQL, orchestration, APIs, dashboards, and cloud deployment are outside this phase.

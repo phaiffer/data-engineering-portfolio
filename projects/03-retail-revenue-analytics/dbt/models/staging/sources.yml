@@ -1,0 +1,96 @@
+version: 2
+
+sources:
+  - name: silver
+    description: >
+      Source-aligned Silver CSV artifacts produced by the Python Silver pipeline.
+      DBT reads these local files with DuckDB external CSV support instead of
+      reading raw Bronze files directly.
+    tables:
+      - name: orders
+        description: Order header records at one row per order_id.
+        config:
+          external_location: "read_csv_auto('{{ var('silver_tables_path', '../data/silver/tables') }}/orders.csv', header=true)"
+        columns:
+          - name: order_id
+            description: Natural order identifier.
+          - name: customer_id
+            description: Customer order identity.
+          - name: order_status
+            description: Olist order lifecycle status.
+          - name: order_purchase_timestamp
+            description: Timestamp when the order was placed.
+
+      - name: order_items
+        description: Order item records at one row per order_id and order_item_id.
+        config:
+          external_location: "read_csv_auto('{{ var('silver_tables_path', '../data/silver/tables') }}/order_items.csv', header=true)"
+        columns:
+          - name: order_id
+            description: Natural order identifier.
+          - name: order_item_id
+            description: Item sequence within an order.
+          - name: product_id
+            description: Product identifier.
+          - name: seller_id
+            description: Seller identifier.
+          - name: price
+            description: Item price from the source order item row.
+          - name: freight_value
+            description: Item-level freight value.
+
+      - name: order_payments
+        description: Payment records at one row per order payment sequence.
+        config:
+          external_location: "read_csv_auto('{{ var('silver_tables_path', '../data/silver/tables') }}/order_payments.csv', header=true)"
+        columns:
+          - name: order_id
+            description: Natural order identifier.
+          - name: payment_sequential
+            description: Payment sequence number within the order.
+          - name: payment_type
+            description: Payment method.
+          - name: payment_value
+            description: Payment amount reported by the source.
+
+      - name: products
+        description: Product attributes at one row per product_id.
+        config:
+          external_location: "read_csv_auto('{{ var('silver_tables_path', '../data/silver/tables') }}/products.csv', header=true)"
+        columns:
+          - name: product_id
+            description: Product identifier.
+          - name: product_category_name
+            description: Raw product category name.
+
+      - name: product_category_name_translation
+        description: Product category translation lookup.
+        config:
+          external_location: "read_csv_auto('{{ var('silver_tables_path', '../data/silver/tables') }}/product_category_name_translation.csv', header=true)"
+        columns:
+          - name: product_category_name
+            description: Raw product category name.
+          - name: product_category_name_english
+            description: English category label.
+
+      - name: customers
+        description: Customer identities and coarse geography at one row per customer_id.
+        config:
+          external_location: "read_csv_auto('{{ var('silver_tables_path', '../data/silver/tables') }}/customers.csv', header=true)"
+        columns:
+          - name: customer_id
+            description: Customer order identity.
+          - name: customer_unique_id
+            description: Stable customer identity across orders when provided.
+          - name: customer_state
+            description: Customer state code.
+
+      - name: sellers
+        description: Seller identities and coarse geography at one row per seller_id.
+        config:
+          external_location: "read_csv_auto('{{ var('silver_tables_path', '../data/silver/tables') }}/sellers.csv', header=true)"
+        columns:
+          - name: seller_id
+            description: Seller identifier.
+          - name: seller_state
+            description: Seller state code.

@@ -1,0 +1,159 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: >
+      Staging model over the Silver orders table. Grain is one row per order_id.
+    columns:
+      - name: order_id
+        description: Natural order identifier.
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: Customer order identity.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: order_status
+        description: Source order lifecycle status.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['approved', 'canceled', 'created', 'delivered', 'invoiced', 'processing', 'shipped', 'unavailable']
+      - name: order_purchase_timestamp
+        description: Timestamp when the order was placed.
+        tests:
+          - not_null
+
+  - name: stg_order_items
+    description: >
+      Staging model over Silver order items. Grain is one row per order_id and order_item_id.
+    tests:
+      - unique:
+          arguments:
+            column_name: "order_id || '-' || order_item_id"
+    columns:
+      - name: order_id
+        description: Natural order identifier.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: order_item_id
+        description: Item sequence within an order.
+        tests:
+          - not_null
+      - name: product_id
+        description: Product identifier.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+      - name: seller_id
+        description: Seller identifier.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_sellers')
+                field: seller_id
+      - name: item_price
+        description: Item price from the source order item row.
+        tests:
+          - not_null
+      - name: freight_value
+        description: Item-level freight value.
+        tests:
+          - not_null
+
+  - name: stg_order_payments
+    description: >
+      Staging model over Silver order payments. Grain is one row per order_id and payment_sequential.
+    tests:
+      - unique:
+          arguments:
+            column_name: "order_id || '-' || payment_sequential"
+    columns:
+      - name: order_id
+        description: Natural order identifier.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: payment_sequential
+        description: Payment sequence number within the order.
+        tests:
+          - not_null
+      - name: payment_type
+        description: Payment method.
+        tests:
+          - not_null
+      - name: payment_value
+        description: Reported payment value.
+        tests:
+          - not_null
+
+  - name: stg_products
+    description: Product staging model at one row per product_id.
+    columns:
+      - name: product_id
+        description: Product identifier.
+        tests:
+          - not_null
+          - unique
+      - name: product_category_name
+        description: Raw product category name.
+
+  - name: stg_product_category_name_translation
+    description: Product category translation lookup.
+    columns:
+      - name: product_category_name
+        description: Raw product category name.
+        tests:
+          - not_null
+          - unique
+      - name: product_category_name_english
+        description: English category label.
+        tests:
+          - not_null
+
+  - name: stg_customers
+    description: Customer staging model at one row per customer_id.
+    columns:
+      - name: customer_id
+        description: Customer order identity.
+        tests:
+          - not_null
+          - unique
+      - name: customer_unique_id
+        description: Stable customer identity across orders when provided.
+        tests:
+          - not_null
+      - name: customer_state
+        description: Customer state code.
+        tests:
+          - not_null
+
+  - name: stg_sellers
+    description: Seller staging model at one row per seller_id.
+    columns:
+      - name: seller_id
+        description: Seller identifier.
+        tests:
+          - not_null
+          - unique
+      - name: seller_state
+        description: Seller state code.
+        tests:
+          - not_null

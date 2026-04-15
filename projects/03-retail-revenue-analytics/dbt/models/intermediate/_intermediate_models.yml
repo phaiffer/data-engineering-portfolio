@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: int_order_items_enriched
+    description: >
+      Enriched order item model at one row per order_id and order_item_id. It joins
+      item rows to order, product, category, customer, and seller context. Payment
+      rows are intentionally not joined here to avoid multiplying item records.
+    tests:
+      - unique:
+          arguments:
+            column_name: "order_id || '-' || order_item_id"
+    columns:
+      - name: order_id
+        description: Natural order identifier.
+        tests:
+          - not_null
+      - name: order_item_id
+        description: Item sequence within an order.
+        tests:
+          - not_null
+      - name: product_id
+        description: Product identifier.
+        tests:
+          - not_null
+      - name: seller_id
+        description: Seller identifier.
+        tests:
+          - not_null
+      - name: customer_id
+        description: Customer order identity.
+        tests:
+          - not_null
+      - name: order_purchase_date
+        description: Date extracted from the order purchase timestamp.
+        tests:
+          - not_null
+      - name: item_price
+        description: Item price from the order item source row.
+        tests:
+          - not_null
+      - name: gross_merchandise_value
+        description: Item price plus item freight value.
+        tests:
+          - not_null
+
+  - name: int_order_payments_summary
+    description: >
+      Order-grain payment summary. This model prevents downstream duplication by
+      aggregating payment rows before they are joined to item-grain sales marts.
+    columns:
+      - name: order_id
+        description: Natural order identifier. Grain column for the model.
+        tests:
+          - not_null
+          - unique
+      - name: payment_record_count
+        description: Number of payment rows for the order.
+        tests:
+          - not_null
+      - name: payment_value_total
+        description: Total payment value reported for the order.
+        tests:
+          - not_null
+      - name: payment_types_used
+        description: Comma-separated distinct payment types used on the order.

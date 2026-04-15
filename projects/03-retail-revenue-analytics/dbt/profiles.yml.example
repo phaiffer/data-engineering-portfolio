@@ -1,0 +1,8 @@
+retail_revenue_analytics:
+  target: duckdb
+  outputs:
+    duckdb:
+      type: duckdb
+      path: ../data/retail_revenue_analytics.duckdb
+      schema: marts
+      threads: 4
