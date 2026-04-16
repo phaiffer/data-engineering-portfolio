@@ -18,7 +18,7 @@ from config import (  # noqa: E402
 def test_bronze_batch_path_uses_stream_date_and_batch_id() -> None:
     path = build_bronze_batch_file_path(stream_date="2026-04-15", batch_id="20260415T120000Z")
 
-    assert str(path).endswith(
+    assert path.as_posix().endswith(
         "data/bronze/raw/stream_date=2026-04-15/batch_20260415T120000Z.jsonl"
     )
 
@@ -26,7 +26,7 @@ def test_bronze_batch_path_uses_stream_date_and_batch_id() -> None:
 def test_silver_output_path_uses_event_date_and_batch_id() -> None:
     path = build_silver_output_file_path(event_date="2026-04-15", batch_id="20260415T120000Z")
 
-    assert str(path).endswith(
+    assert path.as_posix().endswith(
         "data/silver/tables/recentchange_events/event_date=2026-04-15/batch_20260415T120000Z.parquet"
     )
 
@@ -37,6 +37,6 @@ def test_gold_output_path_uses_table_name_and_event_date_partition() -> None:
         event_date="2026-04-15",
     )
 
-    assert str(path).endswith(
+    assert path.as_posix().endswith(
         "data/gold/tables/minute_event_summary/event_date=2026-04-15/minute_event_summary.parquet"
     )

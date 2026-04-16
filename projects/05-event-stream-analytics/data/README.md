@@ -13,6 +13,7 @@ All generated artifacts under `data/` are local-only and excluded from git via t
 - Bronze metadata and consumer checkpoint state
 - Silver Parquet tables and metadata
 - Gold Parquet summary tables and metadata
+- Operations validation manifests
 
 To reset the pipeline to a clean state, delete the generated files inside each subdirectory
 (keeping the `.gitkeep` files) and re-run from the beginning.
@@ -40,18 +41,20 @@ data/
 |   |   `-- latest_silver_run.json
 |   `-- state/
 |       `-- silver_state.json
-`-- gold/
-    |-- tables/
-    |   |-- minute_event_summary/event_date=YYYY-MM-DD/minute_event_summary.parquet
-    |   |-- event_type_summary/event_date=YYYY-MM-DD/event_type_summary.parquet
-    |   |-- bot_vs_human_summary/event_date=YYYY-MM-DD/bot_vs_human_summary.parquet
-    |   |-- wiki_activity_summary/event_date=YYYY-MM-DD/wiki_activity_summary.parquet
-    |   `-- namespace_activity_summary/event_date=YYYY-MM-DD/namespace_activity_summary.parquet
-    |-- metadata/
-    |   |-- gold_event_date_*.json
-    |   `-- latest_gold_run.json
-    `-- state/
-        `-- gold_state.json
+|-- gold/
+|   |-- tables/
+|   |   |-- minute_event_summary/event_date=YYYY-MM-DD/minute_event_summary.parquet
+|   |   |-- event_type_summary/event_date=YYYY-MM-DD/event_type_summary.parquet
+|   |   |-- bot_vs_human_summary/event_date=YYYY-MM-DD/bot_vs_human_summary.parquet
+|   |   |-- wiki_activity_summary/event_date=YYYY-MM-DD/wiki_activity_summary.parquet
+|   |   `-- namespace_activity_summary/event_date=YYYY-MM-DD/namespace_activity_summary.parquet
+|   |-- metadata/
+|   |   |-- gold_event_date_*.json
+|   |   `-- latest_gold_run.json
+|   `-- state/
+|       `-- gold_state.json
+`-- operations/
+    `-- latest_validation_run.json
 ```
 
 ## File Formats
@@ -59,4 +62,5 @@ data/
 - Bronze raw landing uses JSONL (one JSON object per line) so broker-consumed events remain
   easy to inspect without tooling.
 - Silver and Gold write Parquet for compact local analytical reads.
-- Metadata and checkpoint artifacts use human-readable JSON with stable formatting.
+- Metadata, checkpoint artifacts, and validation manifests use human-readable JSON with stable
+  formatting.

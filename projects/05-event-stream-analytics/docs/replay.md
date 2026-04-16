@@ -54,6 +54,20 @@ a clean slate, or to use `run_replay.py` (offline replay) which is idempotent by
 
 Broker replay is useful for local experimentation but is not the recommended rebuild story.
 
+### Safe rebuild after duplicate broker replay
+
+If broker replay created duplicate Bronze files for the same retained topic history, do not rebuild
+Gold and treat the output as clean. First decide which Bronze JSONL batches represent the intended
+raw landing set. Then remove only the extra generated local files and rebuild downstream layers
+from the known-good Bronze set.
+
+The safe path for normal rebuilds is:
+
+```bash
+python src/jobs/run_replay.py
+python src/jobs/run_validation.py --mode offline_replay
+```
+
 ---
 
 ## Offline Replay From Bronze (Recommended)

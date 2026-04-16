@@ -63,6 +63,8 @@ class ProjectSettings:
     gold_state_dir: Path
     gold_state_path: Path
     latest_gold_run_path: Path
+    operations_metadata_dir: Path
+    latest_validation_run_path: Path
 
 
 def get_project_root() -> Path:
@@ -82,6 +84,7 @@ def get_settings() -> ProjectSettings:
     gold_tables_dir = PROJECT_ROOT / os.getenv("GOLD_TABLES_DIR", "data/gold/tables")
     gold_metadata_dir = PROJECT_ROOT / os.getenv("GOLD_METADATA_DIR", "data/gold/metadata")
     gold_state_dir = PROJECT_ROOT / os.getenv("GOLD_STATE_DIR", "data/gold/state")
+    operations_metadata_dir = PROJECT_ROOT / os.getenv("OPERATIONS_METADATA_DIR", "data/operations")
 
     return ProjectSettings(
         project_name=os.getenv("PROJECT_NAME", "event-stream-analytics"),
@@ -124,6 +127,8 @@ def get_settings() -> ProjectSettings:
         gold_state_dir=gold_state_dir,
         gold_state_path=gold_state_dir / "gold_state.json",
         latest_gold_run_path=gold_metadata_dir / "latest_gold_run.json",
+        operations_metadata_dir=operations_metadata_dir,
+        latest_validation_run_path=operations_metadata_dir / "latest_validation_run.json",
     )
 
 
@@ -140,6 +145,7 @@ def ensure_runtime_directories() -> None:
         settings.gold_tables_dir,
         settings.gold_metadata_dir,
         settings.gold_state_dir,
+        settings.operations_metadata_dir,
     )
 
     for directory in directories:

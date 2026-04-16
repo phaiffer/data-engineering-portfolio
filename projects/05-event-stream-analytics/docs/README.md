@@ -12,3 +12,4 @@ This folder keeps the project documentation close to the implementation.
 - `checkpointing.md`: readable checkpoint artifacts and stop or resume behavior.
 - `replay.md`: broker replay versus offline replay from landed Bronze files.
 - `local-run.md`: practical commands for local execution.
+- `validation.md`: what to inspect after a run and how to build the local validation manifest.

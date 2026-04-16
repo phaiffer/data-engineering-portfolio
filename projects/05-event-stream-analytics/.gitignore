@@ -32,6 +32,9 @@ data/gold/tables/**/*.parquet
 data/gold/metadata/*.json
 data/gold/state/*.json
 
+# Local validation manifests
+data/operations/*.json
+
 # Python environment and cache
 .venv/
 __pycache__/
