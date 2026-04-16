@@ -4,3 +4,4 @@ python-dotenv
 duckdb
 dbt-core
 dbt-duckdb
+pytest

@@ -225,91 +225,53 @@ Bridge toward dbt marts: Python handles raw local file preparation, while dbt ow
 
 ## How to Run
 
-### Quick Demo
+### Run Locally On Windows
 
-The shortest successful review path is:
+The main local development path is Windows-native PowerShell from the repository root. The examples below use the repo-level virtual environment at `.venv\Scripts\python.exe`.
 
-1. create a local Python environment;
-2. build Silver outputs and DuckDB marts;
-3. start the API and dashboard demo stack.
-
-Bronze and Gold are still implemented and documented, but they are not required for the shortest visible API and dashboard demo.
-
-```bash
-python -m venv .venv && source .venv/bin/activate
-python -m pip install -r requirements.txt -r projects/03-retail-revenue-analytics/dbt/requirements.txt
-python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
-python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
-(cd projects/03-retail-revenue-analytics/dbt && python -m dbt.cli.main run --profiles-dir . --target duckdb)
-(cd projects/03-retail-revenue-analytics && docker compose up --build retail-api retail-dashboard)
-```
-
-Open:
-
-```text
-API:       http://127.0.0.1:5002
-Dashboard: http://127.0.0.1:4173
-```
-
-### Manual Local Path
-
-From the repository root, create and activate a Python environment, then install the local Python and DBT dependencies:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt -r projects/03-retail-revenue-analytics/dbt/requirements.txt
-```
-
-PowerShell activation still works with:
+Create the virtual environment and install Python, test, and DBT dependencies:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r .\requirements.txt -r .\projects\03-retail-revenue-analytics\dbt\requirements.txt pytest
 ```
 
-If the raw Olist files are not already present under `data/bronze/raw/olist_brazilian_ecommerce`, run ingestion first. This step requires the same Kaggle credentials the rest of the repository uses:
+Move into project 03:
 
-```bash
-python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
+```powershell
+Set-Location .\projects\03-retail-revenue-analytics
 ```
 
-Run Bronze:
+If the raw Olist files are not already present under `data\bronze\raw\olist_brazilian_ecommerce`, run ingestion first. This step requires the same Kaggle credentials the rest of the repository uses:
 
-```bash
-python projects/03-retail-revenue-analytics/src/jobs/run_bronze.py
+```powershell
+..\..\.venv\Scripts\python.exe .\src\jobs\run_ingestion.py
 ```
 
-Run Silver:
+Run the Python tests:
 
-```bash
-python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
+```powershell
+.\scripts\test.ps1
 ```
 
-Run Gold:
+Run the batch pipeline. By default this runs Bronze, Silver, Gold, and `dbt build`:
 
-```bash
-python projects/03-retail-revenue-analytics/src/jobs/run_gold.py
+```powershell
+.\scripts\run_pipeline.ps1
 ```
 
-Project-local Make targets are also available from `projects/03-retail-revenue-analytics`:
+Run the pipeline with ingestion included:
 
-```bash
-make silver
-make gold
-make dbt-run
-make dbt-test
-make test
-make dashboard-build
+```powershell
+.\scripts\run_pipeline.ps1 -IncludeIngestion
 ```
 
-Build and validate the DuckDB marts:
+Run DBT only:
 
-```bash
-cd projects/03-retail-revenue-analytics/dbt
-python -m dbt.cli.main debug --profiles-dir . --target duckdb
-python -m dbt.cli.main run --profiles-dir . --target duckdb
-python -m dbt.cli.main test --profiles-dir . --target duckdb
-cd ../../..
+```powershell
+.\scripts\dbt_build.ps1 debug
+.\scripts\dbt_build.ps1 build
 ```
 
 The expected mart database path is:
@@ -318,18 +280,10 @@ The expected mart database path is:
 projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb
 ```
 
-If you prefer PowerShell for DBT, the helper script is still available from `projects/03-retail-revenue-analytics/dbt`:
+Start the API after DBT has built the DuckDB marts:
 
 ```powershell
-.\scripts\run_dbt_duckdb.ps1 debug
-.\scripts\run_dbt_duckdb.ps1 run
-.\scripts\run_dbt_duckdb.ps1 test
-```
-
-Start the API from the repository root after DBT has built the DuckDB marts:
-
-```bash
-python projects/03-retail-revenue-analytics/api/app.py
+..\..\.venv\Scripts\python.exe .\api\app.py
 ```
 
 Default API URL:
@@ -340,12 +294,11 @@ http://127.0.0.1:5002
 
 The local Flask API is HTTP-only. Use `http://127.0.0.1:5002`, not `https://127.0.0.1:5002`.
 
-In a second terminal, start the dashboard:
+In a second PowerShell terminal, start the dashboard:
 
-```bash
-cd projects/03-retail-revenue-analytics/dashboard
-npm install
-npm run dev
+```powershell
+Set-Location .\projects\03-retail-revenue-analytics
+.\scripts\start_dashboard.ps1 -Install
 ```
 
 Default dashboard URL:
@@ -356,27 +309,57 @@ http://127.0.0.1:5173
 
 If Vite falls back to another local port, the API allows common local Vite origins and HTTP `localhost` or `127.0.0.1` origins on ports `5173` through `5199` for local development.
 
-### Docker-Assisted Local Path
+`uv` is also supported for isolated command execution. The DBT helper at `dbt\scripts\run_dbt_duckdb.ps1` still works:
 
-Docker support is included for a cleaner demo path:
+```powershell
+.\dbt\scripts\run_dbt_duckdb.ps1 debug
+.\dbt\scripts\run_dbt_duckdb.ps1 build
+```
+
+The project-local `Makefile` is kept as a secondary convenience for shells where `make` is already available. Windows users do not need it for the normal workflow.
+
+### Run With Docker
+
+Docker is optional. It is useful for repeatable local demos and for running project commands in the `retail-pipeline` container, but it is not required for day-to-day Windows development.
+
+Docker support is scoped to project 03:
 
 - `docker/api.Dockerfile` for the Flask API;
 - `docker/dashboard.Dockerfile` for the dashboard static build and lightweight web server;
-- `docker-compose.yml` for the local demo stack;
-- `docker/pipeline.Dockerfile` for explicit Python job and DBT commands when needed.
-
-The Docker path is still local-first. It improves packaging and startup ergonomics, but it does not turn the project into a production deployment, and it is not required for day-to-day development.
-
-The normal Docker demo flow expects the DuckDB mart database to already exist under:
-
-```text
-projects/03-retail-revenue-analytics/data/retail_revenue_analytics.duckdb
-```
+- `docker/pipeline.Dockerfile` for Python jobs, pytest, and DBT;
+- `docker-compose.yml` for the local services.
 
 From the project directory:
 
-```bash
-cd projects/03-retail-revenue-analytics
+```powershell
+Set-Location .\projects\03-retail-revenue-analytics
+```
+
+Run tests in Docker:
+
+```powershell
+docker compose --profile pipeline run --rm retail-pipeline python -m pytest tests
+```
+
+Run DBT build in Docker:
+
+```powershell
+docker compose --profile pipeline run --rm retail-pipeline sh -lc "cd dbt && python -m dbt.cli.main build --profiles-dir . --target duckdb"
+```
+
+Run the pipeline jobs in Docker:
+
+```powershell
+docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_bronze.py
+docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_silver.py
+docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_gold.py
+```
+
+If you want to run ingestion in the pipeline container, provide the same Kaggle credentials you would use locally through `KAGGLE_USERNAME` and `KAGGLE_KEY`.
+
+Start the API and dashboard demo stack after the DuckDB mart database exists:
+
+```powershell
 docker compose up --build retail-api retail-dashboard
 ```
 
@@ -395,42 +378,14 @@ http://127.0.0.1:5002
 
 That host URL is intentional. The browser needs a host-reachable API endpoint rather than a Docker-internal hostname.
 
-### Optional Pipeline Container
-
-The optional `retail-pipeline` service exists for explicit commands only. It does not run during the normal `docker compose up` path.
-
-On Linux, prefer passing your host UID and GID when you run the pipeline container so bind-mounted DBT artifacts are written with your user ownership instead of `root`.
-
-Use `HOST_UID` and `HOST_GID` in the command examples. `UID` is a readonly shell variable in `bash`, so `HOST_UID` avoids that shell-level footgun.
-
-Examples:
+On Linux or macOS, you can pass host UID and GID to avoid root-owned bind-mounted DBT artifacts:
 
 ```bash
-cd projects/03-retail-revenue-analytics
-HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_bronze.py
-HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_silver.py
-HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_gold.py
-HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline sh -lc "cd dbt && python -m dbt.cli.main run --profiles-dir . --target duckdb"
+HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline python -m pytest tests
+HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose --profile pipeline run --rm retail-pipeline sh -lc "cd dbt && python -m dbt.cli.main build --profiles-dir . --target duckdb"
 ```
 
-Use the same Kaggle credentials you would use locally if you want to run ingestion inside the pipeline container.
-
-`dbt/logs/` and `dbt/target/` are generated local artifacts. They should not be treated as source files, and the Docker workflow should not rely on them being root-owned.
-
-If an older Docker run left those folders owned by `root`, recover with:
-
-```bash
-cd projects/03-retail-revenue-analytics
-sudo chown -R "$USER":"$(id -gn)" dbt/logs dbt/target
-```
-
-Or remove and recreate them:
-
-```bash
-cd projects/03-retail-revenue-analytics
-sudo rm -rf dbt/logs dbt/target
-mkdir -p dbt/logs dbt/target
-```
+`dbt/logs/` and `dbt/target/` are generated local artifacts. They should not be treated as source files.
 
 ## Troubleshooting
 
@@ -514,6 +469,7 @@ projects/03-retail-revenue-analytics/
 |-- docker/              # Dockerfiles and container-specific requirements
 |-- docs/                # Source, layer, mart, and modeling documentation
 |-- notebooks/           # Exploratory and validation notebooks
+|-- scripts/             # PowerShell helpers for Windows-native local runs
 |-- src/                 # Python ingestion and processing jobs
 |-- tests/               # Focused Python helper tests
 |-- docker-compose.yml   # Local Docker demo stack

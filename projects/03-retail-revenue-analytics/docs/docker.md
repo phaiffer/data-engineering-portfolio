@@ -1,6 +1,6 @@
 # Docker Packaging
 
-Docker was added to make the retail revenue analytics case easier to demo, easier to move between Linux machines, and easier to run without redoing the API and dashboard setup by hand every time.
+Docker was added to make the retail revenue analytics case easier to demo, easier to test in a container, and easier to run without redoing the API and dashboard setup by hand every time.
 
 This is still a local-first packaging layer. It is not a production container platform.
 Manual local development remains an official path. Docker is included for demo ergonomics and reproducibility, not as a requirement for everyday project work.
@@ -10,7 +10,7 @@ Manual local development remains an official path. Docker is included for demo e
 - repeatable local startup for the Flask API;
 - repeatable local startup for the dashboard;
 - one Compose file for the demo path;
-- an optional pipeline container for explicit Python job and DBT commands.
+- an optional pipeline container for explicit tests, Python jobs, and DBT commands.
 
 ## What Docker Does Not Change
 
@@ -37,7 +37,7 @@ Manual local development remains an official path. Docker is included for demo e
 ### retail-pipeline
 
 - Builds from `docker/pipeline.Dockerfile`.
-- Exists for explicit job and DBT commands only.
+- Exists for explicit test, job, and DBT commands only.
 - Is placed behind the Compose profile `pipeline` so it does not start during the normal demo path.
 - On Linux, can run with the host UID and GID so bind-mounted DBT artifacts are not written as `root`.
 
@@ -87,7 +87,16 @@ docker compose up retail-dashboard
 
 ## Optional Pipeline Container
 
-Use the pipeline container for explicit jobs only.
+Use the pipeline container for explicit tests and jobs only.
+
+Windows PowerShell examples:
+
+```powershell
+Set-Location .\projects\03-retail-revenue-analytics
+docker compose --profile pipeline run --rm retail-pipeline python -m pytest tests
+docker compose --profile pipeline run --rm retail-pipeline sh -lc "cd dbt && python -m dbt.cli.main build --profiles-dir . --target duckdb"
+docker compose --profile pipeline run --rm retail-pipeline python src/jobs/run_silver.py
+```
 
 On Linux, pass your host UID and GID when you run the pipeline service:
 

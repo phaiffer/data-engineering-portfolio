@@ -28,4 +28,3 @@ dashboard/dist/
 
 # Local-only project material not needed for container builds
 notebooks/
-tests/
