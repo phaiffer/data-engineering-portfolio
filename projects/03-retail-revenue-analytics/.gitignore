@@ -5,10 +5,19 @@ data/silver/
 data/gold/
 data/*.duckdb
 
+# Python caches and local test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
 # DBT runtime artifacts
 dbt/target/
 dbt/logs/
 dbt/dbt_packages/
+
+# Dashboard dependencies and build output
+dashboard/node_modules/
+dashboard/dist/
 
 # Dashboard source/config files that should remain versioned despite root JSON ignores
 !dashboard/package.json

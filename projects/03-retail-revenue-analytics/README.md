@@ -408,6 +408,12 @@ Avoid committing large raw screen recordings or oversized image exports.
 After starting the Flask API on `http://127.0.0.1:5002`, these PowerShell examples verify the main read-only endpoints:
 
 ```powershell
+.\scripts\smoke_api.ps1
+```
+
+Or call the endpoints directly:
+
+```powershell
 Invoke-RestMethod http://127.0.0.1:5002/health
 Invoke-RestMethod http://127.0.0.1:5002/api/v1
 Invoke-RestMethod http://127.0.0.1:5002/api/v1/kpis
