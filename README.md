@@ -1,186 +1,151 @@
 # Data Engineering Portfolio
 
-`phaiffer/data-engineering-portfolio` is a local-first portfolio of six complementary analytics case studies:
+`phaiffer/data-engineering-portfolio` is a portfolio of six complementary data engineering and analytics engineering case studies.
 
-- [`projects/01-hospital-analytics/`](projects/01-hospital-analytics/)
-- [`projects/02-job-market-analytics/`](projects/02-job-market-analytics/)
-- [`projects/03-retail-revenue-analytics/`](projects/03-retail-revenue-analytics/)
-- [`projects/04-urban-mobility-analytics/`](projects/04-urban-mobility-analytics/)
-- [`projects/05-event-stream-analytics/`](projects/05-event-stream-analytics/)
-- [`projects/06-warehouse-first-analytics/`](projects/06-warehouse-first-analytics/)
+The projects are intentionally not all solving the same problem. Together they show progression across local ingestion, medallion processing, SQL and dbt modeling, dimensional marts, analytics serving, orchestration, incremental batch design, streaming and replay, and warehouse-first BigQuery analytics.
 
-Together they show a clear progression:
+## Start Here
 
-- project 01 proves end-to-end local analytics delivery;
-- project 02 strengthens the SQL and DBT modeling story;
-- project 03 is the strongest dimensional-modeling and analytics-serving case;
-- project 04 is the strongest orchestration, incremental, and partition-aware pipeline case;
-- project 05 is the strongest event-driven, broker-based, and replayable stream pipeline case;
-- project 06 is the strongest warehouse-first and managed-warehouse analytics engineering case.
+Choose the project based on what you want to evaluate:
 
-In a quick review, this README should make it easy to understand what the repository is, what each project proves, how the projects differ, how to run them locally, and what is implemented today versus what is still roadmap.
+| If you want to review... | Start with | Why |
+|---|---|---|
+| Raw data to dashboard | [`01-hospital-analytics`](projects/01-hospital-analytics/) | Clearest end-to-end local analytics product flow |
+| SQL and dbt modeling paths | [`02-job-market-analytics`](projects/02-job-market-analytics/) | Bridges Python medallion processing with DuckDB and PostgreSQL dbt marts |
+| Dimensional modeling and analytics serving | [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/) | Strongest fact/dimension, KPI, API, and dashboard case |
+| Orchestration and incremental batch pipelines | [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/) | Strongest Prefect, state, rerun, and partition-aware case |
+| Streaming, broker boundaries, checkpoints, replay | [`05-event-stream-analytics`](projects/05-event-stream-analytics/) | Strongest Redpanda-backed local streaming and replay-aware case |
+| Warehouse-first analytics engineering | [`06-warehouse-first-analytics`](projects/06-warehouse-first-analytics/) | Strongest dbt BigQuery, managed-warehouse, and cost-aware modeling case |
 
-## Why This Portfolio Exists
+Projects 03 through 06 include stronger reviewer guidance, Windows-native run paths, and validation-oriented documentation in their project READMEs and `docs/` folders.
 
-This repository exists to show practical data engineering work in a format that is easy to inspect locally.
+## Portfolio Narrative
 
-It is not presented as a production platform. The value is in clear analytical layers, credible local run paths, readable project boundaries, and small but real serving surfaces where they already exist.
+This repository exists to show practical data engineering work in a format that is easy to inspect. It is not presented as a single production platform. The value is in clear project boundaries, credible local or warehouse-native run paths, readable analytical layers, and honest scope discipline.
 
-Across the portfolio, recurring themes include:
+The progression is deliberate:
 
-- medallion-style processing;
-- explicit boundaries between raw, standardized, and analytical layers;
-- lightweight APIs and dashboards where they add review value;
-- incremental improvement from one case study to the next without pretending every project solves the same problem.
+- **Project 01** proves that raw data can move through local analytical layers into a served API and dashboard.
+- **Project 02** adds stronger SQL and dbt modeling patterns across DuckDB and PostgreSQL.
+- **Project 03** deepens the analytics-serving story with a richer multi-table source, fact/dimension design, KPI marts, API, dashboard, and Docker-assisted review path.
+- **Project 04** pivots away from serving and focuses on official public batch data, orchestration, incremental month windows, partitioned Parquet, state, and reruns.
+- **Project 05** shifts to event-driven architecture with a local broker, producer/consumer separation, checkpoints, Bronze landing, and replay-aware rebuilds.
+- **Project 06** removes local ingestion entirely and focuses on dbt BigQuery modeling, managed warehouse marts, tests, docs, and cost-aware query design.
 
-## Portfolio Case Studies Overview
+## Project Summaries
 
-- [`01-hospital-analytics`](projects/01-hospital-analytics/): the foundation end-to-end case, from ingestion to PostgreSQL, Flask, and React.
-- [`02-job-market-analytics`](projects/02-job-market-analytics/): a stronger SQL and DBT case with DuckDB and PostgreSQL modeling paths.
-- [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/): the strongest fact/dimension and analytics-serving case, backed by a richer multi-table retail source.
-- [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/): the strongest orchestration and incremental batch pipeline case, built around official monthly NYC TLC data.
-- [`05-event-stream-analytics`](projects/05-event-stream-analytics/): the strongest event-driven and replayable stream pipeline case, built on the official Wikimedia EventStreams RecentChange feed via Redpanda.
-- [`06-warehouse-first-analytics`](projects/06-warehouse-first-analytics/): the strongest warehouse-first analytics engineering case, built with dbt BigQuery over the Stack Overflow public dataset.
+### 01. Hospital Analytics
 
-## Case-by-Case Breakdown
-
-### Project 01 - Hospital Analytics
+**Role:** foundation end-to-end local analytics case.
 
 **Domain:** hospital patient flow and operational reporting.
 
 **What it proves:**
 
-- ingestion plus Bronze, Silver, and Gold processing;
+- ingestion through Bronze, Silver, and Gold processing;
 - PostgreSQL as a local serving layer;
 - Flask API endpoints over served outputs;
 - React dashboard consumption;
-- a complete local analytics product flow from raw data to a reviewable frontend.
+- complete local raw-to-dashboard review path.
 
-**How it is positioned:**
+**Positioning:** best first stop for evaluating the repository's end-to-end delivery foundation. It is intentionally less modeling-heavy than projects 02 and 03.
 
-This is the clearest proof that the portfolio can deliver an end-to-end local analytics experience. It is less modeling-heavy than projects 02 and 03, but it is the best "raw data to dashboard" foundation case.
+### 02. Job Market Analytics
 
-### Project 02 - Job Market Analytics
+**Role:** SQL and dbt modeling bridge.
 
 **Domain:** labor-market and AI-impact analytics.
 
 **What it proves:**
 
 - Python medallion processing;
-- DBT DuckDB and DBT PostgreSQL modeling paths;
+- dbt DuckDB and dbt PostgreSQL modeling paths;
 - mart-style SQL modeling over standardized data;
-- read-only API patterns;
-- dashboard delivery over modeled outputs.
+- read-only API and dashboard over modeled outputs.
 
-**How it is positioned:**
+**Positioning:** stronger SQL/dbt proof than project 01, but not the deepest dimensional modeling or warehouse-first case.
 
-This is the bridge between project 01's end-to-end delivery story and project 03's stronger dimensional-modeling story. It proves materially stronger SQL and DBT work than project 01 without overclaiming full warehouse maturity.
+### 03. Retail Revenue Analytics
 
-### Project 03 - Retail Revenue Analytics
+**Role:** strongest dimensional-modeling and analytics-serving case.
 
 **Domain:** retail and e-commerce revenue analytics using the Olist dataset.
 
-**Why the source matters:**
-
-Olist lands as multiple related tables such as orders, order items, payments, products, customers, and sellers. That makes it a better portfolio case for source-aligned Silver design, careful joins, and dimensional marts than a single flat-file source.
-
 **What it proves:**
 
-- multi-table retail source handling;
+- multi-table source handling across orders, items, payments, products, customers, sellers, and reviews;
 - source-aligned Silver tables;
-- Gold KPI summaries for first-pass business review;
-- DBT DuckDB staging, intermediate, and mart layers;
-- fact plus supporting dimensions;
-- read-only API endpoints over modeled marts;
-- dashboard consumption over the API;
-- Docker-assisted demo packaging for local review.
+- dbt DuckDB staging, intermediate, and mart layers;
+- fact table plus supporting dimensions;
+- business-facing KPI marts;
+- read-only Flask API and React dashboard over modeled outputs;
+- Docker-assisted and Windows-friendly local review paths.
 
-**How it is positioned:**
+**Positioning:** best project for evaluating dimensional thinking, KPI design, mart contracts, and a thin analytics serving layer. It does not claim accounting-grade revenue or production deployment.
 
-Project 03 is the strongest dimensional-modeling and analytics-serving case in the repository today. It is the clearest example of fact-and-dimension thinking, business-facing marts, and a thin serving layer over modeled outputs.
+### 04. Urban Mobility Analytics
 
-### Project 04 - Urban Mobility Analytics
+**Role:** strongest orchestration, incremental batch, state, and partition-aware pipeline case.
 
-**Domain:** urban mobility analytics built around Yellow Taxi trip data.
-
-**Source:** official NYC TLC Yellow Taxi trip records.
-
-**Why the source matters:**
-
-Unlike the earlier Kaggle-based cases, this project uses an official public source with naturally month-based files. That makes it a better fit for incremental ingestion planning, rerunnable monthly processing, and partition-aware local storage.
+**Domain:** NYC Yellow Taxi trip analytics.
 
 **What it proves:**
 
-- official public-source ingestion;
-- month-based incremental pipeline design;
-- partitioned Parquet outputs in Bronze, Silver, and Gold;
-- readable JSON state tracking for reruns and inspection;
-- Prefect orchestration with real task boundaries;
-- local-first batch pipeline operations over a recognizable public dataset.
+- official public-source ingestion from NYC TLC monthly files;
+- month-based incremental execution;
+- partitioned Bronze, Silver, and Gold Parquet outputs;
+- readable JSON state for reruns and inspection;
+- Prefect orchestration with meaningful task boundaries;
+- validation and reviewer guidance without adding an API or dashboard.
 
-**How it is positioned:**
+**Positioning:** best project for reviewing batch operations, rerun behavior, state management, and partition-aware processing. It is a local-first orchestration case, not a production scheduler claim.
 
-Project 04 is materially different from the first three cases. It does not add an API or dashboard in this phase. Instead, it focuses on orchestration, incremental execution, partition-aware storage, and rerun behavior. It is the strongest orchestration and pipeline-operations case in the portfolio today, without claiming to be a production scheduler or platform.
+### 05. Event Stream Analytics
 
-### Project 05 - Event Stream Analytics
+**Role:** strongest broker-backed, checkpoint-aware, replay-aware streaming case.
 
-**Domain:** event stream analytics built on the official Wikimedia EventStreams RecentChange feed.
-
-**Source:** official Wikimedia SSE stream (`stream.wikimedia.org/v2/stream/recentchange`).
-
-**Why the source matters:**
-
-Unlike the batch files used in projects 01 through 04, this source is a live public event stream. That makes it a natural fit for broker-backed ingestion, bounded local capture, checkpointing, and replay-aware pipeline design. The engineering story is fundamentally different from any of the earlier cases.
+**Domain:** Wikimedia RecentChange event stream analytics.
 
 **What it proves:**
 
-- event-driven ingestion via a live public SSE stream;
-- Redpanda message broker decoupling publisher from consumer;
+- bounded live capture from the official Wikimedia SSE stream;
+- Redpanda broker decoupling between publisher and Bronze consumer;
 - explicit producer and consumer boundaries;
-- Bronze raw JSONL landing with readable checkpoint artifacts;
-- Silver row-preserving standardization into partitioned Parquet;
-- Gold category and minute-bucket analytical summaries rebuilt from Silver;
-- offline replay from landed Bronze, which stays reproducible after broker retention moves on;
-- local-first, bounded, and inspectable throughout.
+- raw Bronze JSONL landing with readable checkpoints;
+- partitioned Silver Parquet and local Gold analytical summaries;
+- clear distinction between broker replay and offline replay from landed Bronze;
+- local validation manifest and reviewer-oriented inspection surface.
 
-**How it is positioned:**
+**Positioning:** best project for reviewing streaming architecture, checkpoints, broker retention tradeoffs, duplicate risk, and safe downstream replay. It is not a dashboard, API, or production streaming platform case.
 
-Project 05 is the event-driven complement to the batch-first cases. It does not add a dashboard or API in this phase. Instead, it focuses on broker-based ingestion architecture, checkpointing, and replay-aware pipeline design. It is the strongest streaming and event-pipeline case in the portfolio, without claiming to be a production streaming platform.
+### 06. Warehouse-First Analytics
 
-### Project 06 - Warehouse-First Analytics
+**Role:** strongest warehouse-first, dbt BigQuery, cost-aware analytics engineering case.
 
-**Domain:** developer ecosystem and Stack Overflow analytics.
-
-**Source:** BigQuery public dataset `bigquery-public-data.stackoverflow`.
-
-**Why the source matters:**
-
-Stack Overflow is already available as a warehouse-native public dataset in BigQuery. That makes this case different from the local-file, batch-pipeline, and stream-first projects: there is no local ingestion layer to prove. The engineering work is source inspection, warehouse-native SQL modeling, dbt testing, documentation, and cost-aware mart design directly inside a managed warehouse.
+**Domain:** Stack Overflow developer ecosystem analytics.
 
 **What it proves:**
 
-- dbt BigQuery workflow against a managed warehouse;
-- source inspection directly in BigQuery;
-- staging, intermediate, and marts structure;
-- marts for monthly question activity, tag activity, answer latency, question outcomes, and user reputation segments;
-- dbt schema tests, singular tests, and docs as first-class review artifacts;
-- cost-aware modeling through a configurable `stackoverflow_min_year` window, selective columns, and mart materialization;
-- local dbt development against BigQuery using Application Default Credentials or an equivalent local profile.
+- dbt BigQuery workflow over `bigquery-public-data.stackoverflow`;
+- warehouse-native source inspection without local ingestion;
+- staging views, intermediate views, and mart tables;
+- marts for monthly activity, tag activity, answer latency, question outcomes, and user reputation segments;
+- dbt schema tests, singular tests, and docs as first-class artifacts;
+- cost-aware design through a year-window variable, selective columns, view/table materialization choices, and cheaper development loops;
+- Windows-friendly BigQuery authentication and dbt validation guidance.
 
-**How it is positioned:**
+**Positioning:** best project for evaluating managed-warehouse analytics engineering. It is not a local ingestion, API, dashboard, or production BigQuery governance platform.
 
-Project 06 is the warehouse-first complement to the first five cases. It is not pipeline-first, and it does not add an API or dashboard in this phase. It is the strongest dbt BigQuery and managed-warehouse modeling case in the portfolio, without claiming to be a production BigQuery platform or enterprise warehouse governance setup.
+## Capability Matrix
 
-## Comparison / Capability Matrix
-
-| Case | Domain | Ingestion | Bronze | Silver | Gold | DBT | Warehouse / DB | API | Dashboard | Dimensional Modeling | Orchestration | Incremental / Partitioned | Streaming / Event-Driven | Warehouse-First / Managed Warehouse |
-| ---- | ------ | --------- | ------ | ------ | ---- | --- | -------------- | --- | --------- | -------------------- | ------------- | ------------------------- | ------------------------ | ----------------------------------- |
-| [`01-hospital-analytics`](projects/01-hospital-analytics/) | Hospital operations | Kaggle to local raw files | Yes | Yes | Yes | Scaffold only | PostgreSQL serving layer | Flask | React | Limited; not the main focus | No | No | No | No |
-| [`02-job-market-analytics`](projects/02-job-market-analytics/) | Job market / AI impact | Kaggle to local raw files | Yes | Yes | Yes | DuckDB + PostgreSQL marts | DuckDB + PostgreSQL | Read-only Flask | React | Moderate; stronger marts than 01 | No | No | No | No |
-| [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/) | Retail / e-commerce | Kaggle multi-table source | Yes | Yes; source-aligned tables | Yes | DuckDB staging, intermediate, and marts | DuckDB | Read-only Flask | React | Strongest; fact + dimensions | No | No | No | No |
-| [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/) | Urban mobility / Yellow Taxi | Official NYC TLC monthly files | Yes | Yes; partitioned Parquet | Yes; partitioned summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus in this phase | Prefect, local-first | Strongest | No | No |
-| [`05-event-stream-analytics`](projects/05-event-stream-analytics/) | Event stream / Wikimedia RecentChange | Official live SSE stream via Redpanda | Yes; raw JSONL landing | Yes; partitioned Parquet | Yes; category and minute-bucket summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus | Not the main focus | Partitioned; checkpoint-based | Strongest | No |
-| [`06-warehouse-first-analytics`](projects/06-warehouse-first-analytics/) | Developer ecosystem / Stack Overflow | Warehouse-native public source | Warehouse-native staging views | Intermediate dbt views | Mart tables | Strongest; dbt BigQuery | BigQuery | No | No | Mart-focused analytics modeling | No; not the main focus | Year-window cost control | No | Strongest |
+| Case | Main proof point | Source style | Modeling | Serving | Operations / validation |
+|---|---|---|---|---|---|
+| [`01-hospital-analytics`](projects/01-hospital-analytics/) | End-to-end local analytics | Kaggle local files | Bronze/Silver/Gold, limited dbt scaffold | PostgreSQL, Flask, React | Local pipeline and dashboard review |
+| [`02-job-market-analytics`](projects/02-job-market-analytics/) | SQL and dbt modeling bridge | Kaggle local files | Python medallion, dbt DuckDB + PostgreSQL marts | Flask, React | Local dbt and API/dashboard review |
+| [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/) | Dimensional modeling and analytics serving | Kaggle multi-table source | Source-aligned Silver, fact + dimensions, dbt marts | Flask, React, Docker-assisted demo | Reviewer guide, Windows scripts, API smoke checks |
+| [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/) | Orchestrated incremental batch | Official NYC TLC monthly files | Partitioned Bronze/Silver/Gold Parquet | None by design | Prefect flow, JSON state, rerun and validation docs |
+| [`05-event-stream-analytics`](projects/05-event-stream-analytics/) | Broker-backed streaming and replay | Official Wikimedia live SSE stream | Bronze JSONL, Silver Parquet, Gold summaries | None by design | Redpanda, checkpoints, replay notes, validation manifest |
+| [`06-warehouse-first-analytics`](projects/06-warehouse-first-analytics/) | Warehouse-first analytics engineering | BigQuery public dataset | dbt BigQuery staging/intermediate/marts | None by design | dbt debug/deps/run/test/docs, mart queries, cost notes |
 
 ## Repository Structure
 
@@ -199,13 +164,9 @@ data-engineering-portfolio/
 `-- requirements-dev.txt
 ```
 
-- `projects/` contains the six portfolio case studies.
-- `docs/` contains repository-level notes.
-- `shared/` contains templates, conventions, and shared assets.
-
 ## Local Setup
 
-From the repository root:
+Most projects are local-first and can be reviewed from a Python virtual environment:
 
 ```bash
 python -m venv .venv
@@ -214,244 +175,50 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Install project-specific extras only when needed:
+Install project-specific requirements only when reviewing that project. For example:
 
 ```bash
-python -m pip install -r projects/02-job-market-analytics/dbt/requirements.txt
-python -m pip install -r projects/03-retail-revenue-analytics/dbt/requirements.txt
 python -m pip install -r projects/04-urban-mobility-analytics/requirements.txt
-python -m pip install -r projects/06-warehouse-first-analytics/requirements.txt
-python -m pip install -r projects/06-warehouse-first-analytics/dbt/requirements.txt
-```
-
-Optional repository-wide extras:
-
-```bash
-python -m pip install -r requirements-dev.txt
-```
-
-Install project-specific extras for project 05:
-
-```bash
 python -m pip install -r projects/05-event-stream-analytics/requirements.txt
-```
-
-Project 05 also requires Docker to start the local Redpanda broker.
-
-Practical local notes:
-
-- projects 01, 02, and 03 use Node.js for the dashboard layer;
-- projects 01 and 02 use PostgreSQL for their served local review path;
-- projects 01, 02, and 03 ingest from Kaggle-based sources;
-- project 04 pulls from the official public NYC TLC source instead of Kaggle;
-- project 05 pulls from the official live Wikimedia SSE stream and requires Docker for the Redpanda broker;
-- project 06 models the BigQuery public Stack Overflow dataset directly and requires local BigQuery credentials for full execution.
-
-## How to Run Each Case
-
-### 01. Hospital Analytics
-
-Configure local PostgreSQL settings from `projects/01-hospital-analytics/.env.example`, then run:
-
-```bash
-python projects/01-hospital-analytics/src/jobs/run_ingestion.py
-python projects/01-hospital-analytics/src/jobs/run_bronze.py
-python projects/01-hospital-analytics/src/jobs/run_silver.py
-python projects/01-hospital-analytics/src/jobs/run_gold.py
-python projects/01-hospital-analytics/src/jobs/run_serving.py
-python projects/01-hospital-analytics/api/app.py
-```
-
-Dashboard:
-
-```bash
-cd projects/01-hospital-analytics/dashboard
-cp .env.example .env
-npm install
-npm run dev
-```
-
-Default local API base URL: `http://127.0.0.1:5000`
-
-### 02. Job Market Analytics
-
-Configure local PostgreSQL settings from `projects/02-job-market-analytics/.env.example`, then run the Python medallion flow:
-
-```bash
-python projects/02-job-market-analytics/src/jobs/run_ingestion.py
-python projects/02-job-market-analytics/src/jobs/run_bronze.py
-python projects/02-job-market-analytics/src/jobs/run_silver.py
-python projects/02-job-market-analytics/src/jobs/run_gold.py
-python projects/02-job-market-analytics/src/jobs/run_postgres_load.py
-```
-
-Run the PostgreSQL DBT path from `projects/02-job-market-analytics/dbt`:
-
-```powershell
-.\scripts\run_dbt_postgres.ps1 debug
-.\scripts\run_dbt_postgres.ps1 run
-.\scripts\run_dbt_postgres.ps1 test
-```
-
-Start the API and dashboard:
-
-```bash
-python projects/02-job-market-analytics/api/app.py
-cd projects/02-job-market-analytics/dashboard
-cp .env.example .env
-npm install
-npm run dev
-```
-
-Default local API base URL: `http://127.0.0.1:5001`
-
-DuckDB modeling is also implemented through `projects/02-job-market-analytics/dbt/scripts/run_dbt_duckdb.ps1`.
-
-### 03. Retail Revenue Analytics
-
-Run the layered pipeline and DuckDB marts:
-
-```bash
-python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
-python projects/03-retail-revenue-analytics/src/jobs/run_bronze.py
-python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
-python projects/03-retail-revenue-analytics/src/jobs/run_gold.py
-cd projects/03-retail-revenue-analytics/dbt
-python -m dbt.cli.main debug --profiles-dir . --target duckdb
-python -m dbt.cli.main run --profiles-dir . --target duckdb
-python -m dbt.cli.main test --profiles-dir . --target duckdb
-cd ../../..
-python projects/03-retail-revenue-analytics/api/app.py
-```
-
-Dashboard:
-
-```bash
-cd projects/03-retail-revenue-analytics/dashboard
-cp .env.example .env
-npm install
-npm run dev
-```
-
-Default local API base URL: `http://127.0.0.1:5002`
-
-Project 03 also includes a Docker-assisted demo path:
-
-```bash
-cd projects/03-retail-revenue-analytics
-docker compose up --build retail-api retail-dashboard
-```
-
-### 04. Urban Mobility Analytics
-
-Project 04 has no dashboard or API in this phase. The review surface is the batch pipeline itself plus the generated Parquet and JSON metadata.
-
-Install the project requirements, then run either the jobs individually or the Prefect flow:
-
-```bash
-python -m pip install -r projects/04-urban-mobility-analytics/requirements.txt
-python projects/04-urban-mobility-analytics/src/jobs/run_ingestion.py
-python projects/04-urban-mobility-analytics/src/jobs/run_bronze.py
-python projects/04-urban-mobility-analytics/src/jobs/run_silver.py
-python projects/04-urban-mobility-analytics/src/jobs/run_gold.py
-python projects/04-urban-mobility-analytics/src/jobs/run_flow.py
-```
-
-High-level run path:
-
-```text
-ingestion -> Bronze -> Silver -> Gold
-```
-
-Orchestration entrypoint:
-
-```text
-Prefect flow via projects/04-urban-mobility-analytics/src/jobs/run_flow.py
-```
-
-The default local review window is `2024-01` through `2024-02`. Override it with `--start-month`, `--end-month`, and `--force` when you want to rerun a selected month range.
-
-### 05. Event Stream Analytics
-
-Project 05 has no dashboard or API in this phase. The review surface is the broker pipeline, the landed Bronze JSONL files, and the Gold analytical summaries.
-
-Start the Redpanda broker:
-
-```bash
-cd projects/05-event-stream-analytics
-docker compose up -d
-```
-
-Run the publisher, Bronze consumer, Silver, and Gold layers:
-
-```bash
-python projects/05-event-stream-analytics/src/jobs/run_publisher.py --max-events 100 --max-seconds 60
-python projects/05-event-stream-analytics/src/jobs/run_bronze_consumer.py --max-events 100 --max-seconds 60
-python projects/05-event-stream-analytics/src/jobs/run_silver.py
-python projects/05-event-stream-analytics/src/jobs/run_gold.py
-```
-
-Replay Silver and Gold from already-landed Bronze (no live stream or broker required):
-
-```bash
-python projects/05-event-stream-analytics/src/jobs/run_replay.py
-```
-
-Stop the broker when finished:
-
-```bash
-cd projects/05-event-stream-analytics
-docker compose down
-```
-
-### 06. Warehouse-First Analytics
-
-Project 06 has no local ingestion pipeline, API, or dashboard in this phase. The review surface is the dbt BigQuery project, generated marts, tests, docs, and cost-awareness notes.
-
-Install the project and dbt BigQuery requirements:
-
-```bash
-python -m pip install -r projects/06-warehouse-first-analytics/requirements.txt
 python -m pip install -r projects/06-warehouse-first-analytics/dbt/requirements.txt
 ```
 
-Configure BigQuery credentials and the dbt profile:
+High-level dependency notes:
 
-```bash
-gcloud auth application-default login
-cp projects/06-warehouse-first-analytics/dbt/profiles.yml.example ~/.dbt/profiles.yml
-```
+- projects 01, 02, and 03 use Node.js for their dashboard layers;
+- projects 01 and 02 use PostgreSQL for their served local review path;
+- project 03 includes a Docker-assisted API/dashboard demo path;
+- project 04 uses Prefect locally for orchestration;
+- project 05 requires Docker for the local Redpanda broker;
+- project 06 requires Google Cloud CLI, BigQuery API access, and dbt BigQuery credentials.
 
-Edit `~/.dbt/profiles.yml` with your GCP project ID, then run from the dbt project directory:
+Each project README contains the authoritative run path for that case. Projects 03, 04, 05, and 06 now include reviewer-oriented docs and Windows-native helper scripts where appropriate.
 
-```bash
-cd projects/06-warehouse-first-analytics/dbt
-dbt debug
-dbt deps
-dbt run
-dbt test
-```
+## How To Run Each Case
 
-For a lower-cost development run, restrict the Stack Overflow source window:
+Keep root-level execution guidance high-level. Use the project READMEs for exact commands, environment variables, and validation steps.
 
-```bash
-dbt run --vars '{"stackoverflow_min_year": 2023}'
-```
-
-Full execution depends on local Application Default Credentials or equivalent BigQuery credentials, a GCP project with BigQuery enabled, and appropriate IAM permissions. The project also includes `scripts/run_dbt_bigquery.sh` for the combined `debug -> deps -> run -> test` path.
+| Case | Primary run documentation | Notes |
+|---|---|---|
+| 01 | [`projects/01-hospital-analytics/README.md`](projects/01-hospital-analytics/README.md) | Local PostgreSQL, Flask API, React dashboard |
+| 02 | [`projects/02-job-market-analytics/README.md`](projects/02-job-market-analytics/README.md) | Python medallion flow, dbt DuckDB/PostgreSQL, API, dashboard |
+| 03 | [`projects/03-retail-revenue-analytics/README.md`](projects/03-retail-revenue-analytics/README.md) | Dimensional marts, API/dashboard, Docker-assisted review, Windows scripts |
+| 04 | [`projects/04-urban-mobility-analytics/README.md`](projects/04-urban-mobility-analytics/README.md) | Prefect flow, incremental month windows, partition/state validation |
+| 05 | [`projects/05-event-stream-analytics/README.md`](projects/05-event-stream-analytics/README.md) | Redpanda broker, publisher/consumer, replay, validation manifest |
+| 06 | [`projects/06-warehouse-first-analytics/README.md`](projects/06-warehouse-first-analytics/README.md) | dbt BigQuery, mart inspection queries, cost-aware validation |
 
 ## What The Portfolio Proves Today
 
 Today this repository shows six different but connected proof points:
 
-- **Project 01:** end-to-end local analytics delivery from raw ingestion to PostgreSQL, API, and dashboard.
-- **Project 02:** stronger SQL and DBT modeling through DuckDB and PostgreSQL marts.
-- **Project 03:** the strongest fact/dimension and analytics-serving pattern in the portfolio.
-- **Project 04:** orchestration, incremental execution, partition-aware storage, and readable rerun behavior.
-- **Project 05:** event-driven ingestion, broker-based producer/consumer separation, replayable Bronze landing, and local streaming architecture patterns.
-- **Project 06:** warehouse-first analytics engineering with dbt BigQuery, warehouse-native source inspection, managed-warehouse marts, and cost-aware modeling.
+- local raw-to-dashboard delivery;
+- SQL and dbt modeling across local analytical stores;
+- dimensional modeling and analytics-serving patterns;
+- orchestration, incremental processing, partitioning, state, and reruns;
+- broker-backed streaming, checkpoints, and replay-aware design;
+- warehouse-first analytics engineering in BigQuery with dbt tests, docs, and cost-aware modeling.
 
-Taken together, the portfolio shows breadth without pretending every project has the same goal or maturity level.
+The portfolio shows breadth without pretending every project has the same goal, maturity level, or serving surface.
 
 ## Roadmap
 
@@ -460,7 +227,7 @@ Future work across the portfolio may include:
 - richer observability beyond current local-first instrumentation;
 - broader automated validation and CI;
 - cloud deployment notes only when real deployed environments exist;
-- serving layers only where they are justified by a concrete review or product use case;
+- serving layers only where justified by a concrete review or product use case;
 - stronger warehouse governance, docs, and dbt exposures if later needed;
 - streaming-to-serving scenarios if later justified by a concrete use case.
 
@@ -470,7 +237,7 @@ These are future directions, not implemented repository-wide guarantees.
 
 To keep the portfolio technically credible:
 
-- this is a local-first portfolio, not a repository-level production platform claim;
+- this is a portfolio of case studies, not a repository-level production platform claim;
 - no enterprise authentication, authorization, infrastructure maturity, or operational SLA claim is made unless a project explicitly documents it;
 - roadmap items are future work, not present features;
 - project 03 revenue outputs are analytical item-side measures, not accounting-grade revenue;
