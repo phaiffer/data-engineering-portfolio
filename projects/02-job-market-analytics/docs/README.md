@@ -18,6 +18,7 @@ Use this folder to review how the case moves from raw Kaggle data into modeled a
 ## Modeling
 
 - [DBT project](../dbt/README.md): DuckDB and PostgreSQL DBT execution notes.
+- [DBT Path Comparison](dbt_path_comparison.md): concise explanation of why both dbt targets exist and what each one proves.
 - [Silver Plan](silver_plan.md): design notes for the first Silver implementation.
 - [Gold Plan](gold_plan.md): design notes for the first Gold implementation.
 
@@ -25,6 +26,11 @@ Use this folder to review how the case moves from raw Kaggle data into modeled a
 
 - [API docs](api.md): read-only Flask endpoints over PostgreSQL Silver data and DBT marts.
 - [API README](../api/README.md): concise run instructions and endpoint list for the API package.
+- [PostgreSQL Mart Inspection](postgres_mart_inspection.md): practical SQL queries for reviewing the serving marts.
+
+## Validation
+
+- [Local Validation Guide](local_validation.md): Windows PowerShell checklist for medallion artifacts, dbt, PostgreSQL, API, and dashboard.
 
 ## Portfolio Review Path
 
@@ -32,6 +38,7 @@ For a quick reviewer walkthrough:
 
 1. Read the [Project README](../README.md) for the case positioning.
 2. Open [Bronze](bronze.md), [Silver](silver.md), and [Gold](gold.md) to understand the Python medallion flow.
-3. Review the [DBT project](../dbt/README.md) to see the dual DuckDB and PostgreSQL modeling paths.
-4. Check [API docs](api.md) for the dashboard read layer.
-5. Use [Assets](assets/README.md) to locate the current dashboard screenshot.
+3. Review [DBT Path Comparison](dbt_path_comparison.md) to see the dual DuckDB and PostgreSQL modeling paths.
+4. Use [Local Validation Guide](local_validation.md) to run the lightweight checks.
+5. Check [API docs](api.md) for the dashboard read layer.
+6. Use [Assets](assets/README.md) to locate the current dashboard screenshot.

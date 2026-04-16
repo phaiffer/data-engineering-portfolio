@@ -9,6 +9,8 @@ The DBT implementation is intentionally local and portfolio-oriented. It support
 
 DBT does not read raw Bronze data directly, create serving views, or replace the Python Gold v1 artifacts yet.
 
+For a reviewer-oriented comparison of the two paths, see [`../docs/dbt_path_comparison.md`](../docs/dbt_path_comparison.md). For end-to-end local checks, see [`../docs/local_validation.md`](../docs/local_validation.md).
+
 ## Source Strategy
 
 ### Path A: DuckDB
@@ -95,6 +97,12 @@ python ../src/jobs/run_silver.py
 Run DBT with the DuckDB target:
 
 ```powershell
+..\scripts\validate_dbt_duckdb.ps1
+```
+
+Or run from this DBT directory:
+
+```powershell
 .\scripts\run_dbt_duckdb.ps1 debug
 .\scripts\run_dbt_duckdb.ps1 run
 .\scripts\run_dbt_duckdb.ps1 test
@@ -133,6 +141,12 @@ Then run DBT from this directory:
 .\scripts\run_dbt_postgres.ps1 debug
 .\scripts\run_dbt_postgres.ps1 run
 .\scripts\run_dbt_postgres.ps1 test
+```
+
+From the repository root, the wrapper below runs the Silver PostgreSQL load plus `debug`, `run`, and `test`:
+
+```powershell
+.\projects\02-job-market-analytics\scripts\validate_dbt_postgres.ps1
 ```
 
 The PostgreSQL helper loads `JOB_MARKET_*` variables from `../.env` into the current DBT process before invoking `uv`.

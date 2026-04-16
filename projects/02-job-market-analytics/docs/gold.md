@@ -53,9 +53,11 @@ python projects/02-job-market-analytics/src/jobs/run_silver.py
 
 - Gold v1 is implemented in Pandas, not DBT.
 - Gold v1 is local-file based and does not publish to PostgreSQL.
-- No API or dashboard consumes these outputs yet.
+- The API and dashboard consume PostgreSQL dbt marts, not these local Gold CSV files.
 - The outputs are analytical summaries, not production-certified marts.
 
-## DBT Direction
+## dbt Relationship
 
-The outputs are intentionally named and grained like future marts. A later DBT iteration can translate these tables into SQL models and add tests for categorical values, share ranges, non-negative salaries, and positive grouped row counts.
+The Gold outputs are intentionally named and grained like the dbt marts. They remain useful as local medallion artifacts, while the dbt project is now the stronger SQL review surface.
+
+The implemented dbt marts formalize similar analytical grains with SQL models, model documentation, and tests for categorical values, share ranges, salary ranges, and positive grouped row counts.

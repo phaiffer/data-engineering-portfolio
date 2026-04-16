@@ -1,6 +1,6 @@
 # Gold v1 Plan
 
-Gold v1 turns the standardized Silver dataset into small, curated analytical outputs. These outputs are mart-like local CSVs for portfolio review and future DBT translation, not production DBT marts.
+Gold v1 turns the standardized Silver dataset into small, curated analytical outputs. These outputs are mart-like local CSVs for portfolio review and for comparison with the implemented dbt marts.
 
 ## Source
 
@@ -113,11 +113,11 @@ Metrics:
 
 ## Out of Scope
 
-- No serving layer, API, or dashboard.
-- No production DBT marts yet.
+- Gold CSV files are not the serving layer for the API or dashboard.
+- Gold v1 itself is not production dbt.
 - No deduplication or synthetic primary keys.
 - No salary bands, ordinal scoring, or market representativeness claims.
 
-## DBT Preparation
+## dbt Relationship
 
-The Gold outputs have explicit grains and deterministic metrics, which makes them suitable candidates for future DBT marts. Later DBT work can translate these Pandas outputs into SQL models with tests for accepted categorical values, share ranges, non-negative salaries, and positive grouped row counts.
+The Gold outputs have explicit grains and deterministic metrics, which made them suitable candidates for dbt marts. The current dbt implementation now models the same review-friendly grains in SQL and adds tests for accepted categorical values, share ranges, salary ranges, and positive grouped row counts.

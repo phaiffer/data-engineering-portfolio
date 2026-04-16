@@ -1,6 +1,6 @@
 # Silver Layer
 
-Silver v1 standardizes the Bronze-selected job market CSV into a cleaner, row-preserving dataset for future DBT and Gold modeling.
+Silver v1 standardizes the Bronze-selected job market CSV into a cleaner, row-preserving dataset for Gold outputs and dbt modeling.
 
 ## What Silver Does Now
 
@@ -19,8 +19,8 @@ Silver v1 standardizes the Bronze-selected job market CSV into a cleaner, row-pr
 - It does not aggregate records.
 - It does not deduplicate rows.
 - It does not create dimensional tables or final marts.
-- It does not create serving tables, a Flask API, or a dashboard.
-- It does not claim production DBT models are implemented.
+- It does not create serving tables, a Flask API, or a dashboard by itself.
+- It does not claim production dbt maturity; it provides the stable source contract used by dbt.
 
 ## Output
 
@@ -52,6 +52,13 @@ python projects/02-job-market-analytics/src/jobs/run_ingestion.py
 python projects/02-job-market-analytics/src/jobs/run_bronze.py
 ```
 
-## Future DBT Direction
+## dbt Relationship
 
-Silver v1 gives future DBT staging work a stable row-level contract: predictable column names, normalized categorical values, and an explicit numeric salary field. Production DBT models and Gold marts remain future work.
+Silver v1 gives dbt staging a stable row-level contract: predictable column names, normalized categorical values, and an explicit numeric salary field.
+
+The dbt project uses this same Silver artifact in two ways:
+
+- DuckDB reads the Silver CSV directly for fast local SQL model validation.
+- PostgreSQL reads a loaded copy of the Silver data from `analytics.job_market_insights_silver` for the API/dashboard serving path.
+
+The Silver layer remains row-preserving. Aggregations belong in Python Gold summaries and dbt marts.

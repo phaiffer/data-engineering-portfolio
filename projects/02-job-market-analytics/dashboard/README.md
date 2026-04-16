@@ -60,15 +60,16 @@ Start the stack in this order:
 From the repository root, start the API:
 
 ```powershell
-.\.venv\Scripts\python.exe projects/02-job-market-analytics/api/app.py
+.\projects\02-job-market-analytics\scripts\start_api.ps1
 ```
 
 Then start the dashboard:
 
 ```powershell
-cd projects/02-job-market-analytics/dashboard
-npm run dev
+.\projects\02-job-market-analytics\scripts\start_dashboard.ps1
 ```
+
+The dashboard script runs `npm install` only when `node_modules` is missing. To skip that check, use `.\projects\02-job-market-analytics\scripts\start_dashboard.ps1 -SkipInstall`.
 
 Vite will print the local dashboard URL, usually:
 
