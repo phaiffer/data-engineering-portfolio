@@ -23,6 +23,12 @@ The dashboard expects the API at:
 http://127.0.0.1:5002
 ```
 
+The validated local Vite dashboard URL is:
+
+```text
+http://127.0.0.1:5173
+```
+
 The local Flask API is HTTP-only. A URL such as `https://127.0.0.1:5002` is wrong for this project and can produce browser SSL protocol errors.
 
 Direct browser navigation to `/health` is not the same as a dashboard `fetch` request. Opening `/health` directly does not require CORS, while the dashboard does because it runs from a Vite origin such as `http://127.0.0.1:5173` or `http://127.0.0.1:5179`.

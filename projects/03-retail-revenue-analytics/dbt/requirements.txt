@@ -1,2 +1,4 @@
 dbt-core
 dbt-duckdb
+charset-normalizer
+chardet<6

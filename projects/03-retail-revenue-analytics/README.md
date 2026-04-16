@@ -25,6 +25,51 @@ The project proves:
 - a cleaner Docker packaging path for local demos and reproducibility;
 - a clean path toward future orchestration without adding it prematurely.
 
+## What To Review First
+
+For a quick technical review, start with:
+
+- [DBT marts](dbt/models/marts): dimensional outputs, fact grain, and business summary marts.
+- [DBT tests](dbt/tests): custom data quality checks for payment aggregation, fact grain, non-negative measures, and valid dates.
+- [API contract](api/app.py): read-only Flask routes over the modeled DuckDB marts.
+- [Dashboard](dashboard/src/pages/DashboardPage.tsx): local analytics presentation backed by the API.
+- [KPI definitions](docs/kpis.md): formulas, metric intent, and source-data caveats.
+
+## Evaluate In 5 Minutes
+
+From the repository root on Windows PowerShell:
+
+```powershell
+Set-Location .\projects\03-retail-revenue-analytics
+.\scripts\dbt_build.ps1 build
+..\..\.venv\Scripts\python.exe .\api\app.py
+```
+
+In a second terminal:
+
+```powershell
+Set-Location .\projects\03-retail-revenue-analytics
+.\scripts\start_dashboard.ps1
+```
+
+Then verify:
+
+- dbt finishes with `PASS=139 WARN=0 ERROR=0`.
+- API health opens at `http://127.0.0.1:5002/health`.
+- API index opens at `http://127.0.0.1:5002/api/v1`.
+- Dashboard opens at `http://127.0.0.1:5173`.
+- KPI cards, charts, and tables load from the local API.
+
+## Key Business Insights
+
+The project is designed to answer marketplace revenue questions without mixing grains:
+
+- Revenue performance is measured from order-item sales values, so category, seller, customer-state, and daily trends avoid payment-row duplication.
+- Payment behavior is modeled separately by payment type, keeping payment mix analysis distinct from item-side sales revenue.
+- Seller and customer geography outputs make it easy to compare marketplace concentration by state.
+- Order status remains visible in the marts and dashboard, allowing reviewers to see how non-delivered statuses affect analytical totals instead of silently filtering them away.
+- The KPI layer exposes total orders, item rows, item revenue, freight, gross merchandise value, and item-side average order value as reviewer-friendly summary measures.
+
 ## Business Problem
 
 Retail leaders need a reliable way to understand revenue performance across products, categories, sellers, customer regions, order status, and payment behavior. The raw Olist export is spread across orders, items, products, customers, sellers, and payments, so direct reporting can easily double-count revenue or mix grains.
@@ -221,20 +266,32 @@ Bridge toward dbt marts: Python handles raw local file preparation, while dbt ow
 - [API layer](docs/api.md)
 - [Dashboard layer](docs/dashboard.md)
 - [Docker packaging](docs/docker.md)
+- [Portfolio screenshots](docs/screenshots/README.md)
 - [Modeling plan](docs/modeling_plan.md)
 
 ## How to Run
 
 ### Run Locally On Windows
 
-The main local development path is Windows-native PowerShell from the repository root. The examples below use the repo-level virtual environment at `.venv\Scripts\python.exe`.
+The main local development path is Windows-native PowerShell from the repository root. This project uses two lightweight local environments:
 
-Create the virtual environment and install Python, test, and DBT dependencies:
+- `.venv` for the Python app flow, tests, ingestion, processing jobs, Flask API, and dashboard support.
+- `.venv-dbt` with Python 3.12 for dbt commands.
+
+Create the general app environment:
 
 ```powershell
-py -3.12 -m venv .venv
+py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install -r .\requirements.txt -r .\projects\03-retail-revenue-analytics\dbt\requirements.txt pytest
+.\.venv\Scripts\python.exe -m pip install -r .\requirements.txt pytest
+```
+
+Create the dbt environment:
+
+```powershell
+py -3.12 -m venv .venv-dbt
+.\.venv-dbt\Scripts\python.exe -m pip install --upgrade pip
+.\.venv-dbt\Scripts\python.exe -m pip install -r .\projects\03-retail-revenue-analytics\dbt\requirements.txt
 ```
 
 Move into project 03:
@@ -274,6 +331,8 @@ Run DBT only:
 .\scripts\dbt_build.ps1 build
 ```
 
+The dbt helper prefers `.venv-dbt\Scripts\python.exe`, then `py -3.12`, then `uv` if available. If Python 3.12 or dbt is missing, it prints the setup commands above.
+
 The expected mart database path is:
 
 ```text
@@ -293,6 +352,8 @@ http://127.0.0.1:5002
 ```
 
 The local Flask API is HTTP-only. Use `http://127.0.0.1:5002`, not `https://127.0.0.1:5002`.
+
+`GET /` returning `404` is expected. This Flask app is an API service, not a homepage server. Use `/health` or `/api/v1` as the entry points.
 
 In a second PowerShell terminal, start the dashboard:
 
@@ -317,6 +378,45 @@ If Vite falls back to another local port, the API allows common local Vite origi
 ```
 
 The project-local `Makefile` is kept as a secondary convenience for shells where `make` is already available. Windows users do not need it for the normal workflow.
+
+### Validated Local Run
+
+The Windows local workflow has been validated with:
+
+- `.\scripts\dbt_build.ps1 build` using Python 3.12 in `.venv-dbt`.
+- Flask API running on `http://127.0.0.1:5002`.
+- API health and mart endpoints returning successfully from `/health` and `/api/v1/...`.
+- Vite dashboard running on `http://127.0.0.1:5173`.
+- Dashboard rendering KPI cards, charts, and tables from the local API.
+
+The dbt requirements include a lightweight `chardet<6` fallback to avoid requests character-detection warnings on Windows environments that block compiled charset helpers.
+
+### Portfolio Screenshots
+
+For portfolio presentation, keep lightweight dashboard captures under [docs/screenshots](docs/screenshots/README.md). Recommended captures:
+
+- Dashboard overview with KPI cards and API status.
+- Daily revenue and category performance sections.
+- Seller, customer-state, order-status, and payment-type tables.
+- API health or API index running locally on port `5002`.
+- dbt build success showing the final `PASS=139 WARN=0 ERROR=0` line.
+
+Avoid committing large raw screen recordings or oversized image exports.
+
+### Local API Examples
+
+After starting the Flask API on `http://127.0.0.1:5002`, these PowerShell examples verify the main read-only endpoints:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:5002/health
+Invoke-RestMethod http://127.0.0.1:5002/api/v1
+Invoke-RestMethod http://127.0.0.1:5002/api/v1/kpis
+Invoke-RestMethod "http://127.0.0.1:5002/api/v1/daily-revenue?limit=10&sort=desc"
+Invoke-RestMethod "http://127.0.0.1:5002/api/v1/category-performance?limit=10&sort_by=gross_merchandise_value&sort=desc"
+Invoke-RestMethod "http://127.0.0.1:5002/api/v1/seller-performance?limit=10&sort_by=gross_merchandise_value&sort=desc"
+```
+
+The API is intentionally read-only. It does not run dbt, rebuild marts, or write data.
 
 ### Run With Docker
 
@@ -476,13 +576,15 @@ projects/03-retail-revenue-analytics/
 `-- README.md            # Case study overview
 ```
 
-## Current Limitations
+## Known Limitations / Modeling Notes
 
 - The DBT marts are local analytical contracts, not an enterprise warehouse.
 - `fct_sales` is not an accounting-grade revenue ledger.
 - No refund, cancellation, chargeback, settlement, tax, or revenue recognition logic is implemented.
 - Order status is retained rather than silently filtering to delivered orders.
 - Reviews and geolocation are documented but deferred from Silver v1 and DBT marts.
+- Payment context is aggregated to order grain before joining to item-grain facts; repeated payment fields on `fct_sales` should not be summed as item-level revenue.
+- `dim_store` and `dim_salesperson` are seller-based analytical proxies because Olist does not provide physical stores or named salespeople.
 - The API is local and read-only, not production hardened.
 - The dashboard is a local analytical presentation layer, not a production commerce application.
 - The Docker setup improves local packaging and demo ergonomics, but it is not production infrastructure.

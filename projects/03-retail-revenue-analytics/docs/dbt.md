@@ -73,19 +73,22 @@ Implemented DBT tests include:
 
 ## Run Commands
 
-From the repository root:
+On Windows, dbt is validated with Python 3.12 in a repo-root `.venv-dbt` environment:
 
 ```powershell
-python projects/03-retail-revenue-analytics/src/jobs/run_ingestion.py
-python projects/03-retail-revenue-analytics/src/jobs/run_silver.py
-cd projects/03-retail-revenue-analytics/dbt
-.\scripts\run_dbt_duckdb.ps1 debug
-.\scripts\run_dbt_duckdb.ps1 run
-.\scripts\run_dbt_duckdb.ps1 test
+py -3.12 -m venv .venv-dbt
+.\.venv-dbt\Scripts\python.exe -m pip install --upgrade pip
+.\.venv-dbt\Scripts\python.exe -m pip install -r .\projects\03-retail-revenue-analytics\dbt\requirements.txt
 ```
 
-The script uses:
+Then run dbt from the project helper:
 
 ```powershell
-uv run --python 3.12 --with-requirements requirements.txt python -m dbt.cli.main ...
+Set-Location .\projects\03-retail-revenue-analytics
+.\scripts\dbt_build.ps1 debug
+.\scripts\dbt_build.ps1 build
 ```
+
+The helper prefers `.venv-dbt\Scripts\python.exe`, then `py -3.12`, then `uv` if available. This keeps dbt isolated from the general `.venv` used by the Python app, Flask API, and tests.
+
+The dbt requirements include a lightweight `chardet<6` fallback to avoid requests character-detection warnings on Windows environments that block compiled charset helpers.

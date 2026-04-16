@@ -68,6 +68,7 @@ function connectionGuidance(errorMessage?: string): string {
 
 function buildPath(path: string, query?: Record<string, string | number | undefined>): string {
   const params = new URLSearchParams();
+  const cleanPath = normalizeApiPath(path);
 
   Object.entries(query ?? {}).forEach(([key, value]) => {
     if (value !== undefined) {
@@ -76,7 +77,7 @@ function buildPath(path: string, query?: Record<string, string | number | undefi
   });
 
   const suffix = params.toString();
-  return suffix ? `${path}?${suffix}` : path;
+  return suffix ? `${cleanPath}?${suffix}` : cleanPath;
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
@@ -84,9 +85,10 @@ async function fetchJson<T>(path: string): Promise<T> {
     throw new ApiClientError(apiConfigurationError);
   }
 
+  const cleanPath = normalizeApiPath(path);
   let response: Response;
   try {
-    response = await fetch(`${apiBaseUrl}${path}`);
+    response = await fetch(`${apiBaseUrl}${cleanPath}`);
   } catch (error) {
     throw new ApiClientError(
       error instanceof Error
@@ -117,6 +119,11 @@ function assertListEnvelope<T>(payload: ListEnvelope<T>, path: string): T[] {
   }
 
   return payload.data;
+}
+
+function normalizeApiPath(path: string): string {
+  const trimmed = path.trim();
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
 function assertKpiEnvelope(payload: KpiEnvelope): DashboardKpis {

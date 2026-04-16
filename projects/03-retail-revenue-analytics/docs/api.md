@@ -14,6 +14,8 @@ The API does not perform analytical transformations. Business logic belongs in P
 
 Do not use `https://127.0.0.1:5002` for local development. Flask is not serving TLS in this project.
 
+`GET /` returning `404` is expected. The Flask process serves API routes only; use `/health` or `/api/v1` as the local entry points.
+
 ## Docker Runtime
 
 The project also includes a Docker packaging path for the API:
