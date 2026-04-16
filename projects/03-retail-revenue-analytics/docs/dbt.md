@@ -57,7 +57,7 @@ Intermediate models prepare reusable modeling structures:
 
 Mart models materialize as DuckDB tables:
 
-- dimensions;
+- dimensions: `dim_date`, `dim_product`, `dim_customer`, `dim_seller`, `dim_store`, and `dim_salesperson`;
 - `fct_sales`;
 - business summary marts.
 
@@ -67,9 +67,9 @@ Implemented DBT tests include:
 
 - `not_null` tests for key identifiers and important measures;
 - `unique` tests where the model grain is clear;
-- relationship tests between order items, orders, products, customers, and sellers;
+- relationship tests between order items, orders, products, customers, sellers, stores, salespeople, and dates;
 - accepted values tests for the observed `order_status` domain;
-- singular tests for sales fact row preservation and non-negative item-side sales measures.
+- singular tests for sales fact row preservation, non-negative item-side sales measures, non-negative payments, valid purchase dates, and order-grain payment summaries.
 
 ## Run Commands
 

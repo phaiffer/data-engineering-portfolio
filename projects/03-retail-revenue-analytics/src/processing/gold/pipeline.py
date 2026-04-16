@@ -18,6 +18,7 @@ from processing.gold.metrics import (
     build_kpi_overview,
     summarize_payments,
 )
+from processing.run_metrics import build_run_metrics, utc_now_iso
 from processing.silver.config import get_silver_tables_dir
 
 
@@ -115,6 +116,7 @@ def run_gold_pipeline(silver_tables_dir: Path | None = None) -> dict[str, Any]:
     summarized separately to avoid duplicating item revenue when an order has
     multiple payment records.
     """
+    started_at_utc = utc_now_iso()
     silver_dir = silver_tables_dir or get_silver_tables_dir()
     tables = {
         table_name: _read_silver_table(table_name, silver_dir)
@@ -181,11 +183,24 @@ def run_gold_pipeline(silver_tables_dir: Path | None = None) -> dict[str, Any]:
     ).sort_values("gross_merchandise_value", ascending=False)
     outputs.append(_write_output(order_status_summary, output_dir, "order_status_summary.csv"))
 
+    run_metrics = build_run_metrics(
+        job_name="retail_gold_kpi_outputs",
+        status="success",
+        started_at_utc=started_at_utc,
+        rows_read=sum(len(table) for table in tables.values()),
+        rows_written=sum(output["row_count"] for output in outputs),
+        invalid_row_count=int(item_data["order_purchase_date"].isna().sum()),
+        rejected_row_count=0,
+        extra={"output_count": len(outputs)},
+    )
+
     metadata = build_gold_run_metadata(outputs)
+    metadata["run_metrics"] = run_metrics
     metadata_path = write_gold_run_metadata(metadata)
 
     return {
         "output_count": len(outputs),
         "outputs": outputs,
         "metadata_path": path_relative_to_project(metadata_path),
+        "run_metrics": run_metrics,
     }

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -22,6 +23,7 @@ def main() -> None:
             f"- {table['logical_table_name']}: "
             f"{table['row_count']} rows, {table['column_count']} columns -> {table['output_file']}"
         )
+    print(f"Run metrics: {json.dumps(result['run_metrics'], sort_keys=True)}")
     print(f"Run metadata artifact: {result['metadata_path']}")
 
 

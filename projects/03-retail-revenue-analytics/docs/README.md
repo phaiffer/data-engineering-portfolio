@@ -13,6 +13,8 @@ Official run guidance lives in:
 - [Silver layer](silver.md): implemented Silver outputs, metadata, and run command.
 - [Modeling plan](modeling_plan.md): likely future fact and dimension direction.
 - [Gold layer](gold.md): Gold v1 outputs, KPI definitions, and limitations.
+- [KPI definitions](kpis.md): business metric formulas, intended meaning, and source-data caveats.
+- [Data quality and rerun safety](data_quality.md): dbt validations, batch rerun behavior, and run metrics.
 - [DBT layer](dbt.md): DuckDB DBT project, source strategy, model layers, and tests.
 - [Dimensional marts](marts.md): dimensions, fact-like mart, business marts, grains, and caveats.
 - [API layer](api.md): read-only Flask API over DuckDB marts, endpoints, filters, and limitations.

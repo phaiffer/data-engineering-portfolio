@@ -4,6 +4,8 @@ select
     items.product_id,
     items.customer_id,
     items.seller_id,
+    items.seller_id as store_id,
+    items.seller_id as salesperson_id,
     items.order_purchase_timestamp,
     items.order_purchase_date,
     items.order_status,

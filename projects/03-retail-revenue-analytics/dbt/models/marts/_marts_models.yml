@@ -48,6 +48,51 @@ models:
         tests:
           - not_null
 
+  - name: dim_store
+    description: >
+      Marketplace store dimension at one row per store_id. Olist does not provide
+      physical retail stores, so this model treats each seller storefront as the
+      store entity for dimensional analysis.
+    columns:
+      - name: store_id
+        description: Storefront identifier derived from seller_id.
+        tests:
+          - not_null
+          - unique
+      - name: seller_id
+        description: Source seller identifier behind the storefront.
+        tests:
+          - not_null
+          - unique
+      - name: store_state
+        description: Storefront state code from seller geography.
+        tests:
+          - not_null
+
+  - name: dim_salesperson
+    description: >
+      Salesperson-style dimension at one row per salesperson_id. The source data
+      has sellers rather than named salespeople, so seller_id is used as a
+      salesperson proxy for portfolio dimensional modeling.
+    columns:
+      - name: salesperson_id
+        description: Salesperson proxy identifier derived from seller_id.
+        tests:
+          - not_null
+          - unique
+      - name: store_id
+        description: Storefront identifier associated with the salesperson proxy.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_store')
+                field: store_id
+      - name: salesperson_state
+        description: State code from seller geography.
+        tests:
+          - not_null
+
   - name: dim_date
     description: Date dimension built from purchase dates present in item-grain sales data.
     columns:
@@ -113,6 +158,22 @@ models:
               arguments:
                 to: ref('dim_seller')
                 field: seller_id
+      - name: store_id
+        description: Storefront identifier for dimensional store analysis.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_store')
+                field: store_id
+      - name: salesperson_id
+        description: Salesperson proxy identifier for dimensional sales ownership analysis.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_salesperson')
+                field: salesperson_id
       - name: order_purchase_date
         description: Purchase date for date dimension joins.
         tests:

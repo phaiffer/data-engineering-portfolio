@@ -25,6 +25,23 @@ The project proves:
 - a cleaner Docker packaging path for local demos and reproducibility;
 - a clean path toward future orchestration without adding it prematurely.
 
+## Business Problem
+
+Retail leaders need a reliable way to understand revenue performance across products, categories, sellers, customer regions, order status, and payment behavior. The raw Olist export is spread across orders, items, products, customers, sellers, and payments, so direct reporting can easily double-count revenue or mix grains.
+
+This project turns those source tables into a batch-built analytical model that answers business questions such as:
+
+- Which product categories generate the most item-side revenue?
+- Which sellers or seller states drive the strongest marketplace performance?
+- How does daily revenue change by order status?
+- Which customer states contribute the most orders and revenue?
+- Which payment methods are most common, and how large are their payment values?
+- How many order-item rows, orders, and item-side sales dollars are represented in the model?
+
+## Business Value
+
+The model helps a retail analytics team prioritize category investment, review seller performance, monitor order-status impact on revenue, understand regional demand, and separate product-sales metrics from payment behavior. It is intentionally shaped as a portfolio case study for dimensional modeling and KPI design rather than as an accounting ledger.
+
 ## Dataset Choice
 
 This project uses the Olist Brazilian E-Commerce Public Dataset from Kaggle:
@@ -44,6 +61,16 @@ Kaggle dataset
 -> DBT DuckDB staging/intermediate/marts
 -> Flask read-only API
 -> React dashboard
+```
+
+```mermaid
+flowchart LR
+    raw["Raw Olist CSV files"] --> bronze["Bronze raw landing and profiling"]
+    bronze --> silver["Silver source-aligned tables"]
+    silver --> modeled["Dimensions and facts in dbt"]
+    modeled --> gold["Gold reporting marts"]
+    gold --> api["Read-only Flask API"]
+    api --> dashboard["React dashboard"]
 ```
 
 ## Implemented Layers
@@ -83,6 +110,8 @@ Dimensions:
 - `dim_product`
 - `dim_customer`
 - `dim_seller`
+- `dim_store`
+- `dim_salesperson`
 - `dim_date`
 
 Fact-like mart:
@@ -114,7 +143,19 @@ The dashboard keeps business logic in the modeled layers and API contract. React
 
 ## Revenue And Grain Rules
 
-The central sales grain is one row per `order_id` and `order_item_id`.
+The central analytical fact is `fct_sales`, which represents the conceptual `fact_sales` model for this portfolio case.
+
+Fact grain: one row per sold item per order, identified by `order_id` and `order_item_id`.
+
+Core dimensional model:
+
+- `fact_sales` / implemented as `fct_sales`: one order-item row with item-side revenue measures and order-level payment context.
+- `dim_date`: purchase-date calendar attributes.
+- `dim_product`: product and category attributes.
+- `dim_customer`: customer identity and coarse geography.
+- `dim_store`: seller storefront proxy because Olist does not provide physical stores.
+- `dim_salesperson`: seller proxy because Olist does not provide named salespeople.
+- `dim_seller`: retained source-aligned marketplace seller dimension used by existing marts and dashboard endpoints.
 
 Item-side measures:
 
@@ -126,6 +167,46 @@ Raw payment rows are not joined directly to item rows. DBT aggregates payments t
 
 Payment fields in `fct_sales` are order-level context. They can repeat across multi-item orders and should not be summed as item-level sales revenue.
 
+## KPI Definitions
+
+Primary KPIs are documented in [KPI definitions](docs/kpis.md). The core implemented metrics are:
+
+- `gross_revenue`: `sum(item_price + freight_value)`.
+- `net_revenue`: `sum(item_price)`.
+- `units_sold`: `count(*)` at `fct_sales` grain.
+- `order_count`: `count(distinct order_id)`.
+- `average_order_value`: `sum(item_price) / count(distinct order_id)`.
+
+Discount, margin, and profit metrics are documented as future-ready definitions, but they are not calculated because the selected Olist source tables do not contain discount, product cost, fee, tax, or settlement inputs.
+
+## Batch Load Strategy
+
+This project uses full-batch local rebuilds. Silver and Gold outputs are overwritten on each run, and dbt rebuilds DuckDB marts from the current Silver tables. That makes reruns safe for the same raw inputs and keeps the portfolio workflow easy to inspect.
+
+The next incremental step would be partitioned processing by `order_purchase_date` with a lookback window for late-arriving order items, payment records, or status changes. Current duplicate protection is expressed through source-grain and fact-grain tests instead of hidden append logic.
+
+## Data Quality Checks
+
+Data quality is handled with dbt tests and lightweight Python run metadata. Current checks validate:
+
+- no nulls in critical keys;
+- uniqueness where dimensions or source grains require it;
+- referential integrity between `fct_sales` and dimensions;
+- no duplicate fact rows at `order_id` and `order_item_id` grain;
+- non-negative sales and payment values;
+- valid purchase dates;
+- order-level payment aggregation before joining to item-grain facts.
+
+See [Data quality and rerun safety](docs/data_quality.md) for the validation and observability details.
+
+## Design Trade-offs
+
+Batch instead of streaming: Olist is a static analytical export, and the business questions are periodic revenue-analysis questions. Batch processing keeps the logic reproducible and avoids unnecessary infrastructure.
+
+Dimensional modeling: the source has multiple natural grains, so facts and dimensions make KPI definitions clearer and reduce double-counting risk, especially around payments and order items.
+
+Bridge toward dbt marts: Python handles raw local file preparation, while dbt owns modeled analytical contracts, tests, and future mart evolution. This creates a clean path toward orchestration later without adding orchestration before it is useful.
+
 ## Documentation
 
 - [Bronze layer](docs/bronze.md)
@@ -133,6 +214,8 @@ Payment fields in `fct_sales` are order-level context. They can repeat across mu
 - [Silver plan](docs/silver_plan.md)
 - [Silver layer](docs/silver.md)
 - [Gold layer](docs/gold.md)
+- [KPI definitions](docs/kpis.md)
+- [Data quality and rerun safety](docs/data_quality.md)
 - [DBT layer](docs/dbt.md)
 - [Dimensional marts](docs/marts.md)
 - [API layer](docs/api.md)
@@ -206,6 +289,17 @@ Run Gold:
 
 ```bash
 python projects/03-retail-revenue-analytics/src/jobs/run_gold.py
+```
+
+Project-local Make targets are also available from `projects/03-retail-revenue-analytics`:
+
+```bash
+make silver
+make gold
+make dbt-run
+make dbt-test
+make test
+make dashboard-build
 ```
 
 Build and validate the DuckDB marts:

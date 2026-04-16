@@ -18,6 +18,7 @@ from processing.silver.metadata import (
     write_table_metadata,
 )
 from processing.silver.standardization import standardize_source_table
+from processing.run_metrics import build_run_metrics, utc_now_iso
 
 
 def run_silver_pipeline() -> dict[str, Any]:
@@ -27,6 +28,7 @@ def run_silver_pipeline() -> dict[str, Any]:
     Each output table preserves its source row grain. No business joins,
     aggregations, surrogate keys, or dimensional modeling are applied.
     """
+    started_at_utc = utc_now_iso()
     registry = discover_source_registry()
     expected_configs = get_silver_v1_configs()
     missing_tables = [
@@ -75,10 +77,22 @@ def run_silver_pipeline() -> dict[str, Any]:
         )
 
     run_metadata = build_run_metadata(table_results)
+    run_metrics = build_run_metrics(
+        job_name="retail_silver_standardization",
+        status="success",
+        started_at_utc=started_at_utc,
+        rows_read=sum(table["row_count"] for table in table_results),
+        rows_written=sum(table["row_count"] for table in table_results),
+        invalid_row_count=0,
+        rejected_row_count=0,
+        extra={"table_count": len(table_results)},
+    )
+    run_metadata["run_metrics"] = run_metrics
     run_metadata_path = write_run_metadata(run_metadata)
 
     return {
         "table_count": len(table_results),
         "tables": table_results,
         "metadata_path": path_relative_to_project(run_metadata_path),
+        "run_metrics": run_metrics,
     }

@@ -112,6 +112,36 @@ def build_kpi_overview(
 
     rows = [
         {
+            "metric_name": "gross_revenue",
+            "metric_value": gross_merchandise_value,
+            "metric_scope": "order_items.price + order_items.freight_value",
+            "notes": "Item-side gross revenue including freight.",
+        },
+        {
+            "metric_name": "net_revenue",
+            "metric_value": item_revenue,
+            "metric_scope": "order_items.price",
+            "notes": "Item-side product revenue before accounting adjustments.",
+        },
+        {
+            "metric_name": "units_sold",
+            "metric_value": order_item_count,
+            "metric_scope": "order_items",
+            "notes": "Count of rows at order item grain.",
+        },
+        {
+            "metric_name": "order_count",
+            "metric_value": item_order_count,
+            "metric_scope": "order_items",
+            "notes": "Distinct order_id count represented in item-grain sales data.",
+        },
+        {
+            "metric_name": "average_order_value",
+            "metric_value": round(item_revenue / item_order_count, 2) if item_order_count else 0,
+            "metric_scope": "order_items.price / distinct order_id",
+            "notes": "Average item-side product revenue per represented order.",
+        },
+        {
             "metric_name": "distinct_orders",
             "metric_value": order_count,
             "metric_scope": "orders",

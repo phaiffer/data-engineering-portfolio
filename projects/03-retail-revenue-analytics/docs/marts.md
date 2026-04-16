@@ -24,6 +24,18 @@ Grain: one row per `seller_id`.
 
 Includes seller zip prefix, city, and state.
 
+### dim_store
+
+Grain: one row per `store_id`.
+
+Olist does not provide physical stores. For this portfolio model, each seller storefront is treated as a store entity using `seller_id` as `store_id`. This keeps the dimensional model recognizable for retail analytics without inventing unavailable store attributes.
+
+### dim_salesperson
+
+Grain: one row per `salesperson_id`.
+
+Olist provides sellers rather than named salespeople. This model uses `seller_id` as a salesperson proxy so the analytical model can demonstrate sales-owner dimensional thinking while keeping the source limitation visible.
+
 ### dim_date
 
 Grain: one row per purchase date represented in item-grain sales data.
@@ -36,7 +48,7 @@ Includes year, quarter, month, week, day of month, and day of week attributes.
 
 Grain: one row per `order_id` and `order_item_id`.
 
-This is the central analytical sales fact-like mart. It joins order item rows to order, product, category, customer, seller, date, and order-grain payment context.
+This is the central analytical sales fact-like mart. It joins order item rows to order, product, category, customer, seller, store, salesperson, date, and order-grain payment context.
 
 Measures:
 

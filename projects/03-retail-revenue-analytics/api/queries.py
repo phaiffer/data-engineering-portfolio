@@ -83,6 +83,8 @@ MART_COLUMNS: dict[str, tuple[str, ...]] = {
         "product_id",
         "customer_id",
         "seller_id",
+        "store_id",
+        "salesperson_id",
         "order_purchase_timestamp",
         "order_purchase_date",
         "order_status",
