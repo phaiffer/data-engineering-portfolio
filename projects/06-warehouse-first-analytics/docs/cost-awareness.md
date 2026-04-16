@@ -1,151 +1,144 @@
 # Cost-Aware Query Design
 
-BigQuery charges by bytes scanned, not by query count or wall time. The Stack Overflow
-public dataset is large enough that careless queries can cost real money. This document
-explains the design decisions made to keep this project cost-efficient.
+BigQuery charges primarily by bytes scanned. The Stack Overflow public dataset is large enough that
+careless queries can cost real money during normal development. This document explains the choices
+that keep the project practical, reviewable, and honest as a warehouse-first case study.
 
----
+## Reviewer Takeaway
 
-## Source Table Sizes (approximate, unfiltered)
+Cost awareness is part of the modeling design:
+
+- constrain source scans with a year-window variable;
+- exclude large HTML text columns that the marts do not need;
+- keep staging and intermediate models as views;
+- persist only the final marts as BigQuery tables;
+- use approximate percentile functions where exact percentiles are not required;
+- run narrower development windows before running the full default build.
+
+## Source Table Sizes
+
+Approximate unfiltered sizes:
 
 | Table | Estimated size |
 |---|---|
-| `posts_questions` | ~60–70 GB |
-| `posts_answers` | ~70–80 GB |
-| `users` | ~2 GB |
+| `posts_questions` | 60-70 GB |
+| `posts_answers` | 70-80 GB |
+| `users` | 2 GB |
 | `tags` | < 10 MB |
 
-A full-scan query across questions and answers alone could scan ~140 GB, which at
-BigQuery on-demand pricing (~$6.25/TB) costs approximately $0.88 per query.
-Multiply that by a development cycle of dozens of iterative runs and costs accumulate.
+A full scan across questions and answers alone can read about 140 GB. At BigQuery on-demand pricing,
+that is roughly $0.88 for one careless query. Repeating that during development is the risk this
+project avoids.
 
----
+## Decision 1: Year-Window Filter In Staging
 
-## Decision 1: Year-Window Filter in Staging
-
-**What:** Both `stg_stackoverflow__questions` and `stg_stackoverflow__answers` apply:
+Both `stg_stackoverflow__questions` and `stg_stackoverflow__answers` apply:
 
 ```sql
-WHERE EXTRACT(year FROM creation_date) >= {{ var('stackoverflow_min_year') }}
+where extract(year from creation_date) >= {{ var('stackoverflow_min_year') }}
 ```
 
-**Default:** `stackoverflow_min_year = 2021` (4-year window: 2021–2024).
+Default: `stackoverflow_min_year = 2021`.
 
-**Effect:** Reduces scan from ~140 GB to approximately 15–20 GB across both tables.
-Cost reduction: roughly 85–90%.
+This reduces the effective scan from roughly 140 GB to about 15-20 GB across the large posts tables.
+The filter is variable-driven so reviewers can run cheaper development windows:
 
-**Why EXTRACT(year) instead of a literal date?**
-The `creation_date` column is not a partition key in this public dataset.
-BigQuery cannot push a partition prune. Using `EXTRACT(year)` is functionally
-equivalent to `creation_date >= '2021-01-01'` but makes the variable-driven
-intent explicit. For a production table with date partitioning, a
-`creation_date >= DATE(...)` filter would enable true partition pruning.
-
-**How to override:**
 ```bash
-# More restricted (2-year window, lower cost)
 dbt run --vars '{"stackoverflow_min_year": 2023}'
-
-# Full historical window (high cost - avoid in dev)
-dbt run --vars '{"stackoverflow_min_year": 2008}'
 ```
 
----
+PowerShell wrapper:
 
-## Decision 2: Views at Staging and Intermediate
+```powershell
+.\projects\06-warehouse-first-analytics\scripts\dbt_run.ps1 -MinYear 2023
+```
 
-**What:** Staging and intermediate models materialize as `VIEW`, not `TABLE`.
+Use a narrow window while editing SQL. Use the default 2021 window for the full portfolio build.
 
-**Why:** If staging were materialized as a table, every `dbt run` would write the
-filtered data to a new table (scanning the source again + storing the result).
-Views defer execution to the mart layer, so the year-window predicate is evaluated
-exactly once per mart table build, not once per layer.
+## Decision 2: Large Text Columns Are Excluded
 
-**Trade-off:** Repeated queries against intermediate views will re-scan staging.
-For this portfolio project, marts are the intended query targets, so this is acceptable.
-In a production setting with high query frequency, materializing intermediate models
-as tables would reduce repeated source scans.
+The Stack Overflow posts tables include large HTML `body` columns. They are intentionally never
+selected in staging because the current marts answer structured analytics questions and do not need
+raw text.
 
----
+Because BigQuery is columnar, excluding `body` avoids scanning tens of extra gigabytes on every run.
+This is a simple but important warehouse-native optimization.
 
-## Decision 3: Tables at Marts
+## Decision 3: Staging And Intermediate Are Views
 
-**What:** Mart models materialize as `TABLE`.
+Staging and intermediate models materialize as views.
 
-**Why:** Marts are the intended read layer. Once built, downstream consumers
-(notebooks, ad-hoc queries) query the pre-aggregated mart table without triggering
-a source re-scan. This is the key cost-saving pattern for serving analytics:
-aggregate once at build time, query cheaply at use time.
+Why:
 
----
+- no redundant table writes while developing;
+- the year-window predicate remains visible in the compiled query path;
+- intermediate transformation logic stays documented without creating extra persisted copies;
+- marts are the intended query surface.
 
-## Decision 4: Body Column Excluded
+Trade-off: repeated ad-hoc queries against intermediate views may re-scan upstream data. That is
+acceptable here because reviewers and downstream consumers should inspect the mart tables.
 
-**What:** The `body` column (raw HTML text) on both posts tables is never selected.
+## Decision 4: Marts Are Tables
 
-**Why:** In BigQuery, SELECT from a columnar table only reads the columns requested.
-Including `body` would add ~50–100 GB to every staging query. Since marts do not
-use free text, excluding it is a zero-cost, zero-downside decision.
+Mart models materialize as BigQuery tables.
 
----
+Why:
 
-## Decision 5: approx_quantiles for Percentiles
+- the expensive source scan happens during model build;
+- downstream reads hit pre-aggregated tables;
+- mart outputs are stable and easy to inspect in BigQuery;
+- dbt docs can describe the final analytical contract cleanly.
 
-**What:** `APPROX_QUANTILES` is used in latency marts instead of `PERCENTILE_CONT`.
+## Decision 5: Approximate Quantiles
 
-**Why:** `PERCENTILE_CONT` as an analytic function requires a full sort pass over
-the data. `APPROX_QUANTILES` uses a probabilistic sketch, which is cheaper and
-faster. For trend monitoring at monthly granularity, ~1–2% approximation error
-is acceptable.
+`APPROX_QUANTILES` is used for latency percentiles instead of exact analytic percentile functions.
+For monthly response-time trend analysis, approximate percentiles are accurate enough and cheaper to
+compute.
 
----
+## Decision 6: Tag Explosion Is Scoped
 
-## Decision 6: Tag Explosion Scoped to Intermediate
+Tags are exploded from the pipe-delimited string only in `int_question_tag_exploded`. Models that do
+not need tag-level rows never reference the exploded intermediate, avoiding unnecessary row
+multiplication.
 
-**What:** Tags are exploded from the pipe-delimited string in `int_question_tag_exploded`,
-not in staging.
+## Decision 7: Minimum Tag Threshold
 
-**Why:** Exploding tags in a staging view would multiply the row count (on average
-~2.5 tags per question) before any filtering. By keeping the flat tag string through
-staging and intermediate, only the `mart_tag_activity` build reads the exploded model.
-Models that don't need tags (`mart_monthly_question_activity`, `mart_answer_latency`)
-never reference the exploded intermediate.
+`mart_tag_activity` keeps only tags with at least 10 questions in the selected window:
 
----
+```sql
+having count(distinct question_id) >= 10
+```
 
-## Decision 7: Minimum Tag Threshold in mart_tag_activity
-
-**What:** `HAVING count(distinct question_id) >= 10`
-
-**Why:** The tags table has ~65,000 tags. Without a threshold, the mart would contain
-65,000 rows of mostly noise (rare tags with 1–2 questions). The 10-question threshold
-reduces the mart to the analytically meaningful tags (~5,000–8,000 in a 4-year window)
-while keeping the build query lean.
-
----
+This keeps the mart focused on meaningful tags and avoids filling the output with low-signal rows.
 
 ## Cost Summary
 
-| Layer | Materialization | Bytes scanned per dbt run |
+| Layer | Materialization | Cost behavior |
 |---|---|---|
-| Staging | VIEW | 0 (deferred) |
-| Intermediate | VIEW | 0 (deferred) |
-| Marts (5 tables) | TABLE | ~15–20 GB total (year-window filtered) |
+| Staging | View | No persisted write; filters large source tables |
+| Intermediate | View | No persisted write; prepares reusable logic |
+| Marts | Table | Scans filtered view graph once and persists reviewable outputs |
 
-A full `dbt run` with default settings scans approximately 15–20 GB total.
-At $6.25/TB this is roughly **$0.09–$0.13 per full run** — well within the
-BigQuery free tier (1 TB/month free) and negligible for paid tiers.
+Estimated default full `dbt run`: 15-20 GB scanned, or roughly $0.09-$0.13 at on-demand pricing.
 
----
+Cheaper development loop:
 
-## What This Project Does Not Do (Intentionally)
+```bash
+dbt run --select +mart_monthly_question_activity --vars '{"stackoverflow_min_year": 2023}'
+dbt test --select mart_monthly_question_activity
+```
 
-- **Cluster or partition the mart tables.** The mart tables are small after aggregation
-  (monthly or tag-level grain). Partitioning is not necessary and would add complexity.
-  For a large-scale production deployment, partitioning mart tables by `month_start`
-  would improve query performance for time-range filters.
+PowerShell:
 
-- **Use BigQuery BI Engine or materialized views.** Out of scope for a v1 portfolio case.
+```powershell
+.\projects\06-warehouse-first-analytics\scripts\dbt_run.ps1 -Select "+mart_monthly_question_activity" -MinYear 2023
+.\projects\06-warehouse-first-analytics\scripts\dbt_test.ps1 -Select mart_monthly_question_activity
+```
 
-- **Cost tagging or budget alerts.** Real production deployments should configure GCP
-  budget alerts. This is not in scope for a local portfolio demonstration.
+## What This Project Does Not Do
+
+- It does not configure budget alerts. A production deployment should.
+- It does not partition or cluster mart tables. The marts are small after aggregation.
+- It does not use BI Engine or BigQuery materialized views.
+- It does not model raw HTML body text or NLP features.
+- It does not claim production scheduling or warehouse operations.

@@ -1,6 +1,6 @@
-# docs — Project 06: Warehouse-First Analytics
+# docs - Project 06: Warehouse-First Analytics
 
-Technical documentation for the Stack Overflow analytics case study.
+Technical documentation for the Stack Overflow analytics engineering case study.
 
 | Document | Contents |
 |---|---|
@@ -10,3 +10,4 @@ Technical documentation for the Stack Overflow analytics case study.
 | [tests.md](tests.md) | dbt schema tests and singular tests |
 | [cost-awareness.md](cost-awareness.md) | BigQuery cost control decisions |
 | [local-run.md](local-run.md) | Step-by-step setup and run guide |
+| [validation.md](validation.md) | dbt validation sequence, mart inspection queries, screenshots |
