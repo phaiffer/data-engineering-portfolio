@@ -15,6 +15,7 @@ from config import (
     resolve_month_window,
 )
 from ingestion.state import (
+    get_current_timestamp,
     get_month_entry,
     mark_month_completed,
     read_state,
@@ -92,6 +93,7 @@ def run_silver_pipeline(
 ) -> dict[str, Any]:
     """Standardize monthly Yellow Taxi raw files into a partition-aware Silver table."""
     ensure_runtime_directories()
+    run_started_at_utc = get_current_timestamp()
     settings = get_settings()
     selected_months = list(months or resolve_month_window(start_month=start_month, end_month=end_month))
     silver_state = read_state(settings.silver_state_path, "silver")
@@ -159,6 +161,7 @@ def run_silver_pipeline(
                 "source_month": month.month_id,
                 "status": "processed",
                 "metadata_path": path_relative_to_project(metadata_path),
+                "output_files": metadata["output_files"],
                 "output_file_count": len(output_files),
                 "row_count": quality_report["silver_row_count"],
                 "row_count_preserved": quality_report["row_count_preserved"],
@@ -170,6 +173,7 @@ def run_silver_pipeline(
         selected_months=[month.month_id for month in selected_months],
         results=results,
         force=force,
+        run_started_at_utc=run_started_at_utc,
     )
     run_metadata["state_path"] = path_relative_to_project(state_path)
     run_metadata_path = write_silver_run_metadata(run_metadata)

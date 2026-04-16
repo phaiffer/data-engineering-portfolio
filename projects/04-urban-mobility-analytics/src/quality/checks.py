@@ -45,8 +45,15 @@ def build_silver_quality_report(
         "source_year",
         "source_month",
     ]
+    critical_timestamp_columns = ["pickup_datetime", "dropoff_datetime"]
     negative_value_columns = [
         "trip_distance",
+        "fare_amount",
+        "tip_amount",
+        "tolls_amount",
+        "total_amount",
+    ]
+    monetary_columns = [
         "fare_amount",
         "tip_amount",
         "tolls_amount",
@@ -75,11 +82,24 @@ def build_silver_quality_report(
         "row_count_preserved": len(raw_dataframe) == len(silver_dataframe),
         "duplicate_row_count": int(silver_dataframe.duplicated().sum()),
         "null_counts": get_null_counts(silver_dataframe, required_columns),
+        "critical_timestamp_null_counts": get_null_counts(
+            silver_dataframe,
+            critical_timestamp_columns,
+        ),
         "negative_value_counts": get_negative_value_counts(silver_dataframe, negative_value_columns),
+        "monetary_negative_value_counts": get_negative_value_counts(
+            silver_dataframe,
+            monetary_columns,
+        ),
         "pickup_datetime_missing_count": int(silver_dataframe["pickup_datetime"].isna().sum())
         if "pickup_datetime" in silver_dataframe.columns
         else 0,
         "pickup_outside_source_month_count": pickup_outside_source_month_count,
         "invalid_trip_duration_count": invalid_trip_duration_count,
         "required_columns_present": all(column in silver_dataframe.columns for column in required_columns),
+        "dropoff_on_or_after_pickup_check": invalid_trip_duration_count == 0,
+        "expected_partition_columns_present": all(
+            column in silver_dataframe.columns
+            for column in ["pickup_year", "pickup_month", "source_year", "source_month"]
+        ),
     }

@@ -15,6 +15,7 @@ from config import (
     resolve_month_window,
 )
 from ingestion.state import (
+    get_current_timestamp,
     get_month_entry,
     mark_month_completed,
     read_state,
@@ -195,6 +196,7 @@ def run_gold_pipeline(
 ) -> dict[str, Any]:
     """Build monthly Gold operational summaries from the partitioned Silver dataset."""
     ensure_runtime_directories()
+    run_started_at_utc = get_current_timestamp()
     settings = get_settings()
     selected_months = list(months or resolve_month_window(start_month=start_month, end_month=end_month))
     gold_state = read_state(settings.gold_state_path, "gold")
@@ -229,6 +231,11 @@ def run_gold_pipeline(
             table_results=table_results,
         )
         metadata_path = write_gold_month_metadata(metadata)
+        output_paths = [
+            output["output_path"]
+            for table_result in table_results
+            for output in table_result["outputs"]
+        ]
 
         gold_state = mark_month_completed(
             gold_state,
@@ -244,6 +251,7 @@ def run_gold_pipeline(
                 "source_month": month.month_id,
                 "status": "processed",
                 "metadata_path": path_relative_to_project(metadata_path),
+                "output_files": output_paths,
                 "table_count": metadata["table_count"],
             }
         )
@@ -253,6 +261,7 @@ def run_gold_pipeline(
         selected_months=[month.month_id for month in selected_months],
         results=results,
         force=force,
+        run_started_at_utc=run_started_at_utc,
     )
     run_metadata["state_path"] = path_relative_to_project(state_path)
     run_metadata_path = write_gold_run_metadata(run_metadata)

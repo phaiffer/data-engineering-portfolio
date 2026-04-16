@@ -10,6 +10,7 @@ if str(PROJECT_SRC) not in sys.path:
 
 from config import MonthPartition  # noqa: E402
 from ingestion.state import (  # noqa: E402
+    build_run_metadata_summary,
     build_state_template,
     is_month_completed,
     mark_month_completed,
@@ -47,3 +48,33 @@ def test_mark_month_completed_updates_completion_status() -> None:
 
     assert is_month_completed(state, march) is True
     assert state["completed_months"]["2024-03"]["row_count"] == 123456
+
+
+def test_build_run_metadata_summary_exposes_processed_and_skipped_months() -> None:
+    metadata = build_run_metadata_summary(
+        layer="silver",
+        selected_months=["2024-01", "2024-02"],
+        results=[
+            {
+                "source_month": "2024-01",
+                "status": "processed",
+                "metadata_path": "data/silver/metadata/silver_month_2024-01.json",
+            },
+            {
+                "source_month": "2024-02",
+                "status": "skipped",
+                "metadata_path": "data/silver/metadata/silver_month_2024-02.json",
+            },
+        ],
+        force=False,
+        run_started_at_utc="2026-04-16T12:00:00+00:00",
+        processed_statuses={"processed"},
+    )
+
+    assert metadata["status"] == "completed"
+    assert metadata["selected_month_window"]["start_month"] == "2024-01"
+    assert metadata["selected_month_window"]["end_month"] == "2024-02"
+    assert metadata["processed_months"] == ["2024-01"]
+    assert metadata["skipped_months"] == ["2024-02"]
+    assert metadata["processed_month_count"] == 1
+    assert metadata["skipped_month_count"] == 1

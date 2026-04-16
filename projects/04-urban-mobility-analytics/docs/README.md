@@ -6,6 +6,7 @@
 - [Gold layer](gold.md)
 - [Orchestration](orchestration.md)
 - [Incremental model](incremental.md)
+- [Operational review guide](operational-review.md)
 
 Documentation themes in this case:
 

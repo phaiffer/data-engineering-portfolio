@@ -28,7 +28,7 @@ def test_bronze_partition_path_uses_year_and_month() -> None:
 
     path = build_bronze_raw_file_path(month)
 
-    assert str(path).endswith("data/bronze/raw/yellow_taxi/year=2024/month=02/source.parquet")
+    assert path.as_posix().endswith("data/bronze/raw/yellow_taxi/year=2024/month=02/source.parquet")
 
 
 def test_silver_and_gold_partition_paths_include_source_month_file_names() -> None:
@@ -46,9 +46,9 @@ def test_silver_and_gold_partition_paths_include_source_month_file_names() -> No
         partition_month=2,
     )
 
-    assert str(silver_path).endswith(
+    assert silver_path.as_posix().endswith(
         "data/silver/tables/trips/pickup_year=2024/pickup_month=02/yellow_taxi_trips_2024-02.parquet"
     )
-    assert str(gold_path).endswith(
+    assert gold_path.as_posix().endswith(
         "data/gold/tables/daily_trip_summary/pickup_year=2024/pickup_month=02/daily_trip_summary_2024-02.parquet"
     )

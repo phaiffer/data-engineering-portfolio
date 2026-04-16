@@ -8,6 +8,7 @@ import pandas as pd
 import pyarrow.parquet as pq
 
 from config import MonthPartition, get_settings, path_relative_to_project
+from ingestion.state import build_run_metadata_summary
 
 
 TEMPORAL_COLUMNS = ["tpep_pickup_datetime", "tpep_dropoff_datetime"]
@@ -74,17 +75,19 @@ def build_bronze_run_metadata(
     selected_months: list[str],
     results: list[dict[str, Any]],
     force: bool,
+    run_started_at_utc: str,
 ) -> dict[str, Any]:
     """Build a compact run-level Bronze metadata summary."""
-    return {
-        "project_name": get_settings().project_name,
-        "layer": "bronze_metadata",
-        "selected_months": selected_months,
-        "profiled_month_count": sum(1 for result in results if result["status"] == "profiled"),
-        "skipped_month_count": sum(1 for result in results if result["status"] == "skipped"),
-        "force": force,
-        "results": results,
-    }
+    metadata = build_run_metadata_summary(
+        layer="bronze_metadata",
+        selected_months=selected_months,
+        results=results,
+        force=force,
+        run_started_at_utc=run_started_at_utc,
+        processed_statuses={"profiled"},
+    )
+    metadata["profiled_month_count"] = metadata["processed_month_count"]
+    return metadata
 
 
 def write_bronze_run_metadata(metadata: dict[str, Any]) -> Path:

@@ -26,6 +26,12 @@ Implemented tasks:
 
 Run the full local flow with:
 
+```powershell
+.\projects\04-urban-mobility-analytics\scripts\run_flow.ps1 -StartMonth 2024-01 -EndMonth 2024-02
+```
+
+The same flow can also be run through the Python entrypoint:
+
 ```bash
 python projects/04-urban-mobility-analytics/src/jobs/run_flow.py
 ```
@@ -37,6 +43,8 @@ The flow returns a nested summary of:
 - Bronze metadata results;
 - Silver processing results;
 - Gold output results.
+
+Each layer also writes a latest-run metadata file that records the selected month window, run timestamps, processed months, skipped months, output paths, status, and state path.
 
 ## Scope Boundaries
 

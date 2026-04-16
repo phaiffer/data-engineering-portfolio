@@ -92,3 +92,58 @@ def mark_month_completed(
     }
     state.setdefault("completed_months", {})[month_key(month_partition)] = entry
     return state
+
+
+def build_run_metadata_summary(
+    *,
+    layer: str,
+    selected_months: list[str],
+    results: list[dict[str, Any]],
+    force: bool,
+    run_started_at_utc: str,
+    processed_statuses: set[str],
+) -> dict[str, Any]:
+    """Build a consistent latest-run summary for local operational review."""
+    processed_months = [
+        result["source_month"]
+        for result in results
+        if result.get("status") in processed_statuses
+    ]
+    skipped_months = [
+        result["source_month"]
+        for result in results
+        if result.get("status") == "skipped"
+    ]
+    output_paths: list[str] = []
+    for result in results:
+        for path_key in ("output_path", "metadata_path"):
+            path_value = result.get(path_key)
+            if isinstance(path_value, str):
+                output_paths.append(path_value)
+
+        output_file_values = result.get("output_files")
+        if isinstance(output_file_values, list):
+            output_paths.extend(
+                path for path in output_file_values if isinstance(path, str)
+            )
+
+    return {
+        "project_name": get_settings().project_name,
+        "layer": layer,
+        "status": "completed",
+        "run_started_at_utc": run_started_at_utc,
+        "run_completed_at_utc": get_current_timestamp(),
+        "selected_month_window": {
+            "start_month": selected_months[0] if selected_months else None,
+            "end_month": selected_months[-1] if selected_months else None,
+            "month_count": len(selected_months),
+        },
+        "selected_months": selected_months,
+        "processed_months": processed_months,
+        "skipped_months": skipped_months,
+        "processed_month_count": len(processed_months),
+        "skipped_month_count": len(skipped_months),
+        "force": force,
+        "output_paths": sorted(set(output_paths)),
+        "results": results,
+    }

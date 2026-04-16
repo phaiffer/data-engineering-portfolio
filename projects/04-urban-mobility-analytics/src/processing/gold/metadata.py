@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from config import MonthPartition, get_settings, path_relative_to_project
+from ingestion.state import build_run_metadata_summary
 
 
 def build_gold_month_metadata(
@@ -33,17 +34,17 @@ def build_gold_run_metadata(
     selected_months: list[str],
     results: list[dict[str, Any]],
     force: bool,
+    run_started_at_utc: str,
 ) -> dict[str, Any]:
     """Build the latest Gold run summary."""
-    return {
-        "project_name": get_settings().project_name,
-        "layer": "gold",
-        "selected_months": selected_months,
-        "processed_month_count": sum(1 for result in results if result["status"] == "processed"),
-        "skipped_month_count": sum(1 for result in results if result["status"] == "skipped"),
-        "force": force,
-        "results": results,
-    }
+    return build_run_metadata_summary(
+        layer="gold",
+        selected_months=selected_months,
+        results=results,
+        force=force,
+        run_started_at_utc=run_started_at_utc,
+        processed_statuses={"processed"},
+    )
 
 
 def write_gold_run_metadata(metadata: dict[str, Any]) -> Path:

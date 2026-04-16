@@ -14,6 +14,7 @@ from config import (
 )
 from ingestion.download import download_file, fetch_remote_metadata
 from ingestion.state import (
+    build_run_metadata_summary,
     get_current_timestamp,
     get_month_entry,
     mark_month_completed,
@@ -76,6 +77,7 @@ def run_ingestion_pipeline(
 ) -> dict[str, Any]:
     """Land official NYC TLC monthly Parquet files into the Bronze raw area."""
     ensure_runtime_directories()
+    run_started_at_utc = get_current_timestamp()
     settings = get_settings()
     selected_months = list(months or resolve_month_window(start_month=start_month, end_month=end_month))
 
@@ -146,16 +148,16 @@ def run_ingestion_pipeline(
         )
 
     state_path = write_state(settings.bronze_ingestion_state_path, state)
-    run_metadata = {
-        "project_name": settings.project_name,
-        "layer": "bronze_ingestion",
-        "selected_months": [month.month_id for month in selected_months],
-        "downloaded_month_count": sum(1 for result in results if result["status"] == "downloaded"),
-        "skipped_month_count": sum(1 for result in results if result["status"] == "skipped"),
-        "force": force,
-        "results": results,
-        "state_path": path_relative_to_project(state_path),
-    }
+    run_metadata = build_run_metadata_summary(
+        layer="bronze_ingestion",
+        selected_months=[month.month_id for month in selected_months],
+        results=results,
+        force=force,
+        run_started_at_utc=run_started_at_utc,
+        processed_statuses={"downloaded"},
+    )
+    run_metadata["downloaded_month_count"] = run_metadata["processed_month_count"]
+    run_metadata["state_path"] = path_relative_to_project(state_path)
     run_metadata_path = _write_ingestion_run_metadata(run_metadata)
 
     return {

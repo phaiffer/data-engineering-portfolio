@@ -11,6 +11,7 @@ from config import (
     resolve_month_window,
 )
 from ingestion.state import (
+    get_current_timestamp,
     get_month_entry,
     mark_month_completed,
     read_state,
@@ -34,6 +35,7 @@ def run_bronze_pipeline(
 ) -> dict[str, Any]:
     """Build raw inventory and month-level metadata over landed Bronze files."""
     ensure_runtime_directories()
+    run_started_at_utc = get_current_timestamp()
     settings = get_settings()
     selected_months = list(months or resolve_month_window(start_month=start_month, end_month=end_month))
     ingestion_state = read_state(settings.bronze_ingestion_state_path, "bronze_ingestion")
@@ -93,6 +95,7 @@ def run_bronze_pipeline(
         selected_months=[month.month_id for month in selected_months],
         results=results,
         force=force,
+        run_started_at_utc=run_started_at_utc,
     )
     run_metadata["state_path"] = path_relative_to_project(state_path)
     run_metadata_path = write_bronze_run_metadata(run_metadata)
