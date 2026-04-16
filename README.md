@@ -1,12 +1,13 @@
 # Data Engineering Portfolio
 
-`phaiffer/data-engineering-portfolio` is a local-first portfolio of five complementary analytics case studies:
+`phaiffer/data-engineering-portfolio` is a local-first portfolio of six complementary analytics case studies:
 
 - [`projects/01-hospital-analytics/`](projects/01-hospital-analytics/)
 - [`projects/02-job-market-analytics/`](projects/02-job-market-analytics/)
 - [`projects/03-retail-revenue-analytics/`](projects/03-retail-revenue-analytics/)
 - [`projects/04-urban-mobility-analytics/`](projects/04-urban-mobility-analytics/)
 - [`projects/05-event-stream-analytics/`](projects/05-event-stream-analytics/)
+- [`projects/06-warehouse-first-analytics/`](projects/06-warehouse-first-analytics/)
 
 Together they show a clear progression:
 
@@ -14,7 +15,8 @@ Together they show a clear progression:
 - project 02 strengthens the SQL and DBT modeling story;
 - project 03 is the strongest dimensional-modeling and analytics-serving case;
 - project 04 is the strongest orchestration, incremental, and partition-aware pipeline case;
-- project 05 is the strongest event-driven, broker-based, and replayable stream pipeline case.
+- project 05 is the strongest event-driven, broker-based, and replayable stream pipeline case;
+- project 06 is the strongest warehouse-first and managed-warehouse analytics engineering case.
 
 In a quick review, this README should make it easy to understand what the repository is, what each project proves, how the projects differ, how to run them locally, and what is implemented today versus what is still roadmap.
 
@@ -38,6 +40,7 @@ Across the portfolio, recurring themes include:
 - [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/): the strongest fact/dimension and analytics-serving case, backed by a richer multi-table retail source.
 - [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/): the strongest orchestration and incremental batch pipeline case, built around official monthly NYC TLC data.
 - [`05-event-stream-analytics`](projects/05-event-stream-analytics/): the strongest event-driven and replayable stream pipeline case, built on the official Wikimedia EventStreams RecentChange feed via Redpanda.
+- [`06-warehouse-first-analytics`](projects/06-warehouse-first-analytics/): the strongest warehouse-first analytics engineering case, built with dbt BigQuery over the Stack Overflow public dataset.
 
 ## Case-by-Case Breakdown
 
@@ -144,15 +147,40 @@ Unlike the batch files used in projects 01 through 04, this source is a live pub
 
 Project 05 is the event-driven complement to the batch-first cases. It does not add a dashboard or API in this phase. Instead, it focuses on broker-based ingestion architecture, checkpointing, and replay-aware pipeline design. It is the strongest streaming and event-pipeline case in the portfolio, without claiming to be a production streaming platform.
 
+### Project 06 - Warehouse-First Analytics
+
+**Domain:** developer ecosystem and Stack Overflow analytics.
+
+**Source:** BigQuery public dataset `bigquery-public-data.stackoverflow`.
+
+**Why the source matters:**
+
+Stack Overflow is already available as a warehouse-native public dataset in BigQuery. That makes this case different from the local-file, batch-pipeline, and stream-first projects: there is no local ingestion layer to prove. The engineering work is source inspection, warehouse-native SQL modeling, dbt testing, documentation, and cost-aware mart design directly inside a managed warehouse.
+
+**What it proves:**
+
+- dbt BigQuery workflow against a managed warehouse;
+- source inspection directly in BigQuery;
+- staging, intermediate, and marts structure;
+- marts for monthly question activity, tag activity, answer latency, question outcomes, and user reputation segments;
+- dbt schema tests, singular tests, and docs as first-class review artifacts;
+- cost-aware modeling through a configurable `stackoverflow_min_year` window, selective columns, and mart materialization;
+- local dbt development against BigQuery using Application Default Credentials or an equivalent local profile.
+
+**How it is positioned:**
+
+Project 06 is the warehouse-first complement to the first five cases. It is not pipeline-first, and it does not add an API or dashboard in this phase. It is the strongest dbt BigQuery and managed-warehouse modeling case in the portfolio, without claiming to be a production BigQuery platform or enterprise warehouse governance setup.
+
 ## Comparison / Capability Matrix
 
-| Case | Domain | Ingestion | Bronze | Silver | Gold | DBT | Warehouse / DB | API | Dashboard | Dimensional Modeling | Orchestration | Incremental / Partitioned | Streaming / Event-Driven |
-| ---- | ------ | --------- | ------ | ------ | ---- | --- | -------------- | --- | --------- | -------------------- | ------------- | ------------------------- | ------------------------ |
-| [`01-hospital-analytics`](projects/01-hospital-analytics/) | Hospital operations | Kaggle to local raw files | Yes | Yes | Yes | Scaffold only | PostgreSQL serving layer | Flask | React | Limited; not the main focus | No | No | No |
-| [`02-job-market-analytics`](projects/02-job-market-analytics/) | Job market / AI impact | Kaggle to local raw files | Yes | Yes | Yes | DuckDB + PostgreSQL marts | DuckDB + PostgreSQL | Read-only Flask | React | Moderate; stronger marts than 01 | No | No | No |
-| [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/) | Retail / e-commerce | Kaggle multi-table source | Yes | Yes; source-aligned tables | Yes | DuckDB staging, intermediate, and marts | DuckDB | Read-only Flask | React | Strongest; fact + dimensions | No | No | No |
-| [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/) | Urban mobility / Yellow Taxi | Official NYC TLC monthly files | Yes | Yes; partitioned Parquet | Yes; partitioned summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus in this phase | Prefect, local-first | Strongest | No |
-| [`05-event-stream-analytics`](projects/05-event-stream-analytics/) | Event stream / Wikimedia RecentChange | Official live SSE stream via Redpanda | Yes; raw JSONL landing | Yes; partitioned Parquet | Yes; category and minute-bucket summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus | Not the main focus | Partitioned; checkpoint-based | Strongest |
+| Case | Domain | Ingestion | Bronze | Silver | Gold | DBT | Warehouse / DB | API | Dashboard | Dimensional Modeling | Orchestration | Incremental / Partitioned | Streaming / Event-Driven | Warehouse-First / Managed Warehouse |
+| ---- | ------ | --------- | ------ | ------ | ---- | --- | -------------- | --- | --------- | -------------------- | ------------- | ------------------------- | ------------------------ | ----------------------------------- |
+| [`01-hospital-analytics`](projects/01-hospital-analytics/) | Hospital operations | Kaggle to local raw files | Yes | Yes | Yes | Scaffold only | PostgreSQL serving layer | Flask | React | Limited; not the main focus | No | No | No | No |
+| [`02-job-market-analytics`](projects/02-job-market-analytics/) | Job market / AI impact | Kaggle to local raw files | Yes | Yes | Yes | DuckDB + PostgreSQL marts | DuckDB + PostgreSQL | Read-only Flask | React | Moderate; stronger marts than 01 | No | No | No | No |
+| [`03-retail-revenue-analytics`](projects/03-retail-revenue-analytics/) | Retail / e-commerce | Kaggle multi-table source | Yes | Yes; source-aligned tables | Yes | DuckDB staging, intermediate, and marts | DuckDB | Read-only Flask | React | Strongest; fact + dimensions | No | No | No | No |
+| [`04-urban-mobility-analytics`](projects/04-urban-mobility-analytics/) | Urban mobility / Yellow Taxi | Official NYC TLC monthly files | Yes | Yes; partitioned Parquet | Yes; partitioned summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus in this phase | Prefect, local-first | Strongest | No | No |
+| [`05-event-stream-analytics`](projects/05-event-stream-analytics/) | Event stream / Wikimedia RecentChange | Official live SSE stream via Redpanda | Yes; raw JSONL landing | Yes; partitioned Parquet | Yes; category and minute-bucket summaries | No | DuckDB for local Gold aggregation | No | No | Not the main focus | Not the main focus | Partitioned; checkpoint-based | Strongest | No |
+| [`06-warehouse-first-analytics`](projects/06-warehouse-first-analytics/) | Developer ecosystem / Stack Overflow | Warehouse-native public source | Warehouse-native staging views | Intermediate dbt views | Mart tables | Strongest; dbt BigQuery | BigQuery | No | No | Mart-focused analytics modeling | No; not the main focus | Year-window cost control | No | Strongest |
 
 ## Repository Structure
 
@@ -163,14 +191,15 @@ data-engineering-portfolio/
 |   |-- 02-job-market-analytics/
 |   |-- 03-retail-revenue-analytics/
 |   |-- 04-urban-mobility-analytics/
-|   `-- 05-event-stream-analytics/
+|   |-- 05-event-stream-analytics/
+|   `-- 06-warehouse-first-analytics/
 |-- docs/
 |-- shared/
 |-- requirements.txt
 `-- requirements-dev.txt
 ```
 
-- `projects/` contains the five portfolio case studies.
+- `projects/` contains the six portfolio case studies.
 - `docs/` contains repository-level notes.
 - `shared/` contains templates, conventions, and shared assets.
 
@@ -191,6 +220,8 @@ Install project-specific extras only when needed:
 python -m pip install -r projects/02-job-market-analytics/dbt/requirements.txt
 python -m pip install -r projects/03-retail-revenue-analytics/dbt/requirements.txt
 python -m pip install -r projects/04-urban-mobility-analytics/requirements.txt
+python -m pip install -r projects/06-warehouse-first-analytics/requirements.txt
+python -m pip install -r projects/06-warehouse-first-analytics/dbt/requirements.txt
 ```
 
 Optional repository-wide extras:
@@ -213,7 +244,8 @@ Practical local notes:
 - projects 01 and 02 use PostgreSQL for their served local review path;
 - projects 01, 02, and 03 ingest from Kaggle-based sources;
 - project 04 pulls from the official public NYC TLC source instead of Kaggle;
-- project 05 pulls from the official live Wikimedia SSE stream and requires Docker for the Redpanda broker.
+- project 05 pulls from the official live Wikimedia SSE stream and requires Docker for the Redpanda broker;
+- project 06 models the BigQuery public Stack Overflow dataset directly and requires local BigQuery credentials for full execution.
 
 ## How to Run Each Case
 
@@ -372,15 +404,52 @@ cd projects/05-event-stream-analytics
 docker compose down
 ```
 
+### 06. Warehouse-First Analytics
+
+Project 06 has no local ingestion pipeline, API, or dashboard in this phase. The review surface is the dbt BigQuery project, generated marts, tests, docs, and cost-awareness notes.
+
+Install the project and dbt BigQuery requirements:
+
+```bash
+python -m pip install -r projects/06-warehouse-first-analytics/requirements.txt
+python -m pip install -r projects/06-warehouse-first-analytics/dbt/requirements.txt
+```
+
+Configure BigQuery credentials and the dbt profile:
+
+```bash
+gcloud auth application-default login
+cp projects/06-warehouse-first-analytics/dbt/profiles.yml.example ~/.dbt/profiles.yml
+```
+
+Edit `~/.dbt/profiles.yml` with your GCP project ID, then run from the dbt project directory:
+
+```bash
+cd projects/06-warehouse-first-analytics/dbt
+dbt debug
+dbt deps
+dbt run
+dbt test
+```
+
+For a lower-cost development run, restrict the Stack Overflow source window:
+
+```bash
+dbt run --vars '{"stackoverflow_min_year": 2023}'
+```
+
+Full execution depends on local Application Default Credentials or equivalent BigQuery credentials, a GCP project with BigQuery enabled, and appropriate IAM permissions. The project also includes `scripts/run_dbt_bigquery.sh` for the combined `debug -> deps -> run -> test` path.
+
 ## What The Portfolio Proves Today
 
-Today this repository shows five different but connected proof points:
+Today this repository shows six different but connected proof points:
 
 - **Project 01:** end-to-end local analytics delivery from raw ingestion to PostgreSQL, API, and dashboard.
 - **Project 02:** stronger SQL and DBT modeling through DuckDB and PostgreSQL marts.
 - **Project 03:** the strongest fact/dimension and analytics-serving pattern in the portfolio.
 - **Project 04:** orchestration, incremental execution, partition-aware storage, and readable rerun behavior.
 - **Project 05:** event-driven ingestion, broker-based producer/consumer separation, replayable Bronze landing, and local streaming architecture patterns.
+- **Project 06:** warehouse-first analytics engineering with dbt BigQuery, warehouse-native source inspection, managed-warehouse marts, and cost-aware modeling.
 
 Taken together, the portfolio shows breadth without pretending every project has the same goal or maturity level.
 
@@ -390,9 +459,10 @@ Future work across the portfolio may include:
 
 - richer observability beyond current local-first instrumentation;
 - broader automated validation and CI;
-- warehouse-first patterns where a future case truly benefits from them;
-- streaming-to-serving scenarios if later justified by a concrete use case;
-- cloud deployment notes only when real deployed environments exist.
+- cloud deployment notes only when real deployed environments exist;
+- serving layers only where they are justified by a concrete review or product use case;
+- stronger warehouse governance, docs, and dbt exposures if later needed;
+- streaming-to-serving scenarios if later justified by a concrete use case.
 
 These are future directions, not implemented repository-wide guarantees.
 
@@ -406,4 +476,5 @@ To keep the portfolio technically credible:
 - project 03 revenue outputs are analytical item-side measures, not accounting-grade revenue;
 - project 04 orchestration is a local-first Prefect implementation, not a claim of a production scheduler or data platform;
 - project 05 is a bounded local streaming case; it is not a claim of a production streaming platform, exactly-once delivery guarantees, or cloud infrastructure maturity;
+- project 06 is a warehouse-first portfolio case; it is not a claim of a production BigQuery platform, enterprise warehouse governance setup, or scheduled cloud deployment;
 - projects without an API or dashboard are intentionally scoped that way rather than presented as unfinished production systems.
